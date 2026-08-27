@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FoodHub | Domino's Pizza</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header>
+
+        <nav id="navbar">
+
+            <div class="logo">
+                <h2>🍔 FoodHub</h2>
+            </div>
+
+            <ul class="nav-links">
+
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+
+                <li>
+                    <a href="menu.html">Menu</a>
+                </li>
+
+                <li>
+                    <a href="cart.html">Cart</a>
+                </li>
+
+                <li>
+                    <a href="checkout.html">Checkout</a>
+                </li>
+
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+
+                <li>
+                    <a href="contact.html">Contact</a>
+                </li>
+
+                <li>
+                    <a href="singup.html" class="signup-btn">Signup</a>
+                </li>
+
+                <li>
+                    <a href="login.html" class="login-btn">Login</a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </header>
+
+
+    <!-- ================= RESTAURANT HEADER ================= -->
+
+    <section class="restaurant-header">
+
+        <img src="dominoes/dominos-banner.png" alt="Domino's Pizza Banner">
+
+        <div class="restaurant-details">
+
+            <h1>🍕 Domino's Pizza</h1>
+
+            <p>
+                ⭐ 4.7 (2,500+ Ratings)
+            </p>
+
+            <p>
+                <i class="fa-solid fa-clock"></i>
+                25-30 Minutes
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= DOMINO'S MENU ================= -->
+
+    <section class="menu-container">
+
+
+        <!-- ================= ITEM 1 ================= -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/margherita.png" alt="Margherita Pizza">
+
+            <h3>Margherita Pizza</h3>
+
+            <p>
+                Classic cheese pizza.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.8
+            </div>
+
+            <h4>₹199</h4>
+
+            <button type="button" class="add-to-cart" data-name="Margherita Pizza" data-price="199"
+                data-image="dominoes/margherita.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 2 ================= -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/farmhose.png" alt="Farmhouse Pizza">
+
+            <h3>Farmhouse Pizza</h3>
+
+            <p>
+                Loaded with vegetables.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.9
+            </div>
+
+            <h4>₹349</h4>
+
+            <button type="button" class="add-to-cart" data-name="Farmhouse Pizza" data-price="349"
+                data-image="dominoes/farmhose.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 3 ================= -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/cheese-pizza.png" alt="Cheese Pizza">
+
+            <h3>Cheese Pizza</h3>
+
+            <p>
+                Extra cheese delight.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐☆ 4.6
+            </div>
+
+            <h4>₹249</h4>
+
+            <button type="button" class="add-to-cart" data-name="Cheese Pizza" data-price="249"
+                data-image="dominoes/cheese-pizza.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 4 ================= -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/garlic-bread.png" alt="Garlic Bread">
+
+            <h3>Garlic Bread</h3>
+
+            <p>
+                Fresh baked garlic bread.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.8
+            </div>
+
+            <h4>₹149</h4>
+
+            <button type="button" class="add-to-cart" data-name="Garlic Bread" data-price="149"
+                data-image="dominoes/garlic-bread.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 5 ================= -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/choco-lava.png" alt="Choco Lava Cake">
+
+            <h3>Choco Lava Cake</h3>
+
+            <p>
+                Soft chocolate dessert.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.9
+            </div>
+
+            <h4>₹119</h4>
+
+            <button type="button" class="add-to-cart" data-name="Choco Lava Cake" data-price="119"
+                data-image="dominoes/choco-lava.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 6 ================= -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/pepsi.png" alt="Pepsi">
+
+            <h3>Pepsi</h3>
+
+            <p>
+                Cold soft drink.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐☆ 4.5
+            </div>
+
+            <h4>₹59</h4>
+
+            <button type="button" class="add-to-cart" data-name="Domino's Pepsi" data-price="59"
+                data-image="dominoes/pepsi.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             NEW ITEM 7
+        ================================================== -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/Pepper Barbecue Chicken.png" alt="Pepper Barbecue Chicken">
+
+            <h3>Pepper Barbecue Chicken</h3>
+
+            <p>
+                Smoky chicken loaded with delicious toppings.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.7
+            </div>
+
+            <h4>₹399</h4>
+
+            <button type="button" class="add-to-cart" data-name="Pepper Barbecue Chicken" data-price="399"
+                data-image="dominoes/Pepper Barbecue Chicken.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             NEW ITEM 8
+        ================================================== -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/Paneer Makhani Pizza.png" alt="Paneer Makhani Pizza">
+
+            <h3>Paneer Makhani Pizza</h3>
+
+            <p>
+                Creamy paneer with rich makhani sauce.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.6
+            </div>
+
+            <h4>₹329</h4>
+
+            <button type="button" class="add-to-cart" data-name="Paneer Makhani Pizza" data-price="329"
+                data-image="dominoes/Paneer Makhani Pizza.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             NEW ITEM 9
+        ================================================== -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/Cheese Burst Pizza.png" alt="Cheese Burst Pizza">
+
+            <h3>Cheese Burst Pizza</h3>
+
+            <p>
+                Extra cheesy pizza with a cheese-filled crust.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.8
+            </div>
+
+            <h4>₹379</h4>
+
+            <button type="button" class="add-to-cart" data-name="Cheese Burst Pizza" data-price="379"
+                data-image="dominoes/Cheese Burst Pizza.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             NEW ITEM 10
+        ================================================== -->
+
+        <div class="menu-card">
+
+            <img src="dominoes/Chocolate Brownie.png" alt="Chocolate Brownie">
+
+            <h3>Chocolate Brownie</h3>
+
+            <p>
+                Soft, rich and delicious chocolate brownie.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.5
+            </div>
+
+            <h4>₹99</h4>
+
+            <button type="button" class="add-to-cart" data-name="Chocolate Brownie" data-price="99"
+                data-image="dominoes/Chocolate Brownie.png">
+
+                Add to Cart
+
+            </button>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-content">
+
+            <h2>🍔 FoodHub</h2>
+
+            <p>
+                Fresh Food • Fast Delivery • Best Taste
+            </p>
+
+            <p>
+                Email :
+                <a href="mailto:akashkumar906552@gmail.com">
+                    akashkumar906552@gmail.com
+                </a>
+            </p>
+
+            <p>
+                Phone :
+                <a href="tel:+919065521532">
+                    +91 9065521532
+                </a>
+            </p>
+
+            <p>
+                &copy; 2026 FoodHub. All Rights Reserved.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ================= SCRIPT ================= -->
+
+    <script src="toast.js"></script>
+    <script type="module" src="cart-manager.js"></script>
+    <script src="script.js"></script>
+
+    <script src="bottom-nav.js"></script>
+</body>
+
+</html>

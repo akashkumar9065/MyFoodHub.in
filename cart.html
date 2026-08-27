@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub | Cart</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header>
+
+        <nav id="navbar">
+
+            <div class="logo">
+                <h2>🍔 FoodHub</h2>
+            </div>
+
+            <ul class="nav-links">
+
+                <li><a href="index.html">Home</a></li>
+
+                <li><a href="menu.html">Menu</a></li>
+
+                <li><a href="cart.html" class="active">Cart</a></li>
+
+                <li><a href="about.html">About</a></li>
+
+                <li><a href="contact.html">Contact</a></li>
+
+            </ul>
+
+        </nav>
+
+    </header>
+
+    <!-- ================= CART HEADER ================= -->
+
+    <section class="cart-header">
+
+        <h1>🛒 Your Shopping Cart</h1>
+
+        <p>Review your selected food items before placing your order.</p>
+
+    </section>
+
+    <!-- ================= CART TABLE ================= -->
+
+    <section class="cart-section">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Food</th>
+
+                    <th>Price</th>
+
+                    <th>Quantity</th>
+
+                    <th>Total</th>
+
+                    <th>Remove</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>Cheese Pizza</td>
+
+                    <td>₹249</td>
+
+                    <td>
+                        <input type="number" value="1" min="1">
+                    </td>
+
+                    <td>₹249</td>
+
+                    <td>
+                        <button>Remove</button>
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <td>Chicken Burger</td>
+
+                    <td>₹159</td>
+
+                    <td>
+                        <input type="number" value="2" min="1">
+                    </td>
+
+                    <td>₹318</td>
+
+                    <td>
+                        <button>Remove</button>
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+    <!-- ================= BILL SUMMARY ================= -->
+
+    <section class="bill-summary">
+
+        <h2>Order Summary</h2>
+
+        <p>Items : <span>2</span></p>
+
+        <p>Subtotal : <span>₹567</span></p>
+
+        <p>Delivery Charge : <span>₹40</span></p>
+
+        <hr>
+
+        <h3>Total : ₹607</h3>
+
+        <button class="checkout-btn">
+           <a href="checkout.html"> Proceed to Checkout</a>
+        </button>
+
+    </section>
+
+    <!-- ================= RECOMMENDED ================= -->
+
+    <section class="recommended">
+
+        <h2>You May Also Like</h2>
+
+        <div class="recommend-container">
+
+            <div class="food-card">
+
+                <img src="pasta.png" alt="Pasta">
+
+                <h3>White Sauce Pasta</h3>
+
+                <p>Creamy pasta tossed in rich white sauce.</p>
+
+                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
+
+                <span class="price">₹199</span>
+
+                <button type="button" class="add-to-cart" data-name="White Sauce Pasta" data-price="199" data-image="pasta.png">Add to Cart</button>
+
+            </div>
+
+            <div class="food-card">
+
+                <img src="icecream.png" alt="Ice Cream">
+
+                <h3>Chocolate Ice Cream</h3>
+
+                <p>Rich and creamy chocolate ice cream.</p>
+
+                <div class="rating">⭐⭐⭐⭐⭐ 4.7</div>
+
+                <span class="price">₹99</span>
+
+                <button type="button" class="add-to-cart" data-name="Chocolate Ice Cream" data-price="99" data-image="icecream.png">Add to Cart</button>
+
+            </div>
+
+            <div class="food-card">
+
+                <img src="coke.png" alt="Drink">
+
+                <h3>Coca Cola</h3>
+
+                <p>Cold and refreshing soft drink.</p>
+
+                <div class="rating">⭐⭐⭐⭐☆ 4.5</div>
+
+                <span class="price">₹49</span>
+
+                <button type="button" class="add-to-cart" data-name="Coca Cola" data-price="49" data-image="coke.png">Add to Cart</button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-content">
+
+            <h2>🍔 FoodHub</h2>
+
+            <p>Fresh Food • Fast Delivery • Best Taste</p>
+
+            <p>
+                Email :
+                <a href="mailto:akashkumar906552@gmail.com">
+                    akashkumar906552@gmail.com
+                </a>
+            </p>
+
+            <p>
+                Phone :
+                <a href="tel:+919065521532">
+                    +91 9065521532
+                </a>
+            </p>
+
+            <p>&copy; 2026 FoodHub. All Rights Reserved.</p>
+
+        </div>
+
+    </footer>
+
+    <script src="toast.js"></script>
+    <script type="module" src="cart-manager.js"></script>
+    <script src="script.js"></script>
+
+    <script src="bottom-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub | Food Booking Website</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header>
+
+        <nav id="navbar" class="auth-pending" aria-busy="true">
+
+            <div class="logo">
+                <h2>🍔 FoodHub</h2>
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="checkout.html">Checkout</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li id="nav-signup" class="auth-nav-item"><a href="singup.html" class="signup-btn">Signup</a></li>
+                <li id="nav-login" class="auth-nav-item"><a href="login.html" class="login-btn">login</a></li>
+                <li id="nav-profile" class="auth-nav-item" style="display: none;">
+                    <a href="profile.html" class="nav-profile-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Profile">
+                    </a>
+                </li>
+                <li class="auth-nav-loader" aria-label="Checking login status"><span></span><span></span><span></span></li>
+            </ul>
+
+        </nav>
+
+    </header>
+
+    <!-- ================= HERO SECTION ================= -->
+
+    <section id="hero">
+
+        <div class="hero-text">
+
+            <h1>Delicious Food <br> Delivered To Your Door</h1>
+
+            <p>
+                Order your favourite meals from the best restaurants.
+                Fast delivery, fresh ingredients and affordable prices.
+            </p>
+
+            <a href="menu.html" class="btn">Order Now</a>
+
+        </div>
+
+        <div class="hero-image">
+
+            <img src="indexImage/hero.png" alt="Food Image">
+
+        </div>
+
+    </section>
+
+    <!-- ================= SEARCH ================= -->
+
+    <section class="menu-search home-menu-search">
+
+        <div class="search-box home-search-box">
+
+            <input type="text" id="searchBox" placeholder="Search your favourite food or restaurant..."
+                autocomplete="off" aria-label="Search food or restaurant">
+
+            <button id="searchBtn" type="button" aria-label="Search">
+                <i class="fa-solid fa-search"></i>
+            </button>
+
+        </div>
+
+        <div id="homeSearchResults" class="home-search-results" aria-live="polite"></div>
+
+    </section>
+
+    <!-- ================= CATEGORIES ================= -->
+
+    <section id="category">
+
+        <h2>Popular Categories</h2>
+
+        <div class="category-container">
+
+            <div class="card">
+                <img src="indexImage/pizza.png" alt="pizza image">
+                <h3>Pizza</h3>
+            </div>
+
+            <div class="card">
+                <img src="indexImage/burger.png" alt="">
+                <h3>Burger</h3>
+            </div>
+
+            <div class="card">
+                <img src="indexImage/resbiryani.png" alt="biryani">
+                <h3>Biryani</h3>
+            </div>
+
+            <div class="card">
+                <img src="indexImage/juice.png" alt="juice image">
+                <h3>Drinks</h3>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= POPULAR RESTAURANTS ================= -->
+
+    <!-- ================= POPULAR RESTAURANTS ================= -->
+
+    <section id="restaurants">
+
+        <h2>Popular Restaurants</h2>
+
+        <div class="restaurant-container">
+
+            <!-- Restaurant 1 -->
+            <div class="restaurant-card">
+
+                <img src="indexImage/dominos-resturent.png" alt="Domino's Pizza">
+
+                <div class="restaurant-info">
+
+                    <h3>Domino's Pizza</h3>
+
+                    <p class="rating">
+                        ⭐ 4.7 <span>(2.5k Reviews)</span>
+                    </p>
+
+                    <p class="time">
+                        <i class="fa-solid fa-clock"></i>
+                        25-30 mins
+                    </p>
+
+                    <button onclick="location.href='dominos.html'">
+                        View Menu
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Restaurant 2 -->
+            <div class="restaurant-card">
+
+                <img src="kfc/kfc-banner.png" alt="KFC">
+
+                <div class="restaurant-info">
+
+                    <h3>KFC</h3>
+
+                    <p class="rating">
+                        ⭐ 4.6 <span>(3k Reviews)</span>
+                    </p>
+
+                    <p class="time">
+                        <i class="fa-solid fa-clock"></i>
+                        20-25 mins
+                    </p>
+
+                    <button onclick="location.href='kfc.html'">
+                        View Menu
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Restaurant 3 -->
+            <div class="restaurant-card">
+
+                <img src="burgerking/burgerKing-banner.png" alt="Burger King">
+
+                <div class="restaurant-info">
+
+                    <h3>Burger King</h3>
+
+                    <p class="rating">
+                        ⭐ 4.5 <span>(1.8k Reviews)</span>
+                    </p>
+
+                    <p class="time">
+                        <i class="fa-solid fa-clock"></i>
+                        20-30 mins
+                    </p>
+
+                    <button onclick="location.href='burgerking.html'">
+                        View Menu
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Restaurant 4 -->
+            <div class="restaurant-card">
+
+                <img src="biryanihouse/biryani-banner.png" alt="Biryani House">
+
+                <div class="restaurant-info">
+
+                    <h3>Biryani House</h3>
+
+                    <p class="rating">
+                        ⭐ 4.8 <span>(4.2k Reviews)</span>
+                    </p>
+
+                    <p class="time">
+                        <i class="fa-solid fa-clock"></i>
+                        30-35 mins
+                    </p>
+
+                    <button onclick="location.href='biryani.html'">
+                        View Menu
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+    <!-- ================= WHY CHOOSE US ================= -->
+
+    <section id="why-us">
+
+        <h2>Why Choose FoodHub?</h2>
+
+        <div class="why-container">
+
+            <div class="why-box">
+
+                <i class="fa-solid fa-truck-fast"></i>
+
+                <h3>Fast Delivery</h3>
+
+                <p>Quick and safe food delivery at your doorstep.</p>
+
+            </div>
+
+            <div class="why-box">
+
+                <i class="fa-solid fa-bowl-food"></i>
+
+                <h3>Fresh Food</h3>
+
+                <p>Prepared with fresh ingredients every day.</p>
+
+            </div>
+
+            <div class="why-box">
+
+                <i class="fa-solid fa-wallet"></i>
+
+                <h3>Affordable Price</h3>
+
+                <p>Enjoy delicious food at budget-friendly prices.</p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= REVIEWS ================= -->
+
+    <section id="reviews">
+
+        <h2>Customer Reviews</h2>
+
+        <div class="review-container">
+
+            <div class="review">
+
+                <p>
+                    "Amazing food and very fast delivery.
+                    Highly recommended!"
+                </p>
+
+                <h4>- Rahul</h4>
+
+            </div>
+
+            <div class="review">
+
+                <p>
+                    "Best pizza in town. Great service and quality."
+                </p>
+
+                <h4>- Priya</h4>
+
+            </div>
+
+            <div class="review">
+
+                <p>
+                    "Affordable price and delicious taste."
+                </p>
+
+                <h4>- Aman</h4>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-content">
+
+            <h2>🍔 FoodHub</h2>
+
+            <p>Fresh Food • Fast Delivery • Best Taste</p>
+
+            <p>
+                Email :
+                <a href="mailto:akashkumar906552@gmail.com">
+                    akashkumar906552@gmail.com
+                </a>
+            </p>
+
+            <p>
+                Phone :
+                <a href="tel:+919065521532">
+                    +91 9065521532
+                </a>
+            </p>
+
+            <div class="social">
+
+                <a href="#"><i class="fab fa-facebook"></i></a>
+
+                <a href="#"><i class="fab fa-instagram"></i></a>
+
+                <a href="#"><i class="fab fa-twitter"></i></a>
+
+                <a href="#"><i class="fab fa-youtube"></i></a>
+
+            </div>
+
+            <p>© 2026 FoodHub. All Rights Reserved.</p>
+
+        </div>
+
+    </footer>
+
+    <script src="toast.js"></script>
+    <script type="module" src="cart-manager.js"></script>
+    <script src="script.js"></script>
+    <script type="module" src="navbar.js"></script>
+
+    <script src="bottom-nav.js"></script>
+</body>
+
+</html>

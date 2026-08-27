@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FoodHub | Burger King</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header>
+
+        <nav id="navbar">
+
+            <div class="logo">
+                <h2>🍔 FoodHub</h2>
+            </div>
+
+            <ul class="nav-links">
+
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+
+                <li>
+                    <a href="menu.html">Menu</a>
+                </li>
+
+                <li>
+                    <a href="cart.html">Cart</a>
+                </li>
+
+                <li>
+                    <a href="checkout.html">Checkout</a>
+                </li>
+
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+
+                <li>
+                    <a href="contact.html">Contact</a>
+                </li>
+
+                <li>
+                    <a href="singup.html" class="signup-btn">Signup</a>
+                </li>
+
+                <li>
+                    <a href="login.html" class="login-btn">Login</a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </header>
+
+
+    <!-- ================= RESTAURANT HEADER ================= -->
+
+    <section class="restaurant-header">
+
+        <img src="burgerking/burgerKing-banner.png" alt="Burger King Banner">
+
+        <div class="restaurant-details">
+
+            <h1>🍔 Burger King</h1>
+
+            <p>
+                ⭐ 4.8 (2,900+ Ratings)
+            </p>
+
+            <p>
+                <i class="fa-solid fa-clock"></i>
+                20 - 30 Minutes
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= BURGER KING MENU ================= -->
+
+    <section class="menu-container">
+
+
+        <!-- ================= ITEM 1 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/whopper.png" alt="Whopper Burger">
+
+            <h3>Whopper Burger</h3>
+
+            <p>
+                Flame grilled signature burger.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.9
+            </div>
+
+            <h4>₹269</h4>
+
+            <button type="button" class="add-to-cart" data-name="Whopper Burger" data-price="269"
+                data-image="burgerking/whopper.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 2 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/chicken-whopper.png" alt="Chicken Whopper">
+
+            <h3>Chicken Whopper</h3>
+
+            <p>
+                Grilled chicken with fresh veggies.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.8
+            </div>
+
+            <h4>₹289</h4>
+
+            <button type="button" class="add-to-cart" data-name="Chicken Whopper" data-price="289"
+                data-image="burgerking/chicken-whopper.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 3 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/crispy-veg.png" alt="Crispy Veg Burger">
+
+            <h3>Crispy Veg Burger</h3>
+
+            <p>
+                Crunchy vegetable patty.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐☆ 4.6
+            </div>
+
+            <h4>₹179</h4>
+
+            <button type="button" class="add-to-cart" data-name="Crispy Veg Burger" data-price="179"
+                data-image="burgerking/crispy-veg.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 4 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/fries.png" alt="French Fries">
+
+            <h3>French Fries</h3>
+
+            <p>
+                Golden crispy fries.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.8
+            </div>
+
+            <h4>₹119</h4>
+
+            <button type="button" class="add-to-cart" data-name="Burger King French Fries" data-price="119"
+                data-image="burgerking/fries.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 5 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/bcoke.png" alt="Coca Cola">
+
+            <h3>Coca Cola</h3>
+
+            <p>
+                Ice cold soft drink.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐☆ 4.5
+            </div>
+
+            <h4>₹69</h4>
+
+            <button type="button" class="add-to-cart" data-name="Coca Cola" data-price="69"
+                data-image="burgerking/bcoke.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 6 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/choclate-shake.png" alt="Chocolate Shake">
+
+            <h3>Chocolate Shake</h3>
+
+            <p>
+                Rich creamy chocolate shake.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.9
+            </div>
+
+            <h4>₹149</h4>
+
+            <button type="button" class="add-to-cart" data-name="Chocolate Shake" data-price="149"
+                data-image="burgerking/choclate-shake.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+        <!-- ================= ITEM 7 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/onion-ring.png" alt="Onion Rings">
+
+            <h3>Onion Rings</h3>
+
+            <p>
+                Crispy golden onion rings.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.7
+            </div>
+
+            <h4>₹129</h4>
+
+            <button type="button" class="add-to-cart" data-name="Onion Rings" data-price="129"
+                data-image="burgerking/onion-rings.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 8 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/veg-wrap.png" alt="Veg Wrap">
+
+            <h3>Veg Wrap</h3>
+
+            <p>
+                Fresh vegetables wrapped with tasty sauce.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐☆ 4.6
+            </div>
+
+            <h4>₹159</h4>
+
+            <button type="button" class="add-to-cart" data-name="Veg Wrap" data-price="159"
+                data-image="burgerking/veg-wrap.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 9 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/chicken-nuggets.png" alt="Chicken Nuggets">
+
+            <h3>Chicken Nuggets</h3>
+
+            <p>
+                Crispy and delicious chicken nuggets.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐⭐ 4.8
+            </div>
+
+            <h4>₹199</h4>
+
+            <button type="button" class="add-to-cart" data-name="Chicken Nuggets" data-price="199"
+                data-image="burgerking/chicken-nuggets.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+        <!-- ================= ITEM 10 ================= -->
+
+        <div class="menu-card">
+
+            <img src="burgerking/ice-cream.png" alt="Vanilla Ice Cream">
+
+            <h3>Vanilla Ice Cream</h3>
+
+            <p>
+                Creamy and refreshing vanilla ice cream.
+            </p>
+
+            <div class="rating">
+                ⭐⭐⭐⭐☆ 4.5
+            </div>
+
+            <h4>₹99</h4>
+
+            <button type="button" class="add-to-cart" data-name="Vanilla Ice Cream" data-price="99"
+                data-image="burgerking/ice-cream.png">
+                Add to Cart
+            </button>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-content">
+
+            <h2>🍔 FoodHub</h2>
+
+            <p>
+                Fresh Food • Fast Delivery • Best Taste
+            </p>
+
+            <p>
+                Email :
+                <a href="mailto:akashkumar906552@gmail.com">
+                    akashkumar906552@gmail.com
+                </a>
+            </p>
+
+            <p>
+                Phone :
+                <a href="tel:+919065521532">
+                    +91 9065521532
+                </a>
+            </p>
+
+            <p>
+                &copy; 2026 FoodHub. All Rights Reserved.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ================= SCRIPT ================= -->
+
+    <script src="toast.js"></script>
+    <script type="module" src="cart-manager.js"></script>
+    <script src="script.js"></script>
+
+    <script src="bottom-nav.js"></script>
+</body>
+
+</html>

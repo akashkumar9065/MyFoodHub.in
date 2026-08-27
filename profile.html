@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub | My Profile</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font Awesome (Icons ke liye) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body class="profile-loading">
+
+    <!-- ================= NAVBAR ================= -->
+    <header>
+        <nav id="navbar">
+            <div class="logo">
+                <h2>🍔 FoodHub</h2>
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                
+                <!-- Navbar Profile Icon -->
+                <li class="nav-profile-icon">
+                    <a href="profile.html">
+                        <!-- Default Image -->
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="navProfileImg">
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- ================= PROFILE DASHBOARD ================= -->
+    <section class="profile-dashboard">
+
+        <!-- ===== SIDEBAR ===== -->
+        <div class="profile-sidebar">
+            <div class="user-avatar">
+                <span class="account-label"><i class="fa-solid fa-circle-check"></i> FoodHub account</span>
+                <!-- User Photo -->
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Avatar" id="displayImage">
+                
+                <!-- User Name & Email -->
+                <h3 id="displayName">Loading...</h3>
+                <p id="displayEmail">loading@email.com</p>
+                
+                <!-- Profile Photo Controls -->
+                <input type="file" id="upload-pic" accept="image/*" style="display: none;">
+                <div class="photo-actions">
+                    <label for="upload-pic" class="upload-photo-btn">
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i> Upload New
+                    </label>
+                    <button type="button" id="removePhotoBtn" class="remove-photo-btn">
+                        <i class="fa-regular fa-trash-can"></i> Remove
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar Menu -->
+            <ul class="profile-menu">
+                <li><a href="#profile-info" class="active"><i class="fa-solid fa-user"></i> My Profile</a></li>
+                <li><a href="#orders"><i class="fa-solid fa-box"></i> My Orders</a></li>
+                <li><button type="button" id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></li>
+            </ul>
+        </div>
+
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="profile-content">
+
+            <div class="profile-welcome">
+                <div>
+                    <span class="section-eyebrow">MY ACCOUNT</span>
+                    <h1>Welcome back, <span id="profileGreeting">Foodie</span>!</h1>
+                    <p>Manage your details, saved address, and food orders in one place.</p>
+                </div>
+                <a href="menu.html" class="browse-menu-btn"><i class="fa-solid fa-utensils"></i> Browse Menu</a>
+            </div>
+            
+            <!-- Edit Profile Section -->
+            <div class="content-header" id="profile-info">
+                <h2><i class="fa-solid fa-user-pen"></i> Personal Details</h2>
+            </div>
+            
+            <hr class="divider">
+
+            <!-- Profile Form (Bina OTP Ke) -->
+            <form id="updateProfileForm">
+                
+                <!-- Name & Phone Row -->
+                <div class="profile-form">
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" id="editName" placeholder="Enter your name" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Mobile Number</label>
+                        <input type="tel" id="editPhone" placeholder="Enter 10-digit number" inputmode="numeric" autocomplete="tel" pattern="[0-9]{10}" minlength="10" maxlength="10" title="Mobile number must be exactly 10 digits" required>
+                    </div>
+                </div>
+
+                <!-- Address (Full Width) -->
+                <div class="input-group full-width" style="margin-top: 25px;">
+                    <label>Complete Address</label>
+                    <textarea id="editAddress" rows="3" placeholder="House No, Building, Street..." required></textarea>
+                </div>
+
+                <!-- City & Pincode Row -->
+                <div class="profile-form" style="margin-top: 25px;">
+                    <div class="input-group">
+                        <label>City</label>
+                        <input type="text" id="editCity" placeholder="City" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Pincode</label>
+                        <input type="text" id="editPincode" placeholder="6-digit pincode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{6}" minlength="6" maxlength="6" title="Pincode must be exactly 6 digits" required>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="save-action">
+                    <button type="submit" id="updateProfileBtn" class="save-btn">
+                        Update Profile
+                    </button>
+                </div>
+
+            </form>
+
+            <section class="saved-address-card" aria-labelledby="savedAddressTitle">
+                <div class="address-card-heading">
+                    <div>
+                        <span class="section-eyebrow">QUICK CHECKOUT</span>
+                        <h2 id="savedAddressTitle"><i class="fa-solid fa-location-dot"></i> Saved Address</h2>
+                    </div>
+                    <button type="button" id="editAddressBtn" class="address-edit-btn">Edit address</button>
+                </div>
+                <div id="savedAddressSummary" class="saved-address-summary">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <p>Add your delivery address above to make checkout faster.</p>
+                </div>
+            </section>
+
+            <!-- Order History Section -->
+            <div class="content-header orders-heading" id="orders">
+                <div>
+                    <span class="section-eyebrow">ORDER HISTORY</span>
+                    <h2><i class="fa-solid fa-bag-shopping"></i> My Recent Orders</h2>
+                </div>
+            </div>
+            
+            <hr class="divider">
+            
+            <!-- JavaScript yahan par orders dalega -->
+            <div class="order-list">
+                <div class="orders-skeleton" aria-label="Loading your orders">
+                    <div class="skeleton-order-card"><span></span><b></b><small></small></div>
+                    <div class="skeleton-order-card"><span></span><b></b><small></small></div>
+                    <div class="skeleton-order-card"><span></span><b></b><small></small></div>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <div class="footer-content">
+            <h2>🍔 FoodHub</h2>
+            <p>Fresh Food • Fast Delivery • Best Taste</p>
+            <p>Email : <a href="mailto:akashkumar906552@gmail.com">akashkumar906552@gmail.com</a></p>
+            <p>Phone : <a href="tel:+919065521532">+91 9065521532</a></p>
+            <p>&copy; 2026 FoodHub. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Firebase aur JavaScript -->
+    <script src="toast.js"></script>
+    <script type="module" src="cart-manager.js"></script>
+    <script src="script.js"></script>
+    <script type="module" src="profile.js"></script>
+
+    <script src="bottom-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub | Order Confirmed</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav id="navbar">
+            <div class="logo"><h2>🍔 FoodHub</h2></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="order-success-page">
+        <section class="order-success-card" aria-labelledby="success-title">
+            <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+            <p class="success-eyebrow">Order confirmed</p>
+            <h1 id="success-title">Your food is on its way!</h1>
+            <p class="success-copy">We've received your order and sent its details to the restaurant.</p>
+            <div class="success-details">
+                <div><span>Order ID</span><strong id="successOrderId">—</strong></div>
+                <div><span>Total paid</span><strong id="successTotal">₹0</strong></div>
+                <div><span>Items</span><strong id="successItems">0 items</strong></div>
+                <div><span>Payment</span><strong id="successPayment">—</strong></div>
+            </div>
+            <div class="success-address"><i class="fa-solid fa-location-dot"></i><div><span>Delivering to</span><strong id="successAddress">Your saved delivery address</strong></div></div>
+            <div class="success-actions"><a class="success-primary" href="menu.html">Continue ordering <i class="fa-solid fa-arrow-right"></i></a><a class="success-secondary" href="profile.html">View my orders</a></div>
+        </section>
+    </main>
+    <script src="toast.js"></script>
+    <script type="module" src="cart-manager.js"></script>
+    <script src="script.js"></script>
+    <script type="module" src="navbar.js"></script>
+    <script src="bottom-nav.js"></script>
+    <script>
+        const lastOrder = JSON.parse(localStorage.getItem("lastOrder") || "null");
+        if (lastOrder) {
+            document.getElementById("successOrderId").textContent = `#${String(lastOrder.id).slice(0, 8).toUpperCase()}`;
+            document.getElementById("successTotal").textContent = `₹${lastOrder.total}`;
+            document.getElementById("successItems").textContent = `${lastOrder.itemCount} item${lastOrder.itemCount === 1 ? "" : "s"}`;
+            document.getElementById("successPayment").textContent = lastOrder.payment;
+            document.getElementById("successAddress").textContent = lastOrder.address;
+        }
+    </script>
+</body>
+</html>

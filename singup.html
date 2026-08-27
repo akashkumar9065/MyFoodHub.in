@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub | Sign Up</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header>
+
+        <nav id="navbar">
+
+            <div class="logo">
+                <h2>🍔 FoodHub</h2>
+            </div>
+
+            <ul class="nav-links">
+
+                <li><a href="index.html">Home</a></li>
+
+                <li><a href="menu.html">Menu</a></li>
+
+                <li><a href="cart.html">Cart</a></li>
+
+                <li><a href="about.html">About</a></li>
+
+                <li><a href="contact.html">Contact</a></li>
+
+                <li><a href="login.html">Login</a></li>
+
+                <li><a href="signup.html" class="active">Sign Up</a></li>
+
+            </ul>
+
+        </nav>
+
+    </header>
+
+    <!-- ================= SIGNUP SECTION ================= -->
+
+    <section class="signup-section">
+
+        <div class="signup-box">
+
+            <h1>Create Account</h1>
+
+            <p>Join FoodHub and start ordering delicious food.</p>
+
+            <form id="signupForm" class="modern-form">
+
+                <!-- STEP 1: EMAIL SECTION -->
+                <div id="step1" class="form-step">
+                    <h3 style="margin-bottom: 15px; color: #333; font-size: 18px;">Step 1: Enter your Email</h3>
+
+                    <div class="input-group">
+                        <input type="email" id="signupEmail" placeholder="e.g., akash@gmail.com" required>
+                    </div>
+
+                    <button type="button" id="nextToStep2" class="btn btn-primary"
+                        style="width: 100%; margin-top: 15px;">
+                        Next ➔
+                    </button>
+                </div>
+
+                <!-- STEP 2: PASSWORD SECTION (Shuru mein chhipa rahega) -->
+                <div id="step2" class="form-step" style="display: none;">
+                    <h3 style="margin-bottom: 15px; color: #333; font-size: 18px;">Step 2: Create a Password</h3>
+
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <input type="password" id="signupPassword" placeholder="Create Password" required>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" id="backToStep1" class="btn btn-secondary" style="flex: 1;">
+                            ⬅ Back
+                        </button>
+                        <button type="submit" id="createAccountBtn" class="btn btn-primary" style="flex: 2;">
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+            <div class="signup-links">
+
+                <p>
+                    Already have an account?
+                    <a href="login.html">Login</a>
+                </p>
+
+            </div>
+
+            <hr>
+
+            <div class="social-signup">
+
+                <button>
+                    <i class="fab fa-google"></i>
+                    Sign Up with Google
+                </button>
+
+                <button>
+                    <i class="fab fa-facebook-f"></i>
+                    Sign Up with Facebook
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-content">
+
+            <h2>🍔 FoodHub</h2>
+
+            <p>Fresh Food • Fast Delivery • Best Taste</p>
+
+            <p>
+                Email :
+                <a href="mailto:akashkumar906552@gmail.com">
+                    akashkumar906552@gmail.com
+                </a>
+            </p>
+
+            <p>
+                Phone :
+                <a href="tel:+919065521532">
+                    +91 9065521532
+                </a>
+            </p>
+
+            <p>&copy; 2026 FoodHub. All Rights Reserved.</p>
+
+        </div>
+
+    </footer>
+
+    <script src="toast.js"></script>
+    <script type="module" src="cart-manager.js"></script>
+    <script src="script.js"></script>
+    <script type="module" src="auth.js"></script>
+
+</body>
+
+</html>

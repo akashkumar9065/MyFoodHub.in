@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub | Contact Us</title>
+
+    <!-- CSS File -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <header>
+        <nav id="navbar">
+            <div class="logo">
+                <h2>🍔 FoodHub</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- ================= CONTACT SECTION ================= -->
+    <section class="contact-container">
+
+        <!-- Left: Form -->
+        <div class="contact-form">
+            <h2>Send a Message</h2>
+
+            <form id="contactForm" onsubmit="event.preventDefault(); sendContactWhatsApp();">
+                <input type="text" id="name" placeholder="Your Name" required>
+                <input type="email" id="email" placeholder="Your Email" required>
+                <input type="text" id="subject" placeholder="Subject" required>
+                <textarea id="message" rows="5" placeholder="Write Your Message" required></textarea>
+
+                <button type="button" onclick="sendContactWhatsApp()">
+                    <i class="fa-brands fa-whatsapp"></i> Send on WhatsApp
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: Contact Information -->
+        <div class="contact-info">
+            <h2>Contact Information</h2>
+
+            <div class="info-item">
+                <p><i class="fa-solid fa-location-dot"></i> India</p>
+                <p><i class="fa-solid fa-phone"></i> +91 9065521532</p>
+                <p><i class="fa-solid fa-envelope"></i> akashkumar906552@gmail.com</p>
+                <p><i class="fa-solid fa-clock"></i> Mon – Sun : 9:00 AM – 10:00 PM</p>
+            </div>
+
+            <div class="social-icons">
+                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <div class="footer-content">
+            <h2>🍔 FoodHub</h2>
+            <p>Fresh Food • Fast Delivery • Best Taste</p>
+            <p>Email : <a href="mailto:akashkumar906552@gmail.com">akashkumar906552@gmail.com</a></p>
+            <p>Phone : <a href="tel:+919065521532">+91 9065521532</a></p>
+            <p>&copy; 2026 FoodHub. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- App JS File -->
+    <script src="toast.js"></script>
+    <script type="module" src="cart-manager.js"></script>
+    <script src="app.js"></script>
+    <script src="bottom-nav.js"></script>
+</body>
+
+</html>
