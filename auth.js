@@ -1,15 +1,11 @@
+// 1. CLEAN IMPORTS (Sirf ek baar)
+import { auth, db } from "./firebase.js";
+import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendEmailVerification,
-    sendPasswordResetEmail, // NAYA IMPORT
-    signOut
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-import { auth } from "./firebase.js";
-import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    sendEmailVerification,
+    sendPasswordResetEmail,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
@@ -28,7 +24,7 @@ if (signupForm) {
     nextToStep2Btn.addEventListener("click", () => {
         const email = document.getElementById("signupEmail").value.trim();
         if (email === "" || !email.includes("@")) {
-            showToast("Please enter a valid email address.", "error");
+            window.showToast?.("Please enter a valid email address.", "error");
             return;
         }
         step1.style.display = "none";
@@ -50,22 +46,37 @@ if (signupForm) {
         const confirmPassword = document.getElementById("confirmPassword").value;
 
         if (password !== confirmPassword) {
-            showToast("Passwords do not match.", "error");
+            window.showToast?.("Passwords do not match.", "error");
             return;
         }
 
         try {
             document.getElementById("createAccountBtn").innerText = "Creating Account...";
             
+            // Auth mein account banayein
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await sendEmailVerification(userCredential.user);
+            const user = userCredential.user;
 
-            showToast("Account created! Please verify the link sent to your email.", "success");
+            // NAYA: Signup hote hi Firestore Database mein ek blank document auto-create karein
+            await setDoc(doc(db, "users", user.uid), {
+                email: user.email,
+                name: "",
+                phone: "",
+                address: "",
+                city: "",
+                pincode: "",
+                createdAt: serverTimestamp()
+            });
+
+            // Verification Email
+            await sendEmailVerification(user);
+
+            window.showToast?.("Account created! Please verify the link sent to your email.", "success");
             window.location.href = "login.html";
 
         } catch (error) {
             console.error("Firebase Signup Error:", error);
-            showToast("Signup failed: " + error.message, "error");
+            window.showToast?.("Signup failed: " + error.message, "error");
             document.getElementById("createAccountBtn").innerText = "Create Account";
         }
     });
@@ -89,23 +100,24 @@ if (loginForm) {
             // MAIN SECURITY CHECK
             if (!userCredential.user.emailVerified) {
                 await signOut(auth); 
-                showToast("Please verify your email before logging in. Check inbox or spam.", "info");
+                window.showToast?.("Please verify your email before logging in. Check inbox or spam.", "info");
                 return; 
             }
 
-            showToast("Login successful! Welcome to FoodHub.", "success");
+            window.showToast?.("Login successful! Welcome to FoodHub.", "success");
             window.location.href = "index.html"; 
 
         } catch (error) {
             console.error("Firebase Login Error:", error);
             if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-                showToast("Login failed. Incorrect email or password.", "error");
+                window.showToast?.("Login failed. Incorrect email or password.", "error");
             } else {
-                showToast("Login failed: " + error.message, "error");
+                window.showToast?.("Login failed: " + error.message, "error");
             }
         }
     });
 }
+
 // ==========================================
 // 3. FORGOT PASSWORD SYSTEM
 // ==========================================
@@ -122,7 +134,7 @@ if (forgotPasswordBtn) {
         // Agar user ne email nahi daala hai toh error dikhayein
         if (!email || !email.includes("@")) {
             window.showToast?.("Please enter your registered email address above first.", "info");
-            emailInput.focus();
+            emailInput?.focus();
             return;
         }
 
