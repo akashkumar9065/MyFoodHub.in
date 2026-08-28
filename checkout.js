@@ -198,7 +198,7 @@ if (placeOrderBtn) {
                             totalPrice: finalTotal,
                             date: new Date().toLocaleDateString(),
                             createdAt: new Date().toISOString(),
-                            status: "Pending",
+                            status: "Confirmed", // CHANGED TO CONFIRMED
                             orderId: tempOrderId 
                         });
 
@@ -214,7 +214,7 @@ if (placeOrderBtn) {
                             deliveryFee: 40,
                             total: finalTotal,
                             payment,
-                            status: "Pending",
+                            status: "Confirmed", // CHANGED TO CONFIRMED
                             restaurant: "FoodHub"
                         });
 
