@@ -1,12 +1,14 @@
 // 1. CLEAN IMPORTS (Sirf ek baar)
 import { auth, db } from "./firebase.js";
-import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"; // getDoc NAYA IMPORT KIYA
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendEmailVerification,
     sendPasswordResetEmail,
-    signOut
+    signOut,
+    GoogleAuthProvider,     // NAYA IMPORT
+    signInWithPopup         // NAYA IMPORT
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
 // ==========================================
@@ -154,6 +156,57 @@ if (forgotPasswordBtn) {
                 window.showToast?.("No account found with this email address.", "error");
             } else {
                 window.showToast?.("Error: " + error.message, "error");
+            }
+        }
+    });
+}
+
+// ==========================================
+// 4. GOOGLE LOGIN SYSTEM
+// ==========================================
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+
+if (googleLoginBtn) {
+    googleLoginBtn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        
+        const provider = new GoogleAuthProvider();
+        
+        try {
+            googleLoginBtn.innerText = "Connecting...";
+            
+            // Popup ke zariye Google login open karna
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            
+            // Zaroori Check: Agar naya user hai, toh Firestore mein uski entry bana dein
+            const profileRef = doc(db, "users", user.uid);
+            const profileSnap = await getDoc(profileRef);
+            
+            if (!profileSnap.exists()) {
+                await setDoc(profileRef, {
+                    email: user.email,
+                    name: user.displayName || "",
+                    phone: "",
+                    address: "",
+                    city: "",
+                    pincode: "",
+                    createdAt: serverTimestamp()
+                });
+            }
+
+            window.showToast?.("Google Login successful!", "success");
+            window.location.href = "index.html"; 
+            
+        } catch (error) {
+            console.error("Google Login Error:", error);
+            googleLoginBtn.innerHTML = '<i class="fab fa-google"></i> Login with Google';
+            
+            // Common errors handle karna (jaise popup band kar dena)
+            if (error.code === 'auth/popup-closed-by-user') {
+                window.showToast?.("Login cancelled. You closed the Google popup.", "info");
+            } else {
+                window.showToast?.("Google Login failed: " + error.message, "error");
             }
         }
     });
