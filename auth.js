@@ -106,3 +106,43 @@ if (loginForm) {
         }
     });
 }
+// ==========================================
+// 3. FORGOT PASSWORD SYSTEM
+// ==========================================
+const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+
+if (forgotPasswordBtn) {
+    forgotPasswordBtn.addEventListener("click", async function (e) {
+        e.preventDefault();
+
+        // Login email input se email uthayenge
+        const emailInput = document.getElementById("loginEmail");
+        const email = emailInput ? emailInput.value.trim() : "";
+
+        // Agar user ne email nahi daala hai toh error dikhayein
+        if (!email || !email.includes("@")) {
+            window.showToast?.("Please enter your registered email address above first.", "info");
+            emailInput.focus();
+            return;
+        }
+
+        try {
+            forgotPasswordBtn.innerText = "Sending...";
+            
+            await sendPasswordResetEmail(auth, email);
+            
+            window.showToast?.("Password reset link sent! Please check your email inbox/spam.", "success");
+            forgotPasswordBtn.innerText = "Forgot Password?";
+            
+        } catch (error) {
+            console.error("Reset Password Error:", error);
+            forgotPasswordBtn.innerText = "Forgot Password?";
+            
+            if (error.code === 'auth/user-not-found') {
+                window.showToast?.("No account found with this email address.", "error");
+            } else {
+                window.showToast?.("Error: " + error.message, "error");
+            }
+        }
+    });
+}
