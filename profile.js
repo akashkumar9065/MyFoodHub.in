@@ -36,11 +36,15 @@ function renderSavedAddress(userInfo) {
 
     const location = [userInfo.address, userInfo.city, userInfo.pincode].filter(Boolean).join(", ");
     savedAddressSummary.innerHTML = `
-        <i class="fa-solid fa-location-dot"></i>
-        <div>
-            <strong>${escapeHTML(userInfo.name || "Saved delivery address")}</strong>
-            <p>${escapeHTML(location)}</p>
-            ${userInfo.phone ? `<small><i class="fa-solid fa-phone"></i> ${escapeHTML(userInfo.phone)}</small>` : ""}
+        <div style="display:flex; align-items:flex-start; gap:10px;">
+            <i class="fa-solid fa-location-dot" style="color:#ff5722; margin-top:4px;"></i>
+            <div>
+                <h4 style="margin:0; font-size:16px;">${escapeHTML(userInfo.name || "Home")}</h4>
+                <p style="margin:5px 0 0 0; color:#555; font-size:14px; line-height:1.5;">
+                    ${escapeHTML(location)}<br>
+                    ${userInfo.phone ? `<i class="fa-solid fa-phone" style="font-size:12px;"></i> +91 ${escapeHTML(userInfo.phone)}` : ""}
+                </p>
+            </div>
         </div>`;
 }
 
@@ -48,7 +52,7 @@ function showProfileDetails(user, userInfo = null) {
     const name = userInfo?.name?.trim() || user.displayName || "Foodie";
 
     if (displayName) displayName.innerText = name;
-    if (profileGreeting) profileGreeting.innerText = name;
+    if (profileGreeting) profileGreeting.innerText = name.split(" ")[0]; // Sirf First Name
     if (document.getElementById("editName")) document.getElementById("editName").value = userInfo?.name || "";
     if (document.getElementById("editPhone")) document.getElementById("editPhone").value = userInfo?.phone || "";
     if (document.getElementById("editAddress")) document.getElementById("editAddress").value = userInfo?.address || "";
@@ -62,7 +66,7 @@ onAuthStateChanged(auth, (user) => {
         // 1. User ki basic details set karein
         if(displayName) displayName.innerText = user.displayName || "Foodie";
         if(displayEmail) displayEmail.innerText = user.email;
-        if(profileGreeting) profileGreeting.innerText = user.displayName || "Foodie";
+        if(profileGreeting) profileGreeting.innerText = (user.displayName || "Foodie").split(" ")[0];
 
         // 2. User ki apni photo load karein
         const savedPic = localStorage.getItem("userProfilePic_" + user.email);
@@ -104,51 +108,84 @@ onAuthStateChanged(auth, (user) => {
 
         // 4. Sirf IS USER ke Previous Orders Firebase se layein
         if(orderList) {
-            const q = query(collection(db, "orders"), where("userEmail", "==", user.email));
+            // UserId ke hisab se order search karega (Best Practice)
+            const q = query(collection(db, "orders"), where("userId", "==", user.uid));
             
             getDocs(q).then((querySnapshot) => {
                 orderList.innerHTML = ""; 
                 
                 if(querySnapshot.empty) {
                     orderList.innerHTML = `
-                        <div class="empty-orders">
-                            <i class="fa-solid fa-bowl-food"></i>
-                            <h3>No orders yet</h3>
-                            <p>Your delicious orders will appear here after checkout.</p>
-                            <a href="menu.html">Explore the menu</a>
+                        <div class="empty-orders" style="text-align:center; padding: 40px 20px; background:#fff; border-radius:10px; border:1px solid #eee;">
+                            <img src="https://cdn-icons-png.flaticon.com/512/1046/1046874.png" width="80" style="opacity:0.5; margin-bottom:15px;">
+                            <h3 style="color:#333;">No orders yet</h3>
+                            <p style="color:#777; margin-bottom:20px;">Your delicious orders will appear here after checkout.</p>
+                            <a href="menu.html" style="text-decoration:none; padding:10px 20px; background:#ff5722; color:#fff; border-radius:5px;">Explore the menu</a>
                         </div>`;
                     return;
                 }
 
+                // Convert snapshot to array to sort by date
+                const ordersArray = [];
                 querySnapshot.forEach((doc) => {
-                    const order = doc.data();
-                    const status = String(order.status || "Confirmed");
-                    const statusClass = status.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "confirmed";
+                    ordersArray.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort orders: Latest first
+                ordersArray.sort((a, b) => (b.orderDate || 0) - (a.orderDate || 0));
+
+                ordersArray.forEach((order) => {
+                    const status = String(order.status || "Pending");
+                    
+                    // Dynamic styling based on status
+                    let statusColor = status.toLowerCase() === "delivered" ? "#28a745" : (status.toLowerCase() === "confirmed" ? "#007bff" : "#ff9800");
+                    let statusBg = status.toLowerCase() === "delivered" ? "#e6f4ea" : (status.toLowerCase() === "confirmed" ? "#e7f1ff" : "#fff3e0");
+
+                    // Date formatting (Handle both Firestore Timestamp and String)
+                    let dateStr = "Date unavailable";
+                    if (order.orderDate && typeof order.orderDate.toDate === 'function') {
+                        dateStr = order.orderDate.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+                    } else if (order.date) {
+                        dateStr = order.date;
+                    }
+
+                    // Items formatting (Handle Array or String)
+                    let itemsStr = "Order details unavailable";
+                    if (Array.isArray(order.items)) {
+                        itemsStr = order.items.map(i => `${i.name} (x${i.quantity || 1})`).join(", ");
+                    } else if (order.items) {
+                        itemsStr = order.items;
+                    }
+                    
+                    const totalPrice = order.totalAmount || order.totalPrice || "0";
+
+                    // Premium Order Card Design
                     orderList.innerHTML += `
-                    <div class="order-card">
-                        <div class="order-details">
-                            <span class="order-number">Order #${doc.id.slice(0,6).toUpperCase()}</span>
-                            <p>${escapeHTML(order.items || "Order details unavailable")}</p>
-                            <span class="order-date"><i class="fa-regular fa-calendar"></i> ${escapeHTML(order.date || "Date unavailable")}</span>
+                    <div class="order-card" style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #eaeaea; border-radius:10px; padding:20px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                        <div class="order-details-left">
+                            <h4 style="margin:0 0 5px 0; color:#333; font-size:15px;">Order #${escapeHTML(order.id.slice(0,6).toUpperCase())}</h4>
+                            <p style="margin:0 0 10px 0; color:#666; font-size:13px; max-width:250px;">${escapeHTML(itemsStr)}</p>
+                            <small style="color:#999; font-size:12px;"><i class="fa-regular fa-clock"></i> ${escapeHTML(dateStr)}</small>
                         </div>
-                        <div class="order-price">
-                            <h4>₹${escapeHTML(order.totalPrice)}</h4>
-                            <span class="status ${statusClass}">${escapeHTML(status)}</span>
+                        <div class="order-details-right" style="text-align:right;">
+                            <h3 style="margin:0 0 8px 0; color:#ff5722; font-size:18px;">₹${escapeHTML(String(totalPrice))}</h3>
+                            <span style="background:${statusBg}; color:${statusColor}; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600;">
+                                ${escapeHTML(status)}
+                            </span>
                         </div>
                     </div>`;
                 });
-            }).catch(() => {
-                orderList.innerHTML = "<p class=\"orders-error\">Orders could not be loaded. Please refresh and try again.</p>";
+            }).catch((error) => {
+                console.error("Order load error: ", error);
+                orderList.innerHTML = "<p class=\"orders-error\" style='color:red;'>Orders could not be loaded. Please refresh and try again.</p>";
             });
         }
 
         // ==========================================
-        // 5. PROFILE UPDATE LOGIC (BINA OTP KE)
+        // 5. PROFILE UPDATE LOGIC
         // ==========================================
         const updateProfileForm = document.getElementById("updateProfileForm");
 
-        // Each Firebase user has their own profile document. Old browser-local
-        // demo values are deliberately ignored so new profiles start blank.
         localStorage.removeItem("userInfo_" + user.email);
         const profileRef = doc(db, "users", user.uid);
         getDoc(profileRef).then(snapshot => {
@@ -158,12 +195,11 @@ onAuthStateChanged(auth, (user) => {
             if (typeof showToast === "function") showToast("Profile could not be loaded. You can still save your details.", "info");
         });
 
-        // Final Data Save karne ka logic (Direct Update button dabane par)
+        // Final Data Save karne ka logic
         if (updateProfileForm) {
             const phoneInput = document.getElementById("editPhone");
             const pincodeInput = document.getElementById("editPincode");
 
-            // Keep both fields numeric while typing or pasting.
             [phoneInput, pincodeInput].forEach(input => {
                 input?.addEventListener("input", () => {
                     input.value = input.value.replace(/\D/g, "");
@@ -172,7 +208,7 @@ onAuthStateChanged(auth, (user) => {
             });
 
             updateProfileForm.addEventListener("submit", async function(e) {
-                e.preventDefault(); // Form ko page refresh karne se rokna
+                e.preventDefault(); 
 
                 const name = document.getElementById("editName").value.trim();
                 const address = document.getElementById("editAddress").value.trim();
@@ -180,15 +216,10 @@ onAuthStateChanged(auth, (user) => {
                 const phone = phoneInput.value.trim();
                 const pincode = pincodeInput.value.trim();
 
-                // NAYA FEATURE: Validation to prevent empty fields
                 if (!name || !phone || !address || !city || !pincode) {
-                    if (typeof showToast === "function") {
-                        showToast("Please fill all the fields before updating your profile.", "error");
-                    } else if (window.showToast) {
-                        window.showToast("Please fill all the fields before updating your profile.", "error");
-                    } else {
-                        alert("Please fill all the fields before updating your profile.");
-                    }
+                    if (typeof showToast === "function") showToast("Please fill all the fields.", "error");
+                    else if (window.showToast) window.showToast("Please fill all the fields.", "error");
+                    else alert("Please fill all the fields before updating your profile.");
                     return;
                 }
 
@@ -209,25 +240,20 @@ onAuthStateChanged(auth, (user) => {
                 phoneInput.setCustomValidity("");
                 pincodeInput.setCustomValidity("");
                 
-                const userInfo = {
-                    name,
-                    phone,
-                    address,
-                    city,
-                    pincode
-                };
-
+                const userInfo = { name, phone, address, city, pincode };
                 const button = document.getElementById("updateProfileBtn");
                 if (button) button.disabled = true;
+
                 try {
                     await setDoc(profileRef, { ...userInfo, email: user.email, updatedAt: serverTimestamp() }, { merge: true });
                     showProfileDetails(user, userInfo);
+                    
                     if (typeof showToast === "function") showToast("Profile details saved successfully!", "success");
                     else if (window.showToast) window.showToast("Profile details saved successfully!", "success");
                 } catch (error) {
                     console.error("Profile save failed:", error);
-                    if (typeof showToast === "function") showToast("Profile could not be saved. Please try again.", "error");
-                    else if (window.showToast) window.showToast("Profile could not be saved. Please try again.", "error");
+                    if (typeof showToast === "function") showToast("Profile could not be saved.", "error");
+                    else if (window.showToast) window.showToast("Profile could not be saved.", "error");
                 } finally {
                     if (button) button.disabled = false;
                 }
@@ -240,11 +266,9 @@ onAuthStateChanged(auth, (user) => {
             });
         }
 
-        // User profile data is ready; keep the order skeleton until Firestore responds.
         document.body.classList.remove("profile-loading");
 
     } else {
-        // Agar login nahi hai toh login page par bhejo
         window.location.href = "login.html";
     }
 });
