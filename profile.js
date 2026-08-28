@@ -155,7 +155,7 @@ onAuthStateChanged(auth, (user) => {
             showProfileDetails(user, snapshot.exists() ? snapshot.data() : null);
         }).catch(() => {
             showProfileDetails(user, null);
-            window.showToast?.("Profile could not be loaded. You can still save your details.", "info");
+            if (typeof showToast === "function") showToast("Profile could not be loaded. You can still save your details.", "info");
         });
 
         // Final Data Save karne ka logic (Direct Update button dabane par)
@@ -174,8 +174,23 @@ onAuthStateChanged(auth, (user) => {
             updateProfileForm.addEventListener("submit", async function(e) {
                 e.preventDefault(); // Form ko page refresh karne se rokna
 
+                const name = document.getElementById("editName").value.trim();
+                const address = document.getElementById("editAddress").value.trim();
+                const city = document.getElementById("editCity").value.trim();
                 const phone = phoneInput.value.trim();
                 const pincode = pincodeInput.value.trim();
+
+                // NAYA FEATURE: Validation to prevent empty fields
+                if (!name || !phone || !address || !city || !pincode) {
+                    if (typeof showToast === "function") {
+                        showToast("Please fill all the fields before updating your profile.", "error");
+                    } else if (window.showToast) {
+                        window.showToast("Please fill all the fields before updating your profile.", "error");
+                    } else {
+                        alert("Please fill all the fields before updating your profile.");
+                    }
+                    return;
+                }
 
                 if (!/^\d{10}$/.test(phone)) {
                     phoneInput.setCustomValidity("Please enter a valid 10-digit mobile number.");
@@ -195,10 +210,10 @@ onAuthStateChanged(auth, (user) => {
                 pincodeInput.setCustomValidity("");
                 
                 const userInfo = {
-                    name: document.getElementById("editName").value.trim(),
+                    name,
                     phone,
-                    address: document.getElementById("editAddress").value.trim(),
-                    city: document.getElementById("editCity").value.trim(),
+                    address,
+                    city,
                     pincode
                 };
 
@@ -207,10 +222,12 @@ onAuthStateChanged(auth, (user) => {
                 try {
                     await setDoc(profileRef, { ...userInfo, email: user.email, updatedAt: serverTimestamp() }, { merge: true });
                     showProfileDetails(user, userInfo);
-                    showToast("Profile details saved successfully!", "success");
+                    if (typeof showToast === "function") showToast("Profile details saved successfully!", "success");
+                    else if (window.showToast) window.showToast("Profile details saved successfully!", "success");
                 } catch (error) {
                     console.error("Profile save failed:", error);
-                    showToast("Profile could not be saved. Please try again.", "error");
+                    if (typeof showToast === "function") showToast("Profile could not be saved. Please try again.", "error");
+                    else if (window.showToast) window.showToast("Profile could not be saved. Please try again.", "error");
                 } finally {
                     if (button) button.disabled = false;
                 }
