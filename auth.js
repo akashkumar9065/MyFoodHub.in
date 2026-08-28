@@ -1,14 +1,15 @@
 // 1. CLEAN IMPORTS (Sirf ek baar)
 import { auth, db } from "./firebase.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"; // getDoc NAYA IMPORT KIYA
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"; 
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendEmailVerification,
     sendPasswordResetEmail,
     signOut,
-    GoogleAuthProvider,     // NAYA IMPORT
-    signInWithPopup         // NAYA IMPORT
+    GoogleAuthProvider,
+    FacebookAuthProvider,   // NAYA IMPORT: Facebook ke liye
+    signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
 // ==========================================
@@ -21,8 +22,6 @@ const nextToStep2Btn = document.getElementById("nextToStep2");
 const backToStep1Btn = document.getElementById("backToStep1");
 
 if (signupForm) {
-    
-    // NEXT BUTTON LOGIC
     nextToStep2Btn.addEventListener("click", () => {
         const email = document.getElementById("signupEmail").value.trim();
         if (email === "" || !email.includes("@")) {
@@ -33,13 +32,11 @@ if (signupForm) {
         step2.style.display = "block";
     });
 
-    // BACK BUTTON LOGIC
     backToStep1Btn.addEventListener("click", () => {
         step2.style.display = "none";
         step1.style.display = "block";
     });
 
-    // FINAL SUBMIT (Create Account)
     signupForm.addEventListener("submit", async function (e) {
         e.preventDefault();
 
@@ -55,11 +52,9 @@ if (signupForm) {
         try {
             document.getElementById("createAccountBtn").innerText = "Creating Account...";
             
-            // Auth mein account banayein
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // NAYA: Signup hote hi Firestore Database mein ek blank document auto-create karein
             await setDoc(doc(db, "users", user.uid), {
                 email: user.email,
                 name: "",
@@ -70,7 +65,6 @@ if (signupForm) {
                 createdAt: serverTimestamp()
             });
 
-            // Verification Email
             await sendEmailVerification(user);
 
             window.showToast?.("Account created! Please verify the link sent to your email.", "success");
@@ -99,7 +93,6 @@ if (loginForm) {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-            // MAIN SECURITY CHECK
             if (!userCredential.user.emailVerified) {
                 await signOut(auth); 
                 window.showToast?.("Please verify your email before logging in. Check inbox or spam.", "info");
@@ -129,11 +122,9 @@ if (forgotPasswordBtn) {
     forgotPasswordBtn.addEventListener("click", async function (e) {
         e.preventDefault();
 
-        // Login email input se email uthayenge
         const emailInput = document.getElementById("loginEmail");
         const email = emailInput ? emailInput.value.trim() : "";
 
-        // Agar user ne email nahi daala hai toh error dikhayein
         if (!email || !email.includes("@")) {
             window.showToast?.("Please enter your registered email address above first.", "info");
             emailInput?.focus();
@@ -142,16 +133,13 @@ if (forgotPasswordBtn) {
 
         try {
             forgotPasswordBtn.innerText = "Sending...";
-            
             await sendPasswordResetEmail(auth, email);
-            
             window.showToast?.("Password reset link sent! Please check your email inbox/spam.", "success");
             forgotPasswordBtn.innerText = "Forgot Password?";
             
         } catch (error) {
             console.error("Reset Password Error:", error);
             forgotPasswordBtn.innerText = "Forgot Password?";
-            
             if (error.code === 'auth/user-not-found') {
                 window.showToast?.("No account found with this email address.", "error");
             } else {
@@ -169,17 +157,13 @@ const googleLoginBtn = document.getElementById("googleLoginBtn");
 if (googleLoginBtn) {
     googleLoginBtn.addEventListener("click", async function (e) {
         e.preventDefault();
-        
         const provider = new GoogleAuthProvider();
         
         try {
             googleLoginBtn.innerText = "Connecting...";
-            
-            // Popup ke zariye Google login open karna
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
             
-            // Zaroori Check: Agar naya user hai, toh Firestore mein uski entry bana dein
             const profileRef = doc(db, "users", user.uid);
             const profileSnap = await getDoc(profileRef);
             
@@ -201,12 +185,58 @@ if (googleLoginBtn) {
         } catch (error) {
             console.error("Google Login Error:", error);
             googleLoginBtn.innerHTML = '<i class="fab fa-google"></i> Login with Google';
-            
-            // Common errors handle karna (jaise popup band kar dena)
             if (error.code === 'auth/popup-closed-by-user') {
-                window.showToast?.("Login cancelled. You closed the Google popup.", "info");
+                window.showToast?.("Login cancelled.", "info");
             } else {
                 window.showToast?.("Google Login failed: " + error.message, "error");
+            }
+        }
+    });
+}
+
+// ==========================================
+// 5. FACEBOOK LOGIN SYSTEM
+// ==========================================
+const facebookLoginBtn = document.getElementById("facebookLoginBtn");
+
+if (facebookLoginBtn) {
+    facebookLoginBtn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        const provider = new FacebookAuthProvider();
+        
+        try {
+            facebookLoginBtn.innerText = "Connecting...";
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            
+            const profileRef = doc(db, "users", user.uid);
+            const profileSnap = await getDoc(profileRef);
+            
+            if (!profileSnap.exists()) {
+                await setDoc(profileRef, {
+                    email: user.email || "", // Facebook sometimes hides email
+                    name: user.displayName || "",
+                    phone: "",
+                    address: "",
+                    city: "",
+                    pincode: "",
+                    createdAt: serverTimestamp()
+                });
+            }
+
+            window.showToast?.("Facebook Login successful!", "success");
+            window.location.href = "index.html"; 
+            
+        } catch (error) {
+            console.error("Facebook Login Error:", error);
+            facebookLoginBtn.innerHTML = '<i class="fab fa-facebook-f"></i> Login with Facebook';
+            
+            if (error.code === 'auth/popup-closed-by-user') {
+                window.showToast?.("Login cancelled.", "info");
+            } else if (error.code === 'auth/account-exists-with-different-credential') {
+                 window.showToast?.("An account already exists with the same email but different login method.", "error");
+            } else {
+                window.showToast?.("Facebook Login failed: " + error.message, "error");
             }
         }
     });
