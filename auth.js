@@ -1,3 +1,10 @@
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    sendEmailVerification,
+    sendPasswordResetEmail, // NAYA IMPORT
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import { auth } from "./firebase.js";
 import {
     createUserWithEmailAndPassword,
