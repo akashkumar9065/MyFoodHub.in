@@ -44,18 +44,18 @@ onAuthStateChanged(auth, (user) => {
                         const profileSnapshot = await getDoc(doc(db, "users", user.uid));
                         const savedUserInfo = profileSnapshot.exists() ? profileSnapshot.data() : null;
                         if (savedUserInfo) {
-                        if (name) name.value = savedUserInfo.name || "";
-                        if (phone) phone.value = savedUserInfo.phone || "";
-                        if (address) address.value = savedUserInfo.address || "";
-                        if (city) city.value = savedUserInfo.city || "";
-                        if (pincode) pincode.value = savedUserInfo.pincode || "";
+                            if (name) name.value = savedUserInfo.name || "";
+                            if (phone) phone.value = savedUserInfo.phone || "";
+                            if (address) address.value = savedUserInfo.address || "";
+                            if (city) city.value = savedUserInfo.city || "";
+                            if (pincode) pincode.value = savedUserInfo.pincode || "";
                         } else {
-                        showToast("No saved address found in your profile.", "info");
-                        this.checked = false; // Agar data nahi hai toh wapas uncheck kar do
+                            window.showToast?.("No saved address found in your profile.", "info");
+                            this.checked = false; // Agar data nahi hai toh wapas uncheck kar do
                         }
                     } catch (error) {
                         console.error("Profile load failed:", error);
-                        showToast("Saved address could not be loaded.", "error");
+                        window.showToast?.("Saved address could not be loaded.", "error");
                         this.checked = false;
                     }
                 } else {
@@ -70,7 +70,7 @@ onAuthStateChanged(auth, (user) => {
         }
     } else {
         // Agar user login nahi hai, to usko login page par bhej do
-        showToast("Please log in to proceed to checkout.", "info");
+        window.showToast?.("Please log in to proceed to checkout.", "info");
         window.location.href = "login.html";
     }
 });
@@ -106,7 +106,7 @@ if (placeOrderBtn) {
         let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
 
         if (cartItems.length === 0) {
-            showToast("Your cart is empty. Please add some food first.", "info");
+            window.showToast?.("Your cart is empty. Please add some food first.", "info");
             window.location.href = "menu.html";
             return;
         }
@@ -123,7 +123,7 @@ if (placeOrderBtn) {
             const payment = paymentElement ? paymentElement.value : "Cash on Delivery";
             
             if (!name || !phone || !address || !city || !pincode) {
-                showToast("Please fill all delivery details, including city and pincode.", "error");
+                window.showToast?.("Please fill all delivery details, including city and pincode.", "error");
                 return;
             }
 
@@ -131,7 +131,7 @@ if (placeOrderBtn) {
                 deliveryPhoneInput.setCustomValidity("Please enter a valid 10-digit mobile number.");
                 deliveryPhoneInput.reportValidity();
                 deliveryPhoneInput.focus();
-                showToast("Mobile number must contain exactly 10 digits.", "error");
+                window.showToast?.("Mobile number must contain exactly 10 digits.", "error");
                 return;
             }
 
@@ -139,7 +139,7 @@ if (placeOrderBtn) {
                 deliveryPincodeInput.setCustomValidity("Please enter a valid 6-digit pincode.");
                 deliveryPincodeInput.reportValidity();
                 deliveryPincodeInput.focus();
-                showToast("Pincode must contain exactly 6 digits.", "error");
+                window.showToast?.("Pincode must contain exactly 6 digits.", "error");
                 return;
             }
 
@@ -148,94 +148,100 @@ if (placeOrderBtn) {
 
             try {
                 isPlacingOrder = true;
-                placeOrderBtn.innerText = "Placing Order...";
+                placeOrderBtn.innerText = "Processing...";
                 placeOrderBtn.disabled = true;
 
-                // Cart items ka naam aur quantity ka ek text banayein
+                // 1. Cart Items aur Total Calculate Karein
                 let itemNames = cartItems.map(item => `${item.name} x${item.quantity}`).join(", ");
-                
-                // Real Price calculate karein (+ ₹40 delivery charge)
                 let subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
                 let finalTotal = subtotal + 40;
 
- // ==========================================
-// STEP A: FIREBASE DATABASE MEIN SAVE KAREIN
-// ==========================================
-const orderReference = await addDoc(collection(db, "orders"), {
-    userEmail: user.email,
-    customerName: name,
-    customerPhone: phone,
-    deliveryAddress: `${address}, ${city} - ${pincode}`,
-    paymentMode: payment,
-    items: itemNames,
-    totalPrice: finalTotal,
-    date: new Date().toLocaleDateString(),
-    createdAt: new Date().toISOString(),
-    // YAHAN STATUS "Pending" KAR DIYA HAI
-    status: "Pending" 
-});
+                // 2. Ek Temporary Order ID banayein WhatsApp message ke liye
+                let tempOrderId = "ORD-" + Math.floor(Math.random() * 1000000);
 
-await syncOrderToGoogleSheet({
-    orderId: orderReference.id,
-    orderedAt: new Date().toISOString(),
-    customerName: name,
-    phone,
-    email: user.email,
-    address: `${address}, ${city} - ${pincode}`,
-    items: itemNames,
-    subtotal,
-    deliveryFee: 40,
-    total: finalTotal,
-    payment,
-    // SHEET MEIN BHI PENDING BHEJEIN
-    status: "Pending", 
-    restaurant: "FoodHub"
-});
+                // 3. WHATSAPP MESSAGE BANAYEIN
+                let message = "🍔 *FOODHUB - NEW ORDER*\n";
+                message += "══════════════════════\n\n";
+                message += `🏷️ *Temp Order ID:* ${tempOrderId}\n\n`;
+                message += `👤 *CUSTOMER INFO*\n• *Name:* ${name}\n• *Phone:* ${phone}\n• *Address:* ${address}, ${city} - ${pincode}\n• *Payment:* ${payment}\n\n`;
+                message += "🍽️ *ORDER ITEMS*\n";
 
-// ==========================================
-// STEP B: WHATSAPP MESSAGE BANAYEIN
-// ==========================================
-let message = "🍔 *FOODHUB - NEW ORDER*\n";
-message += "══════════════════════\n\n";
+                cartItems.forEach((item, index) => {
+                    const itemTotal = Number(item.price) * Number(item.quantity);
+                    message += `${index + 1}. *${item.name}* × ${item.quantity}  ➜  ₹${itemTotal}\n`;
+                });
 
-// WHATSAPP MEIN ORDER ID ADD KAR DIYA HAI TAAKI ADMIN MATCH KAR SAKE
-message += `🏷️ *Order ID:* ${orderReference.id.slice(0,8).toUpperCase()}\n\n`;
+                message += `\n💵 *BILL SUMMARY*\n• Subtotal: ₹${subtotal}\n• Delivery Fee: ₹40\n• *Total Payable: ₹${finalTotal}*\n\n`;
+                message += "✨ _Please confirm my order._";
 
-message += `👤 *CUSTOMER INFO*\n• *Name:* ${name}\n• *Phone:* ${phone}\n• *Address:* ${address}, ${city} - ${pincode}\n• *Payment:* ${payment}\n\n`;
-message += "🍽️ *ORDER ITEMS*\n";
+                const whatsappNumber = "919065521532";
+                const whatsappURL = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
 
-cartItems.forEach((item, index) => {
-    const itemTotal = Number(item.price) * Number(item.quantity);
-    message += `${index + 1}. *${item.name}* × ${item.quantity}  ➜  ₹${itemTotal}\n`;
-});
-
-message += `\n💵 *BILL SUMMARY*\n• Subtotal: ₹${subtotal}\n• Delivery Fee: ₹40\n• *Total Payable: ₹${finalTotal}*\n\n`;
-message += "✨ _Please confirm my order._";
-
-const whatsappNumber = "919065521532";
-const whatsappURL = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
-                // ==========================================
-                // STEP C: WHATSAPP OPEN KAREIN AUR REDIRECT KAREIN
-                // ==========================================
-                
-                // WhatsApp naye tab mein kholein
+                // 4. PEHLE WHATSAPP OPEN KAREIN (Bina Firebase mein save kiye)
                 window.open(whatsappURL, "_blank");
 
-                localStorage.setItem("lastOrder", JSON.stringify({
-                    id: orderReference.id,
-                    total: finalTotal,
-                    address: `${address}, ${city} - ${pincode}`,
-                    payment,
-                    itemCount: cartItems.reduce((count, item) => count + Number(item.quantity), 0)
-                }));
+                // 5. THODI DER WAIT KARKE USER SE CONFIRMATION MAANGEIN
+                setTimeout(async () => {
+                    let userConfirmed = confirm("Kya aapne WhatsApp par order send kar diya hai?\n\n(Agar send kar diya hai toh 'OK' dabayein, varna 'Cancel' dabayein)");
 
-                // Order hone ke baad Cart khali kar dein aur confirmation page par bhej dein
-                document.dispatchEvent(new Event("foodhub-clear-cart"));
-                window.location.href = "order-success.html"; 
-                
+                    if (userConfirmed) {
+                        // USER NE BOLA "YES" -> AB FIREBASE MEIN SAVE KAREIN
+                        placeOrderBtn.innerText = "Saving Order...";
+                        
+                        const orderReference = await addDoc(collection(db, "orders"), {
+                            userEmail: user.email,
+                            customerName: name,
+                            customerPhone: phone,
+                            deliveryAddress: `${address}, ${city} - ${pincode}`,
+                            paymentMode: payment,
+                            items: itemNames,
+                            totalPrice: finalTotal,
+                            date: new Date().toLocaleDateString(),
+                            createdAt: new Date().toISOString(),
+                            status: "Pending", // Status ab Pending rahega
+                            tempId: tempOrderId // Temp ID save kar lein match karne ke liye
+                        });
+
+                        await syncOrderToGoogleSheet({
+                            orderId: orderReference.id,
+                            orderedAt: new Date().toISOString(),
+                            customerName: name,
+                            phone,
+                            email: user.email,
+                            address: `${address}, ${city} - ${pincode}`,
+                            items: itemNames,
+                            subtotal,
+                            deliveryFee: 40,
+                            total: finalTotal,
+                            payment,
+                            status: "Pending",
+                            restaurant: "FoodHub"
+                        });
+
+                        localStorage.setItem("lastOrder", JSON.stringify({
+                            id: orderReference.id,
+                            total: finalTotal,
+                            address: `${address}, ${city} - ${pincode}`,
+                            payment,
+                            itemCount: cartItems.reduce((count, item) => count + Number(item.quantity), 0)
+                        }));
+
+                        // CART KHALI KAREIN AUR REDIRECT KAREIN
+                        document.dispatchEvent(new Event("foodhub-clear-cart"));
+                        window.location.href = "order-success.html"; 
+
+                    } else {
+                        // USER NE BOLA "NO" (Back kar diya tha) -> KUCH SAVE NAHI HOGA
+                        isPlacingOrder = false;
+                        placeOrderBtn.disabled = false;
+                        placeOrderBtn.innerText = "Place Order";
+                        window.showToast?.("Order cancelled. Aapka cart safe hai.", "info");
+                    }
+                }, 1500); // 1.5 seconds ka delay taaki pehle WhatsApp khul jaye
+
             } catch (error) {
                 console.error("Error saving order: ", error);
-                showToast("Order could not be placed. Please try again.", "error");
+                window.showToast?.("Something went wrong. Please try again.", "error");
                 isPlacingOrder = false;
                 placeOrderBtn.disabled = false;
                 placeOrderBtn.innerText = "Place Order";
