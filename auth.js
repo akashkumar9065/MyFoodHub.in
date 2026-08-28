@@ -8,7 +8,7 @@ import {
     sendPasswordResetEmail,
     signOut,
     GoogleAuthProvider,
-    FacebookAuthProvider,   // NAYA IMPORT: Facebook ke liye
+    FacebookAuthProvider,
     signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
@@ -169,7 +169,7 @@ if (googleLoginBtn) {
             
             if (!profileSnap.exists()) {
                 await setDoc(profileRef, {
-                    email: user.email,
+                    email: user.email || "",
                     name: user.displayName || "",
                     phone: "",
                     address: "",
@@ -214,7 +214,7 @@ if (facebookLoginBtn) {
             
             if (!profileSnap.exists()) {
                 await setDoc(profileRef, {
-                    email: user.email || "", // Facebook sometimes hides email
+                    email: user.email || "", 
                     name: user.displayName || "",
                     phone: "",
                     address: "",
@@ -237,6 +237,99 @@ if (facebookLoginBtn) {
                  window.showToast?.("An account already exists with the same email but different login method.", "error");
             } else {
                 window.showToast?.("Facebook Login failed: " + error.message, "error");
+            }
+        }
+    });
+}
+
+// ==========================================
+// 6. GOOGLE SIGNUP SYSTEM
+// ==========================================
+const googleSignupBtn = document.getElementById("googleSignupBtn");
+
+if (googleSignupBtn) {
+    googleSignupBtn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        const provider = new GoogleAuthProvider();
+        
+        try {
+            googleSignupBtn.innerText = "Connecting...";
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            
+            const profileRef = doc(db, "users", user.uid);
+            const profileSnap = await getDoc(profileRef);
+            
+            if (!profileSnap.exists()) {
+                await setDoc(profileRef, {
+                    email: user.email || "",
+                    name: user.displayName || "",
+                    phone: "",
+                    address: "",
+                    city: "",
+                    pincode: "",
+                    createdAt: serverTimestamp()
+                });
+            }
+
+            window.showToast?.("Google Sign Up successful!", "success");
+            window.location.href = "index.html"; 
+            
+        } catch (error) {
+            console.error("Google Signup Error:", error);
+            googleSignupBtn.innerHTML = '<i class="fab fa-google"></i> Sign Up with Google';
+            if (error.code === 'auth/popup-closed-by-user') {
+                window.showToast?.("Sign up cancelled.", "info");
+            } else {
+                window.showToast?.("Google Sign Up failed: " + error.message, "error");
+            }
+        }
+    });
+}
+
+// ==========================================
+// 7. FACEBOOK SIGNUP SYSTEM
+// ==========================================
+const facebookSignupBtn = document.getElementById("facebookSignupBtn");
+
+if (facebookSignupBtn) {
+    facebookSignupBtn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        const provider = new FacebookAuthProvider();
+        
+        try {
+            facebookSignupBtn.innerText = "Connecting...";
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            
+            const profileRef = doc(db, "users", user.uid);
+            const profileSnap = await getDoc(profileRef);
+            
+            if (!profileSnap.exists()) {
+                await setDoc(profileRef, {
+                    email: user.email || "", 
+                    name: user.displayName || "",
+                    phone: "",
+                    address: "",
+                    city: "",
+                    pincode: "",
+                    createdAt: serverTimestamp()
+                });
+            }
+
+            window.showToast?.("Facebook Sign Up successful!", "success");
+            window.location.href = "index.html"; 
+            
+        } catch (error) {
+            console.error("Facebook Signup Error:", error);
+            facebookSignupBtn.innerHTML = '<i class="fab fa-facebook-f"></i> Sign Up with Facebook';
+            
+            if (error.code === 'auth/popup-closed-by-user') {
+                window.showToast?.("Sign up cancelled.", "info");
+            } else if (error.code === 'auth/account-exists-with-different-credential') {
+                 window.showToast?.("An account already exists with the same email but different login method.", "error");
+            } else {
+                window.showToast?.("Facebook Sign Up failed: " + error.message, "error");
             }
         }
     });
