@@ -6,8 +6,6 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/f
 const GOOGLE_SHEETS_ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwFKIG-mikHTdm_CZwwgGWv-zLZAOiCDjac1E_oK3GtCBsHqmOg6kIjNZIKPqcrhh4lTQ/exec";
 
 function syncOrderToGoogleSheet(order) {
-    // no-cors lets the browser send the order to the Apps Script web app without
-    // interrupting checkout if the reporting service is temporarily unavailable.
     return fetch(GOOGLE_SHEETS_ORDER_ENDPOINT, {
         method: "POST",
         mode: "no-cors",
@@ -21,7 +19,6 @@ function syncOrderToGoogleSheet(order) {
 // ==========================================
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Email hamesha login user ka rahega
         const emailInput = document.getElementById("email");
         if (emailInput) {
             emailInput.value = user.email;
@@ -39,7 +36,6 @@ onAuthStateChanged(auth, (user) => {
                 const pincode = document.getElementById("pincode");
 
                 if (this.checked) {
-                    // Checkbox ON: use only this user's saved Firestore profile.
                     try {
                         const profileSnapshot = await getDoc(doc(db, "users", user.uid));
                         const savedUserInfo = profileSnapshot.exists() ? profileSnapshot.data() : null;
@@ -51,7 +47,7 @@ onAuthStateChanged(auth, (user) => {
                             if (pincode) pincode.value = savedUserInfo.pincode || "";
                         } else {
                             window.showToast?.("No saved address found in your profile.", "info");
-                            this.checked = false; // Agar data nahi hai toh wapas uncheck kar do
+                            this.checked = false;
                         }
                     } catch (error) {
                         console.error("Profile load failed:", error);
@@ -59,7 +55,6 @@ onAuthStateChanged(auth, (user) => {
                         this.checked = false;
                     }
                 } else {
-                    // Checkbox OFF: Form ko khali kar do taaki naya likh sakein
                     if (name) name.value = "";
                     if (phone) phone.value = "";
                     if (address) address.value = "";
@@ -69,7 +64,6 @@ onAuthStateChanged(auth, (user) => {
             });
         }
     } else {
-        // Agar user login nahi hai, to usko login page par bhej do
         window.showToast?.("Please log in to proceed to checkout.", "info");
         window.location.href = "login.html";
     }
@@ -77,7 +71,7 @@ onAuthStateChanged(auth, (user) => {
 
 
 // ==========================================
-// 2. ORDER PLACE KARNE KA LOGIC (FIREBASE + WHATSAPP)
+// 2. ORDER PLACE KARNE KA LOGIC (CUSTOM POPUP)
 // ==========================================
 const placeOrderBtn = document.getElementById("placeOrderBtn"); 
 let isPlacingOrder = false;
@@ -85,7 +79,6 @@ let isPlacingOrder = false;
 const deliveryPhoneInput = document.getElementById("phone");
 const deliveryPincodeInput = document.getElementById("pincode");
 
-// Only digits are allowed in mobile number and pincode fields, including pasted text.
 [deliveryPhoneInput, deliveryPincodeInput].forEach(input => {
     input?.addEventListener("input", () => {
         input.value = input.value.replace(/\D/g, "");
@@ -97,12 +90,9 @@ if (placeOrderBtn) {
     placeOrderBtn.addEventListener("click", async function(e) {
         e.preventDefault(); 
 
-        // Ignore a second click while the first checkout request is still running.
         if (isPlacingOrder) return;
 
         const user = auth.currentUser;
-        
-        // LocalStorage se real cart items nikalein
         let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
 
         if (cartItems.length === 0) {
@@ -112,7 +102,6 @@ if (placeOrderBtn) {
         }
 
         if (user) {
-            // Check karein ki form ke saare details bhare hue hain ya nahi
             const name = document.getElementById("name").value.trim();
             const phone = document.getElementById("phone").value.trim();
             const address = document.getElementById("address").value.trim();
@@ -151,18 +140,14 @@ if (placeOrderBtn) {
                 placeOrderBtn.innerText = "Processing...";
                 placeOrderBtn.disabled = true;
 
-                // 1. Cart Items aur Total Calculate Karein
                 let itemNames = cartItems.map(item => `${item.name} x${item.quantity}`).join(", ");
                 let subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
                 let finalTotal = subtotal + 40;
-
-                // 2. Ek Temporary Order ID banayein WhatsApp message ke liye
                 let tempOrderId = "ORD-" + Math.floor(Math.random() * 1000000);
 
-                // 3. WHATSAPP MESSAGE BANAYEIN
                 let message = "🍔 *FOODHUB - NEW ORDER*\n";
                 message += "══════════════════════\n\n";
-                message += `🏷️ *Temp Order ID:* ${tempOrderId}\n\n`;
+                message += `🏷️ *Order ID:* ${tempOrderId}\n\n`;
                 message += `👤 *CUSTOMER INFO*\n• *Name:* ${name}\n• *Phone:* ${phone}\n• *Address:* ${address}, ${city} - ${pincode}\n• *Payment:* ${payment}\n\n`;
                 message += "🍽️ *ORDER ITEMS*\n";
 
@@ -177,17 +162,32 @@ if (placeOrderBtn) {
                 const whatsappNumber = "919065521532";
                 const whatsappURL = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
 
-                // 4. PEHLE WHATSAPP OPEN KAREIN (Bina Firebase mein save kiye)
+                // 1. WhatsApp Open Karein
                 window.open(whatsappURL, "_blank");
 
-                // 5. THODI DER WAIT KARKE USER SE CONFIRMATION MAANGEIN
-                setTimeout(async () => {
-                    let userConfirmed = confirm("Kya aapne WhatsApp par order send kar diya hai?\n\n(Agar send kar diya hai toh 'OK' dabayein, varna 'Cancel' dabayein)");
+                // 2. Custom Popup Dikhayein (No Browser Block)
+                const popupOverlay = document.createElement("div");
+                popupOverlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;";
+                
+                popupOverlay.innerHTML = `
+                    <div style="background:#fff;padding:30px;border-radius:15px;width:90%;max-width:400px;text-align:center;box-shadow:0 15px 30px rgba(0,0,0,0.3);">
+                        <div style="font-size:40px;color:#ff5722;margin-bottom:10px;"><i class="fa-brands fa-whatsapp"></i></div>
+                        <h3 style="color:#222;font-size:22px;margin-bottom:15px;">WhatsApp Confirmation</h3>
+                        <p style="color:#555;font-size:16px;margin-bottom:25px;line-height:1.5;">Kya aapne WhatsApp par apna order message send kar diya hai?</p>
+                        <div style="display:flex;gap:15px;justify-content:center;">
+                            <button id="cancelPopupBtn" style="flex:1;background:#f1f1f1;color:#333;border:none;padding:12px;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;transition:0.3s;">Nahi (Cancel)</button>
+                            <button id="confirmPopupBtn" style="flex:1;background:#28a745;color:#fff;border:none;padding:12px;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;transition:0.3s;">Haan (Send)</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(popupOverlay);
 
-                    if (userConfirmed) {
-                        // USER NE BOLA "YES" -> AB FIREBASE MEIN SAVE KAREIN
-                        placeOrderBtn.innerText = "Saving Order...";
-                        
+                // 3. Agar User "Haan (Send)" dabaye -> FIREBASE MEIN SAVE
+                document.getElementById("confirmPopupBtn").addEventListener("click", async () => {
+                    document.body.removeChild(popupOverlay);
+                    placeOrderBtn.innerText = "Saving Order...";
+                    
+                    try {
                         const orderReference = await addDoc(collection(db, "orders"), {
                             userEmail: user.email,
                             customerName: name,
@@ -198,8 +198,8 @@ if (placeOrderBtn) {
                             totalPrice: finalTotal,
                             date: new Date().toLocaleDateString(),
                             createdAt: new Date().toISOString(),
-                            status: "Pending", // Status ab Pending rahega
-                            tempId: tempOrderId // Temp ID save kar lein match karne ke liye
+                            status: "Pending",
+                            orderId: tempOrderId 
                         });
 
                         await syncOrderToGoogleSheet({
@@ -226,22 +226,30 @@ if (placeOrderBtn) {
                             itemCount: cartItems.reduce((count, item) => count + Number(item.quantity), 0)
                         }));
 
-                        // CART KHALI KAREIN AUR REDIRECT KAREIN
                         document.dispatchEvent(new Event("foodhub-clear-cart"));
                         window.location.href = "order-success.html"; 
 
-                    } else {
-                        // USER NE BOLA "NO" (Back kar diya tha) -> KUCH SAVE NAHI HOGA
+                    } catch (err) {
+                        console.error("Firebase Save Error:", err);
+                        window.showToast?.("Error saving order. Try again.", "error");
                         isPlacingOrder = false;
                         placeOrderBtn.disabled = false;
                         placeOrderBtn.innerText = "Place Order";
-                        window.showToast?.("Order cancelled. Aapka cart safe hai.", "info");
                     }
-                }, 1500); // 1.5 seconds ka delay taaki pehle WhatsApp khul jaye
+                });
+
+                // 4. Agar User "Nahi (Cancel)" dabaye -> KUCH SAVE NAHI HOGA
+                document.getElementById("cancelPopupBtn").addEventListener("click", () => {
+                    document.body.removeChild(popupOverlay);
+                    isPlacingOrder = false;
+                    placeOrderBtn.disabled = false;
+                    placeOrderBtn.innerText = "Place Order";
+                    window.showToast?.("Order cancelled. Aapka cart safe hai.", "info");
+                });
 
             } catch (error) {
-                console.error("Error saving order: ", error);
-                window.showToast?.("Something went wrong. Please try again.", "error");
+                console.error("Checkout Error: ", error);
+                window.showToast?.("Something went wrong.", "error");
                 isPlacingOrder = false;
                 placeOrderBtn.disabled = false;
                 placeOrderBtn.innerText = "Place Order";
