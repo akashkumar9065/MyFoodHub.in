@@ -2,8 +2,12 @@
 // FOODHUB - script.js
 // ===============================
 
-// ---------- RESPONSIVE NAVIGATION ----------
+// FIREBASE IMPORTS (Sabse upar hona zaroori hai)
+import { db } from "./firebase.js";
+import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
+
+// ---------- RESPONSIVE NAVIGATION ----------
 const navbar = document.getElementById("navbar");
 
 if (navbar) {
@@ -44,9 +48,8 @@ if (navbar) {
     }
 }
 
-// ---------- SEARCH ----------
-//-----------------------------
 
+// ---------- SEARCH ----------
 const searchBox = document.getElementById("searchBox");
 const homeSearchResults = document.getElementById("homeSearchResults");
 const searchBtn = document.getElementById("searchBtn");
@@ -125,18 +128,13 @@ function showMenuSearchResults(query) {
 }
 
 if (searchBox) {
-
     searchBox.addEventListener("input", function () {
-
         if (homeSearchResults) {
             showHomeSearchResults(this.value);
             return;
         }
-
         showMenuSearchResults(this.value);
-
     });
-
 }
 
 if (searchBtn && searchBox) {
@@ -162,29 +160,116 @@ if (searchBox && !homeSearchResults) {
     }
 }
 
-// ---------- SIMPLE FADE ANIMATION ----------
 
-const cards = document.querySelectorAll(
-    ".food-card, .menu-card, .card, .review, .why-box"
-);
-
+// ---------- SIMPLE FADE ANIMATION (Hardcoded Cards ke liye) ----------
+const cards = document.querySelectorAll(".food-card, .menu-card, .card, .review, .why-box");
 cards.forEach(card => {
-
     card.addEventListener("mouseenter", function () {
-
         card.style.transform = "scale(1.05)";
-
+        card.style.transition = "transform 0.3s ease"; // Smoothness added
     });
-
     card.addEventListener("mouseleave", function () {
-
         card.style.transform = "scale(1)";
-
     });
-
 });
 
+
+// =======================================================
+// FIREBASE DYNAMIC MENU & DELETE LOGIC (NO HTML CHANGES)
+// =======================================================
+
+async function loadDynamicFirebaseMenu() {
+    // Menu page ke pehle food container ko target kar raha hai
+    const firstContainer = document.querySelector(".food-container");
+    if (!firstContainer) return; 
+
+    try {
+        const querySnapshot = await getDocs(collection(db, "menu"));
+        if (querySnapshot.empty) return;
+
+        let menuHTML = "";
+        
+        querySnapshot.forEach((docSnap) => {
+            const item = docSnap.data();
+            const docId = docSnap.id;
+
+            menuHTML += `
+            <div class="food-card live-firebase-card" style="position: relative; border: 2px solid #ff5722; box-shadow: 0 4px 15px rgba(255,87,34,0.15);">
+                
+                <!-- Delete Button -->
+                <button class="delete-dish-btn" data-id="${docId}" style="position: absolute; top: 10px; right: 10px; background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; z-index: 10;" title="Delete this item">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3075/3075977.png'">
+                <h3>${item.name} <span style="font-size: 10px; background: #ff5722; color: white; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle;">NEW</span></h3>
+                <p>${item.description || 'Delicious freshly added dish.'}</p>
+                <div class="rating">⭐⭐⭐⭐⭐ 5.0</div>
+                <span class="price">₹${item.price}</span>
+                
+                <button class="add-to-cart" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}">
+                    Add to Cart
+                </button>
+            </div>
+            `;
+        });
+
+        // Naye cards ko sabse aage (top par) add karna
+        firstContainer.insertAdjacentHTML("afterbegin", menuHTML);
+
+        // Naye cards pe bhi hover animation lagana taaki design match kare
+        const newCards = firstContainer.querySelectorAll(".live-firebase-card");
+        newCards.forEach(card => {
+            card.addEventListener("mouseenter", function () {
+                card.style.transform = "scale(1.05)";
+                card.style.transition = "transform 0.3s ease";
+            });
+            card.addEventListener("mouseleave", function () {
+                card.style.transform = "scale(1)";
+            });
+        });
+
+    } catch (error) {
+        console.error("Firebase menu fetch error:", error);
+    }
+}
+
+// Delete Event Listener (Bina refresh delete hone ke liye)
+document.addEventListener("click", async (e) => {
+    const deleteBtn = e.target.closest(".delete-dish-btn");
+    
+    if (deleteBtn) {
+        const dishId = deleteBtn.getAttribute("data-id");
+        
+        if (confirm("Are you sure you want to delete this new dish?")) {
+            try {
+                deleteBtn.innerHTML = "⏳"; // Loading sign
+                
+                // Firestore se delete karna
+                await deleteDoc(doc(db, "menu", dishId));
+                
+                // HTML se card hatana animation ke sath
+                const cardToRemove = deleteBtn.closest(".live-firebase-card");
+                cardToRemove.style.opacity = "0";
+                setTimeout(() => cardToRemove.remove(), 300);
+                
+                window.showToast?.("Dish deleted successfully!", "success") || alert("Dish deleted!");
+            } catch (error) {
+                console.error("Delete error:", error);
+                window.showToast?.("Failed to delete.", "error") || alert("Failed to delete.");
+                deleteBtn.innerHTML = `<i class="fa-solid fa-trash"></i>`;
+            }
+        }
+    }
+});
+
+// Page load hone par menu load karna
+document.addEventListener("DOMContentLoaded", loadDynamicFirebaseMenu);
+
+
 // ---------- CURRENT YEAR ----------
-
-
-
+const footerYear = document.querySelector("footer p:last-child");
+if (footerYear) {
+    const currentYear = new Date().getFullYear();
+    footerYear.innerHTML = `© ${currentYear} FoodHub. All Rights Reserved.`;
+}
