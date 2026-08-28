@@ -158,62 +158,62 @@ if (placeOrderBtn) {
                 let subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
                 let finalTotal = subtotal + 40;
 
-                // ==========================================
-                // STEP A: FIREBASE DATABASE MEIN SAVE KAREIN
-                // ==========================================
-                const orderReference = await addDoc(collection(db, "orders"), {
-                    userEmail: user.email,
-                    customerName: name,
-                    customerPhone: phone,
-                    deliveryAddress: `${address}, ${city} - ${pincode}`,
-                    paymentMode: payment,
-                    items: itemNames,
-                    totalPrice: finalTotal,
-                    date: new Date().toLocaleDateString(),
-                    createdAt: new Date().toISOString(),
-                    status: "Confirmed" // Default status
-                });
+ // ==========================================
+// STEP A: FIREBASE DATABASE MEIN SAVE KAREIN
+// ==========================================
+const orderReference = await addDoc(collection(db, "orders"), {
+    userEmail: user.email,
+    customerName: name,
+    customerPhone: phone,
+    deliveryAddress: `${address}, ${city} - ${pincode}`,
+    paymentMode: payment,
+    items: itemNames,
+    totalPrice: finalTotal,
+    date: new Date().toLocaleDateString(),
+    createdAt: new Date().toISOString(),
+    // YAHAN STATUS "Pending" KAR DIYA HAI
+    status: "Pending" 
+});
 
-                // Keep the private business report in Google Sheets updated automatically.
-                // Firestore remains the main database for the website.
-                // Wait for the browser to queue the reporting request before opening
-                // WhatsApp and redirecting away from checkout. Without this await,
-                // navigation can cancel the request before Apps Script receives it.
-                await syncOrderToGoogleSheet({
-                    orderId: orderReference.id,
-                    orderedAt: new Date().toISOString(),
-                    customerName: name,
-                    phone,
-                    email: user.email,
-                    address: `${address}, ${city} - ${pincode}`,
-                    items: itemNames,
-                    subtotal,
-                    deliveryFee: 40,
-                    total: finalTotal,
-                    payment,
-                    status: "Confirmed",
-                    restaurant: "FoodHub"
-                });
-                
-                // ==========================================
-                // STEP B: WHATSAPP MESSAGE BANAYEIN
-                // ==========================================
-                let message = "🍔 *FOODHUB - NEW ORDER*\n";
-                message += "══════════════════════\n\n";
-                message += `👤 *CUSTOMER INFO*\n• *Name:* ${name}\n• *Phone:* ${phone}\n• *Address:* ${address}, ${city} - ${pincode}\n• *Payment:* ${payment}\n\n`;
-                message += "🍽️ *ORDER ITEMS*\n";
+await syncOrderToGoogleSheet({
+    orderId: orderReference.id,
+    orderedAt: new Date().toISOString(),
+    customerName: name,
+    phone,
+    email: user.email,
+    address: `${address}, ${city} - ${pincode}`,
+    items: itemNames,
+    subtotal,
+    deliveryFee: 40,
+    total: finalTotal,
+    payment,
+    // SHEET MEIN BHI PENDING BHEJEIN
+    status: "Pending", 
+    restaurant: "FoodHub"
+});
 
-                cartItems.forEach((item, index) => {
-                    const itemTotal = Number(item.price) * Number(item.quantity);
-                    message += `${index + 1}. *${item.name}* × ${item.quantity}  ➜  ₹${itemTotal}\n`;
-                });
+// ==========================================
+// STEP B: WHATSAPP MESSAGE BANAYEIN
+// ==========================================
+let message = "🍔 *FOODHUB - NEW ORDER*\n";
+message += "══════════════════════\n\n";
 
-                message += `\n💵 *BILL SUMMARY*\n• Subtotal: ₹${subtotal}\n• Delivery Fee: ₹40\n• *Total Payable: ₹${finalTotal}*\n\n`;
-                message += "✨ _Thank you for ordering with FoodHub!_";
+// WHATSAPP MEIN ORDER ID ADD KAR DIYA HAI TAAKI ADMIN MATCH KAR SAKE
+message += `🏷️ *Order ID:* ${orderReference.id.slice(0,8).toUpperCase()}\n\n`;
 
-                const whatsappNumber = "919065521532";
-                const whatsappURL = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
+message += `👤 *CUSTOMER INFO*\n• *Name:* ${name}\n• *Phone:* ${phone}\n• *Address:* ${address}, ${city} - ${pincode}\n• *Payment:* ${payment}\n\n`;
+message += "🍽️ *ORDER ITEMS*\n";
 
+cartItems.forEach((item, index) => {
+    const itemTotal = Number(item.price) * Number(item.quantity);
+    message += `${index + 1}. *${item.name}* × ${item.quantity}  ➜  ₹${itemTotal}\n`;
+});
+
+message += `\n💵 *BILL SUMMARY*\n• Subtotal: ₹${subtotal}\n• Delivery Fee: ₹40\n• *Total Payable: ₹${finalTotal}*\n\n`;
+message += "✨ _Please confirm my order._";
+
+const whatsappNumber = "919065521532";
+const whatsappURL = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
                 // ==========================================
                 // STEP C: WHATSAPP OPEN KAREIN AUR REDIRECT KAREIN
                 // ==========================================
