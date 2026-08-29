@@ -34,7 +34,7 @@ if (currentPageTag !== "") {
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             
-            // DHYAN DEIN: Yahan koi Delete Button nahi hai (Sirf Customer View)
+            // Customer View Card Structure
             const card = document.createElement('div');
             card.className = 'food-card firebase-dynamic-item';
             card.innerHTML = `
@@ -48,9 +48,8 @@ if (currentPageTag !== "") {
                 </button>
             `;
 
-            // 1. Agar hum individual restaurant (Jaise kfc.html) par hain
+            // 1. Agar hum individual restaurant page par hain (Jaise kfc.html)
             if (currentPageTag === data.restaurant) {
-                // Yeh code dono (food-container ya menu-container) dhoond lega!
                 const container = document.querySelector('.food-container') || document.querySelector('.menu-container');
                 if (container) {
                     container.prepend(card);
@@ -59,9 +58,21 @@ if (currentPageTag !== "") {
             
             // 2. Agar hum main menu.html par hain
             else if (currentPageTag === "menu") {
-                const section = document.getElementById(data.restaurant + '-menu');
-                if (section) {
-                    section.prepend(card);
+                // Alag-alag options check karega taaki item kahan load hona hai miss na ho
+                const targetSection = 
+                    document.getElementById(data.restaurant + '-menu') || 
+                    document.querySelector(`.${data.restaurant}-menu`) || 
+                    document.querySelector(`[data-restaurant="${data.restaurant}"]`) ||
+                    document.querySelector(`#${data.restaurant} .food-container`);
+
+                if (targetSection) {
+                    targetSection.prepend(card);
+                } else {
+                    // Fallback: Agar specific section na mile toh general menu container mein daal dega
+                    const generalContainer = document.querySelector('.menu-container') || document.querySelector('.food-container');
+                    if (generalContainer) {
+                        generalContainer.prepend(card);
+                    }
                 }
             }
         });
