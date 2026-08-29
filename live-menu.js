@@ -14,7 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Browser ka title padh kar pata lagayenge ki hum kis page par hain
+// Browser ka title padh kar page pata lagana
 const pageTitle = document.title.toLowerCase();
 let currentPageTag = "";
 
@@ -24,35 +24,35 @@ else if (pageTitle.includes("burger")) currentPageTag = "burgerking";
 else if (pageTitle.includes("biryani")) currentPageTag = "biryanihouse";
 else if (pageTitle.includes("menu")) currentPageTag = "menu";
 
-// Agar hum sahi page par hain, toh Firebase se live data fetch karo
 if (currentPageTag !== "") {
     onSnapshot(collection(db, "menu"), (snapshot) => {
         
-        // Refresh hone par purane dynamic items hatao taaki duplicate na ho
+        // Purane dynamic items hatao refresh hone par
         document.querySelectorAll('.firebase-dynamic-item').forEach(el => el.remove());
 
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             
-            // Same aapke purane HTML Card jaisa structure
+            // DHYAN DEIN: Yahan koi Delete Button nahi hai (Sirf Customer View)
             const card = document.createElement('div');
-            card.className = 'menu-card firebase-dynamic-item';
+            card.className = 'food-card firebase-dynamic-item';
             card.innerHTML = `
                 <img src="${data.image}" alt="${data.name}">
                 <h3>${data.name}</h3>
                 <p>${data.description}</p>
                 <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <h4>₹${data.price}</h4>
+                <span class="price">₹${data.price}</span>
                 <button type="button" class="add-to-cart" data-name="${data.name}" data-price="${data.price}" data-image="${data.image}">
                     Add to Cart
                 </button>
             `;
 
-            // 1. Agar hum individual restaurant (e.g., kfc.html) par hain
+            // 1. Agar hum individual restaurant (Jaise kfc.html) par hain
             if (currentPageTag === data.restaurant) {
-                const container = document.querySelector('.menu-container');
+                // Yeh code dono (food-container ya menu-container) dhoond lega!
+                const container = document.querySelector('.food-container') || document.querySelector('.menu-container');
                 if (container) {
-                    container.prepend(card); // List mein sabse upar add karega
+                    container.prepend(card);
                 }
             }
             
