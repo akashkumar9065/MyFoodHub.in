@@ -179,8 +179,9 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
 
         const fullAddress = `${address}, ${city} - ${pincode}`;
 
-        // 1. Firebase mein Save
+        // 1. Firebase mein Save (userId add kar diya gaya hai taaki profile page par order dikhe)
         const orderReference = await addDoc(collection(db, "orders"), {
+            userId: user.uid, // <-- FIX: User ID yahan zaroori hai!
             userEmail: user.email,
             customerName: name,
             customerPhone: phone,
