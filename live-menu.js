@@ -1,14 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 👇 APNA FIREBASE CONFIG YAHAN DAALEIN 👇
+// 👇 AAPKA ASLI FIREBASE CONFIG YAHAN HAI 👇
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBN4o_xEuTEIDqALYWQNRDB5Bj2CoyK4eY",
+    authDomain: "foodhub-6a986.firebaseapp.com",
+    projectId: "foodhub-6a986",
+    storageBucket: "foodhub-6a986.firebasestorage.app",
+    messagingSenderId: "330220531332",
+    appId: "1:330220531332:web:ee932499601bd602f61cd1",
+    measurementId: "G-J8JXSW5P3S"
 };
 
 const app = initializeApp(firebaseConfig);
