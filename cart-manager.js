@@ -35,7 +35,11 @@ function updateLocalCart(items, ownerId = activeUserId) {
     if (ownerId) localStorage.setItem(CART_OWNER_KEY, ownerId);
     else localStorage.removeItem(CART_OWNER_KEY);
     renderCart();
-    window.updateGlobalCartBadges?.();
+    
+    // Global badges update functions safety check
+    if (typeof window.updateGlobalCartBadges === "function") {
+        window.updateGlobalCartBadges();
+    }
     document.dispatchEvent(new CustomEvent("foodhub-cart-updated", { detail: { cart } }));
 }
 
@@ -132,4 +136,9 @@ onAuthStateChanged(auth, user => {
     });
 });
 
-document.addEventListener("DOMContentLoaded", () => { renderCart(); window.updateGlobalCartBadges?.(); });
+document.addEventListener("DOMContentLoaded", () => { 
+    renderCart(); 
+    if (typeof window.updateGlobalCartBadges === "function") {
+        window.updateGlobalCartBadges();
+    }
+});
