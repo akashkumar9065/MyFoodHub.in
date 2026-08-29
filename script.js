@@ -1,10 +1,6 @@
 // ===============================
-// FOODHUB - script.js (fixed search + safe firebase dynamic load)
+// FOODHUB - script.js (Clean Version without Delete Button)
 // ===============================
-
-// NOTE: Removed top-level ESM imports so this file can be included as a plain <script> in HTML
-// Firebase is loaded dynamically inside loadDynamicFirebaseMenu() only when available.
-
 
 // ---------- RESPONSIVE NAVIGATION ----------
 const navbar = document.getElementById("navbar");
@@ -92,7 +88,7 @@ function showHomeSearchResults(query) {
 }
 
 function showMenuSearchResults(query) {
-    if (homeSearchResults) return; // if homeSearchResults exists, we're on home page — don't run menu search here
+    if (homeSearchResults) return; 
 
     const searchTerm = query.trim().toLowerCase();
     const sections = document.querySelectorAll(".restaurant-section");
@@ -159,132 +155,17 @@ if (searchBox && !homeSearchResults) {
     }
 }
 
-// ---------- SIMPLE FADE ANIMATION (Hardcoded Cards ke liye) ----------
+// ---------- SIMPLE FADE ANIMATION ----------
 const cards = document.querySelectorAll(".food-card, .menu-card, .card, .review, .why-box");
 cards.forEach(card => {
     card.addEventListener("mouseenter", function () {
         card.style.transform = "scale(1.05)";
-        card.style.transition = "transform 0.3s ease"; // Smoothness added
+        card.style.transition = "transform 0.3s ease";
     });
     card.addEventListener("mouseleave", function () {
         card.style.transform = "scale(1)";
     });
 });
-
-
-// =======================================================
-// FIREBASE DYNAMIC MENU & DELETE LOGIC (NO HTML CHANGES)
-// =======================================================
-
-async function loadDynamicFirebaseMenu() {
-    // Menu page ke pehle food container ko target kar raha hai
-    const firstContainer = document.querySelector(".food-container");
-    if (!firstContainer) return; 
-
-    // Try dynamic import of firebase modules only on demand. If import fails we quietly skip live menu.
-    let dbLocal, collectionFn, getDocsFn, docFn, deleteDocFn;
-    try {
-        const fbModule = await import('./firebase.js');
-        dbLocal = fbModule.db;
-        const firestoreModule = await import('https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js');
-        ({ collection: collectionFn, getDocs: getDocsFn, doc: docFn, deleteDoc: deleteDocFn } = firestoreModule);
-    } catch (err) {
-        // Firebase not available in this environment — don't block the rest of the script
-        console.warn('Firebase dynamic menu skipped (firebase modules not available):', err);
-        return;
-    }
-
-    try {
-        const querySnapshot = await getDocsFn(collectionFn(dbLocal, "menu"));
-        if (!querySnapshot || querySnapshot.empty) return;
-
-        let menuHTML = "";
-        querySnapshot.forEach((docSnap) => {
-            const item = docSnap.data();
-            const docId = docSnap.id;
-
-            menuHTML += `
-            <div class="food-card live-firebase-card" style="position: relative; border: 2px solid #ff5722; box-shadow: 0 4px 15px rgba(255,87,34,0.15); border-radius: 8px; padding: 12px;">
-                
-                <!-- Delete Button -->
-                <button class="delete-dish-btn" data-id="${docId}" style="position: absolute; top: 10px; right: 10px; background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer;">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3075/3075977.png'" style="max-width:100%; height:auto; display:block; margin-bottom:8px;">
-                <h3>${item.name} <span style="font-size: 10px; background: #ff5722; color: white; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle;">NEW</span></h3>
-                <p>${item.description || 'Delicious freshly added dish.'}</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 5.0</div>
-                <span class="price">₹${item.price}</span>
-                
-                <button class="add-to-cart" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}">
-                    Add to Cart
-                </button>
-            </div>
-            `;
-        });
-
-        // Naye cards ko sabse aage (top par) add karna
-        firstContainer.insertAdjacentHTML("afterbegin", menuHTML);
-
-        // Naye cards pe bhi hover animation lagana taaki design match kare
-        const newCards = firstContainer.querySelectorAll(".live-firebase-card");
-        newCards.forEach(card => {
-            card.addEventListener("mouseenter", function () {
-                card.style.transform = "scale(1.05)";
-                card.style.transition = "transform 0.3s ease";
-            });
-            card.addEventListener("mouseleave", function () {
-                card.style.transform = "scale(1)";
-            });
-        });
-
-    } catch (error) {
-        console.error("Firebase menu fetch error:", error);
-    }
-}
-
-// Delete Event Listener (Bina refresh delete hone ke liye)
-document.addEventListener("click", async (e) => {
-    const deleteBtn = e.target.closest(".delete-dish-btn");
-    
-    if (deleteBtn) {
-        const dishId = deleteBtn.getAttribute("data-id");
-        
-        if (confirm("Are you sure you want to delete this new dish?")) {
-            try {
-                deleteBtn.innerHTML = "⏳"; // Loading sign
-                // Attempt to dynamically use firebase delete helpers if available
-                const fb = await import('./firebase.js').catch(() => null);
-                const fs = await import('https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js').catch(() => null);
-
-                if (fb && fs) {
-                    const { deleteDoc, doc } = fs;
-                    await deleteDoc(doc(fb.db, "menu", dishId));
-                } else {
-                    // If firebase not present we can't delete from DB — revert and notify
-                    throw new Error('Firebase not available');
-                }
-
-                // HTML se card hatana animation ke sath
-                const cardToRemove = deleteBtn.closest(".live-firebase-card");
-                if (cardToRemove) {
-                    cardToRemove.style.opacity = "0";
-                    setTimeout(() => cardToRemove.remove(), 300);
-                }
-
-                window.showToast?.("Dish deleted successfully!", "success") || alert("Dish deleted!");
-            } catch (error) {
-                console.error("Delete error:", error);
-                window.showToast?.("Failed to delete.", "error") || alert("Failed to delete.");
-                deleteBtn.innerHTML = `<i class="fa-solid fa-trash"></i>`;
-            }
-        }
-    }
-});
-
-// Page load hone par menu load karna
-document.addEventListener("DOMContentLoaded", loadDynamicFirebaseMenu);
 
 
 // ---------- CURRENT YEAR ----------
