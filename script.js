@@ -1,10 +1,9 @@
 // ===============================
-// FOODHUB - script.js
+// FOODHUB - script.js (fixed search + safe firebase dynamic load)
 // ===============================
 
-// FIREBASE IMPORTS (Sabse upar hona zaroori hai)
-import { db } from "./firebase.js";
-import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+// NOTE: Removed top-level ESM imports so this file can be included as a plain <script> in HTML
+// Firebase is loaded dynamically inside loadDynamicFirebaseMenu() only when available.
 
 
 // ---------- RESPONSIVE NAVIGATION ----------
@@ -93,7 +92,7 @@ function showHomeSearchResults(query) {
 }
 
 function showMenuSearchResults(query) {
-    if (homeSearchResults) return;
+    if (homeSearchResults) return; // if homeSearchResults exists, we're on home page — don't run menu search here
 
     const searchTerm = query.trim().toLowerCase();
     const sections = document.querySelectorAll(".restaurant-section");
@@ -120,7 +119,7 @@ function showMenuSearchResults(query) {
 
     if (menuSearchStatus) {
         menuSearchStatus.textContent = searchTerm
-            ? (matchCount ? `${matchCount} delicious item${matchCount === 1 ? "" : "s"} found for “${query.trim()}”` : `No food item found for “${query.trim()}”. Try pizza, burger or biryani.`)
+            ? (matchCount ? `${matchCount} delicious item${matchCount === 1 ? "" : "s"} found for "${query.trim()}"` : `No food item found for "${query.trim()}". Try pizza, burger or biryani.`)
             : "";
         menuSearchStatus.classList.toggle("has-results", Boolean(searchTerm && matchCount));
         menuSearchStatus.classList.toggle("no-results", Boolean(searchTerm && !matchCount));
@@ -160,7 +159,6 @@ if (searchBox && !homeSearchResults) {
     }
 }
 
-
 // ---------- SIMPLE FADE ANIMATION (Hardcoded Cards ke liye) ----------
 const cards = document.querySelectorAll(".food-card, .menu-card, .card, .review, .why-box");
 cards.forEach(card => {
@@ -183,25 +181,37 @@ async function loadDynamicFirebaseMenu() {
     const firstContainer = document.querySelector(".food-container");
     if (!firstContainer) return; 
 
+    // Try dynamic import of firebase modules only on demand. If import fails we quietly skip live menu.
+    let dbLocal, collectionFn, getDocsFn, docFn, deleteDocFn;
     try {
-        const querySnapshot = await getDocs(collection(db, "menu"));
-        if (querySnapshot.empty) return;
+        const fbModule = await import('./firebase.js');
+        dbLocal = fbModule.db;
+        const firestoreModule = await import('https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js');
+        ({ collection: collectionFn, getDocs: getDocsFn, doc: docFn, deleteDoc: deleteDocFn } = firestoreModule);
+    } catch (err) {
+        // Firebase not available in this environment — don't block the rest of the script
+        console.warn('Firebase dynamic menu skipped (firebase modules not available):', err);
+        return;
+    }
+
+    try {
+        const querySnapshot = await getDocsFn(collectionFn(dbLocal, "menu"));
+        if (!querySnapshot || querySnapshot.empty) return;
 
         let menuHTML = "";
-        
         querySnapshot.forEach((docSnap) => {
             const item = docSnap.data();
             const docId = docSnap.id;
 
             menuHTML += `
-            <div class="food-card live-firebase-card" style="position: relative; border: 2px solid #ff5722; box-shadow: 0 4px 15px rgba(255,87,34,0.15);">
+            <div class="food-card live-firebase-card" style="position: relative; border: 2px solid #ff5722; box-shadow: 0 4px 15px rgba(255,87,34,0.15); border-radius: 8px; padding: 12px;">
                 
                 <!-- Delete Button -->
-                <button class="delete-dish-btn" data-id="${docId}" style="position: absolute; top: 10px; right: 10px; background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; z-index: 10;" title="Delete this item">
+                <button class="delete-dish-btn" data-id="${docId}" style="position: absolute; top: 10px; right: 10px; background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer;">
                     <i class="fa-solid fa-trash"></i>
                 </button>
 
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3075/3075977.png'">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3075/3075977.png'" style="max-width:100%; height:auto; display:block; margin-bottom:8px;">
                 <h3>${item.name} <span style="font-size: 10px; background: #ff5722; color: white; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle;">NEW</span></h3>
                 <p>${item.description || 'Delicious freshly added dish.'}</p>
                 <div class="rating">⭐⭐⭐⭐⭐ 5.0</div>
@@ -244,15 +254,25 @@ document.addEventListener("click", async (e) => {
         if (confirm("Are you sure you want to delete this new dish?")) {
             try {
                 deleteBtn.innerHTML = "⏳"; // Loading sign
-                
-                // Firestore se delete karna
-                await deleteDoc(doc(db, "menu", dishId));
-                
+                // Attempt to dynamically use firebase delete helpers if available
+                const fb = await import('./firebase.js').catch(() => null);
+                const fs = await import('https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js').catch(() => null);
+
+                if (fb && fs) {
+                    const { deleteDoc, doc } = fs;
+                    await deleteDoc(doc(fb.db, "menu", dishId));
+                } else {
+                    // If firebase not present we can't delete from DB — revert and notify
+                    throw new Error('Firebase not available');
+                }
+
                 // HTML se card hatana animation ke sath
                 const cardToRemove = deleteBtn.closest(".live-firebase-card");
-                cardToRemove.style.opacity = "0";
-                setTimeout(() => cardToRemove.remove(), 300);
-                
+                if (cardToRemove) {
+                    cardToRemove.style.opacity = "0";
+                    setTimeout(() => cardToRemove.remove(), 300);
+                }
+
                 window.showToast?.("Dish deleted successfully!", "success") || alert("Dish deleted!");
             } catch (error) {
                 console.error("Delete error:", error);
