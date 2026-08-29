@@ -57,7 +57,7 @@
         </section>
 
         <!-- LIVE ORDERS TABLE -->
-        <section class="admin-panel" style="margin-bottom: 40px;">
+        <section class="admin-panel admin-mb-40">
             <h3>Recent Orders Tracker</h3>
             <div class="admin-table-wrapper">
                 <table class="admin-table">
@@ -79,32 +79,28 @@
             </div>
         </section>
 
-        <!-- ==========================================
-             NEW SECTION: MANAGE MENU (ADD/EDIT/DELETE)
-        =========================================== -->
+        <!-- MANAGE MENU (ADD/EDIT/DELETE) -->
         <section class="admin-panel" id="manage-menu-section">
-            <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-pizza-slice" style="color:#ff5722;"></i> Manage Menu</h3>
+            <h3 class="admin-menu-title"><i class="fa-solid fa-pizza-slice"></i> Manage Menu</h3>
 
             <!-- Add/Edit Form -->
-            <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #eee;">
-                <form id="menuForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                    
-                    <!-- Hidden input for ID when editing -->
+            <div class="admin-form-container">
+                <form id="menuForm" class="admin-form-grid">
                     <input type="hidden" id="editFoodId">
 
-                    <div>
-                        <label style="font-size: 13px; font-weight: 600; color:#555;">Food Name</label>
-                        <input type="text" id="foodName" required placeholder="e.g., Spicy Zinger Burger" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit;">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Food Name</label>
+                        <input type="text" id="foodName" class="admin-form-input" required placeholder="e.g., Spicy Zinger Burger">
                     </div>
 
-                    <div>
-                        <label style="font-size: 13px; font-weight: 600; color:#555;">Price (₹)</label>
-                        <input type="number" id="foodPrice" required placeholder="e.g., 149" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit;">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Price (₹)</label>
+                        <input type="number" id="foodPrice" class="admin-form-input" required placeholder="e.g., 149">
                     </div>
 
-                    <div>
-                        <label style="font-size: 13px; font-weight: 600; color:#555;">Restaurant Category</label>
-                        <select id="foodRestaurant" required style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; background: white;">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Restaurant Category</label>
+                        <select id="foodRestaurant" class="admin-form-input" required>
                             <option value="">Select Restaurant...</option>
                             <option value="kfc">KFC</option>
                             <option value="dominoes">Domino's Pizza</option>
@@ -113,21 +109,21 @@
                         </select>
                     </div>
 
-                    <div>
-                        <label style="font-size: 13px; font-weight: 600; color:#555;">Image Folder Path</label>
-                        <input type="text" id="foodImage" required placeholder="e.g., kfc/zinger.png" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit;">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Image Folder Path</label>
+                        <input type="text" id="foodImage" class="admin-form-input" required placeholder="e.g., kfc/zinger-burger.png">
                     </div>
 
-                    <div style="grid-column: 1 / -1;">
-                        <label style="font-size: 13px; font-weight: 600; color:#555;">Short Description</label>
-                        <input type="text" id="foodDesc" required placeholder="e.g., Crispy chicken burger with fresh lettuce." style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit;">
+                    <div class="admin-form-group full-width">
+                        <label class="admin-form-label">Short Description</label>
+                        <input type="text" id="foodDesc" class="admin-form-input" required placeholder="e.g., Crispy chicken burger with fresh lettuce.">
                     </div>
 
-                    <div style="grid-column: 1 / -1; display: flex; gap: 15px;">
-                        <button type="submit" id="menuSubmitBtn" style="background: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                    <div class="admin-form-actions full-width">
+                        <button type="submit" id="menuSubmitBtn" class="admin-btn admin-btn-success">
                             <i class="fa-solid fa-plus"></i> Add New Item
                         </button>
-                        <button type="button" id="cancelEditBtn" style="display: none; background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                        <button type="button" id="cancelEditBtn" class="admin-btn admin-btn-secondary" style="display: none;">
                             Cancel
                         </button>
                     </div>
@@ -152,7 +148,6 @@
                 </table>
             </div>
         </section>
-
     </main>
 
     <script type="module" src="admin.js"></script>
