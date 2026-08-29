@@ -14,6 +14,7 @@ const savedAddressSummary = document.getElementById("savedAddressSummary");
 const editAddressBtn = document.getElementById("editAddressBtn");
 const defaultProfileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
+const ADMIN_EMAIL = "akashkumar906552@gmail.com";
 let cancelTimers = {}; // Timer track karne ke liye
 
 function escapeHTML(value) {
@@ -64,6 +65,19 @@ onAuthStateChanged(auth, (user) => {
         if(displayName) displayName.innerText = user.displayName || "Foodie";
         if(displayEmail) displayEmail.innerText = user.email;
         if(profileGreeting) profileGreeting.innerText = (user.displayName || "Foodie").split(" ")[0];
+
+        // Admin Panel Button Injection (Agar user admin hai toh profile menu mein button dikhega)
+        if (user.email === ADMIN_EMAIL) {
+            const profileSidebar = document.querySelector(".cart-section") || document.querySelector("aside") || document.querySelector(".nav-links");
+            if (profileSidebar && !document.getElementById("adminPanelQuickBtn")) {
+                const adminBtnHTML = `
+                    <a id="adminPanelQuickBtn" href="admin.html" style="background: #ff5722; color: white; padding: 10px 15px; border-radius: 8px; display: block; margin: 15px 0; text-align: center; font-weight: bold; text-decoration: none;">
+                        <i class="fa-solid fa-gauge"></i> Admin Panel
+                    </a>
+                `;
+                profileSidebar.insertAdjacentHTML("beforeend", adminBtnHTML);
+            }
+        }
 
         // Profile Photo Logic
         const savedPic = localStorage.getItem("userProfilePic_" + user.email);
