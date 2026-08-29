@@ -2,190 +2,110 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>FoodHub | Checkout</title>
-
     <link rel="stylesheet" href="style.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
 </head>
 
 <body>
 
     <!-- ================= NAVBAR ================= -->
-
     <header>
-
         <nav id="navbar">
-
             <div class="logo">
-
                 <h2>🍔 FoodHub</h2>
-
             </div>
-
             <ul class="nav-links">
-
                 <li><a href="index.html">Home</a></li>
-
                 <li><a href="menu.html">Menu</a></li>
-
                 <li><a href="cart.html">Cart</a></li>
-
                 <li><a href="checkout.html" class="active">Checkout</a></li>
-
             </ul>
-
         </nav>
-
     </header>
 
     <!-- ================= HEADER ================= -->
-
     <section class="checkout-header">
-
         <h1>Checkout</h1>
-
         <p>Please fill your delivery details.</p>
-
     </section>
 
     <!-- ================= CHECKOUT ================= -->
-
     <section class="checkout-container">
-
         <div class="checkout-form">
-
             <h2>Delivery Information</h2>
+            
+            <form id="checkoutForm">
+                <!-- Saved Address Checkbox -->
+                <div class="saved-address-container">
+                    <input type="checkbox" id="useSavedAddress" class="saved-address-checkbox">
+                    <label for="useSavedAddress" class="saved-address-label">Use Saved Profile Address</label>
+                </div>
 
-                <form id="checkoutForm">
+                <input type="text" id="name" placeholder="Full Name" required>
+                <input type="tel" id="phone" placeholder="10-digit Mobile Number" inputmode="numeric" autocomplete="tel" pattern="[0-9]{10}" minlength="10" maxlength="10" title="Mobile number must be exactly 10 digits" required>
+                <input type="email" id="email" placeholder="Email Address" required>
+                <textarea id="address" rows="4" placeholder="Complete Delivery Address" required></textarea>
+                <input type="text" id="city" placeholder="City" required>
+                <input type="text" id="pincode" placeholder="6-digit Pincode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{6}" minlength="6" maxlength="6" title="Pincode must be exactly 6 digits" required>
 
-                    <!-- Naya Checkbox Option -->
-                    <div class="saved-address-container">
-                        <input type="checkbox" id="useSavedAddress" class="saved-address-checkbox">
-                        <label for="useSavedAddress" class="saved-address-label">Use Saved Profile Address</label>
-                    </div>
+                <h3>Select Payment Method</h3>
+                
+                <label>
+                    <input type="radio" name="paymentMethod" value="COD" checked>
+                    Cash on Delivery
+                </label>
+                <label>
+                    <input type="radio" name="paymentMethod" value="UPI">
+                    UPI
+                </label>
+                <label>
+                    <input type="radio" name="paymentMethod" value="Card">
+                    Debit / Credit Card
+                </label>
 
-                    <input type="text" id="name" placeholder="Full Name" required>
-
-                    <input type="tel" id="phone" placeholder="10-digit Mobile Number" inputmode="numeric" autocomplete="tel" pattern="[0-9]{10}" minlength="10" maxlength="10" title="Mobile number must be exactly 10 digits" required>
-
-                    <input type="email" id="email" placeholder="Email Address" required>
-
-                    <textarea id="address" rows="4" placeholder="Complete Delivery Address" required></textarea>
-
-                    <input type="text" id="city" placeholder="City" required>
-
-                    <input type="text" id="pincode" placeholder="6-digit Pincode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{6}" minlength="6" maxlength="6" title="Pincode must be exactly 6 digits" required>
-
-                    <h3>Select Payment Method</h3>
-
-                    <label>
-
-                        <input type="radio" name="payment" value="Cash on Delivery" checked>
-
-                        Cash on Delivery
-
-                    </label>
-
-                    <label>
-
-                        <input type="radio" name="payment" value="UPI">
-
-                        UPI
-
-                    </label>
-
-                    <label>
-
-                        <input type="radio" name="payment" value="Card">
-
-                        Debit / Credit Card
-
-                    </label>
-
-                    <button type="submit" id="placeOrderBtn">
-                        Place Order
-                    </button>
-                </form>
-
+                <button type="submit" id="placeOrderBtn">
+                    Place Order
+                </button>
+            </form>
         </div>
 
         <!-- ORDER SUMMARY -->
-
         <div class="order-summary">
-
             <h2>Order Summary</h2>
-
-            <div id="orderItems">
-
-            </div>
-
+            <div id="orderItems"></div>
             <p class="delivery-fee">
                 <span>Delivery Fee</span>
                 <span id="deliveryFee">₹0</span>
             </p>
-
             <hr>
-
             <h3 id="grandTotal">
-
                 Total : ₹0
-
             </h3>
-
         </div>
-
     </section>
 
     <!-- ================= FOOTER ================= -->
-
     <footer>
-
         <div class="footer-content">
-
             <h2>🍔 FoodHub</h2>
-
             <p>Fresh Food • Fast Delivery • Best Taste</p>
-
             <p>
-
                 Email :
-
-                <a href="mailto:akashkumar906552@gmail.com">
-
-                    akashkumar906552@gmail.com
-
-                </a>
-
+                <a href="mailto:akashkumar906552@gmail.com">akashkumar906552@gmail.com</a>
             </p>
-
             <p>
-
                 Phone :
-
-                <a href="tel:+919065521532">
-
-                    +91 9065521532
-
-                </a>
-
+                <a href="tel:+919065521532">+91 9065521532</a>
             </p>
-
-            <p>
-
-                &copy; 2026 FoodHub. All Rights Reserved.
-
-            </p>
-
+            <p>&copy; 2026 FoodHub. All Rights Reserved.</p>
         </div>
-
     </footer>
+
+    <!-- RAZORPAY SDK (Sabse pehle load hona zaroori hai) -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script src="toast.js"></script>
     <script type="module" src="cart-manager.js"></script>
@@ -198,5 +118,4 @@
 
     <script src="bottom-nav.js"></script>
 </body>
-
 </html>
