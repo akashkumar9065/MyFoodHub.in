@@ -62,12 +62,12 @@ function renderCart() {
     tbody.innerHTML = "";
     let subtotal = 0;
     if (!cart.length) {
-        tbody.innerHTML = '<tr><td colspan="5">🛒 Your Cart is Empty</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">🛒 Your Cart is Empty</td></tr>';
     } else {
         cart.forEach((item, index) => {
             const total = item.price * item.quantity;
             subtotal += total;
-            tbody.insertAdjacentHTML("beforeend", `<tr><td>${item.name}</td><td>₹${item.price}</td><td><input type="number" value="${item.quantity}" min="1" onchange="changeQty(${index}, this.value)"></td><td>₹${total}</td><td><button onclick="removeItem(${index})">Remove</button></td></tr>`);
+            tbody.insertAdjacentHTML("beforeend", `<tr><td>${item.name}</td><td>₹${item.price}</td><td><input type="number" value="${item.quantity}" min="1" onchange="changeQty(${index}, this.value)"></td><td>₹${total}</td><td><button onclick="removeItem(${index})" style="background:#dc3545; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Remove</button></td></tr>`);
         });
     }
     const delivery = cart.length ? 40 : 0;
@@ -117,6 +117,7 @@ onAuthStateChanged(auth, user => {
     const guestCart = localOwner ? [] : readLocalCart();
     let isInitialLoad = true;
     const cartRef = doc(db, "carts", user.uid);
+    
     stopCartListener = onSnapshot(cartRef, snapshot => {
         const cloudCart = snapshot.exists() ? (snapshot.data().items || []) : [];
         const combined = isInitialLoad && !localOwner
