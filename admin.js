@@ -43,7 +43,7 @@ onSnapshot(q, (snapshot) => {
         if (data.status === "Delivered") statusClass = "admin-bg-delivered";
         if (data.status === "Cancelled") statusClass = "admin-bg-cancelled";
 
-        // Table Row Render (Added fallbacks like "Guest" or "N/A" if data is missing)
+        // Table Row Render
         const row = `
             <tr>
                 <td><strong>${data.orderId || docId.substring(0,8)}</strong></td>
@@ -84,7 +84,6 @@ onSnapshot(q, (snapshot) => {
                 // Dropdown disable karein jab tak update ho raha ho
                 e.target.disabled = true;
                 await updateDoc(doc(db, "orders", id), { status: newStatus });
-                // Note: onSnapshot apne aap naya data fetch kar lega aur dropdown wapas enable ho jayega
             } catch (error) {
                 console.error("Error updating status:", error);
                 alert("Failed to update status. Check your connection or permissions.");
