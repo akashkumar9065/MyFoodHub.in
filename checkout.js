@@ -1,8 +1,8 @@
 import { auth, db } from "./firebase.js";
-import { collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { collection, addDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
-// Google Sheets order-report endpoint (Apps Script Web App).
+// Google Sheets order-report endpoint
 const GOOGLE_SHEETS_ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwFKIG-mikHTdm_CZwwgGWv-zLZAOiCDjac1E_oK3GtCBsHqmOg6kIjNZIKPqcrhh4lTQ/exec";
 
 function syncOrderToGoogleSheet(order) {
@@ -69,9 +69,8 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-
 // ==========================================
-// 2. ORDER PLACE KARNE KA LOGIC (CUSTOM POPUP)
+// 2. ORDER PLACE KARNE KA LOGIC (NO WHATSAPP)
 // ==========================================
 const placeOrderBtn = document.getElementById("placeOrderBtn"); 
 let isPlacingOrder = false;
@@ -108,8 +107,9 @@ if (placeOrderBtn) {
             const city = document.getElementById("city") ? document.getElementById("city").value.trim() : "";
             const pincode = document.getElementById("pincode") ? document.getElementById("pincode").value.trim() : "";
             
-            const paymentElement = document.querySelector('input[name="payment"]:checked');
-            const payment = paymentElement ? paymentElement.value : "Cash on Delivery";
+            // Payment method check
+            const paymentElement = document.querySelector('input[name="paymentMethod"]:checked') || document.querySelector('input[name="payment"]:checked');
+            const payment = paymentElement ? paymentElement.value : "COD";
             
             if (!name || !phone || !address || !city || !pincode) {
                 window.showToast?.("Please fill all delivery details, including city and pincode.", "error");
@@ -119,7 +119,6 @@ if (placeOrderBtn) {
             if (!/^\d{10}$/.test(phone)) {
                 deliveryPhoneInput.setCustomValidity("Please enter a valid 10-digit mobile number.");
                 deliveryPhoneInput.reportValidity();
-                deliveryPhoneInput.focus();
                 window.showToast?.("Mobile number must contain exactly 10 digits.", "error");
                 return;
             }
@@ -127,133 +126,112 @@ if (placeOrderBtn) {
             if (!/^\d{6}$/.test(pincode)) {
                 deliveryPincodeInput.setCustomValidity("Please enter a valid 6-digit pincode.");
                 deliveryPincodeInput.reportValidity();
-                deliveryPincodeInput.focus();
                 window.showToast?.("Pincode must contain exactly 6 digits.", "error");
                 return;
             }
 
-            deliveryPhoneInput.setCustomValidity("");
-            deliveryPincodeInput.setCustomValidity("");
+            let itemNames = cartItems.map(item => `${item.name} x${item.quantity}`).join(", ");
+            let subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+            let finalTotal = subtotal + 40; // Delivery charge
+            let tempOrderId = "ORD-" + Math.floor(Math.random() * 1000000);
 
-            try {
-                isPlacingOrder = true;
-                placeOrderBtn.innerText = "Processing...";
-                placeOrderBtn.disabled = true;
-
-                let itemNames = cartItems.map(item => `${item.name} x${item.quantity}`).join(", ");
-                let subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
-                let finalTotal = subtotal + 40;
-                let tempOrderId = "ORD-" + Math.floor(Math.random() * 1000000);
-
-                let message = "🍔 *FOODHUB - NEW ORDER*\n";
-                message += "══════════════════════\n\n";
-                message += `🏷️ *Order ID:* ${tempOrderId}\n\n`;
-                message += `👤 *CUSTOMER INFO*\n• *Name:* ${name}\n• *Phone:* ${phone}\n• *Address:* ${address}, ${city} - ${pincode}\n• *Payment:* ${payment}\n\n`;
-                message += "🍽️ *ORDER ITEMS*\n";
-
-                cartItems.forEach((item, index) => {
-                    const itemTotal = Number(item.price) * Number(item.quantity);
-                    message += `${index + 1}. *${item.name}* × ${item.quantity}  ➜  ₹${itemTotal}\n`;
-                });
-
-                message += `\n💵 *BILL SUMMARY*\n• Subtotal: ₹${subtotal}\n• Delivery Fee: ₹40\n• *Total Payable: ₹${finalTotal}*\n\n`;
-                message += "✨ _Please confirm my order._";
-
-                const whatsappNumber = "919065521532";
-                const whatsappURL = "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message);
-
-                // 1. WhatsApp Open Karein
-                window.open(whatsappURL, "_blank");
-
-                // 2. Custom Popup Dikhayein (No Browser Block)
-                const popupOverlay = document.createElement("div");
-                popupOverlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;";
-                
-                popupOverlay.innerHTML = `
-                    <div style="background:#fff;padding:30px;border-radius:15px;width:90%;max-width:400px;text-align:center;box-shadow:0 15px 30px rgba(0,0,0,0.3);">
-                        <div style="font-size:40px;color:#ff5722;margin-bottom:10px;"><i class="fa-brands fa-whatsapp"></i></div>
-                        <h3 style="color:#222;font-size:22px;margin-bottom:15px;">WhatsApp Confirmation</h3>
-                        <p style="color:#555;font-size:16px;margin-bottom:25px;line-height:1.5;">Kya aapne WhatsApp par apna order message send kar diya hai?</p>
-                        <div style="display:flex;gap:15px;justify-content:center;">
-                            <button id="cancelPopupBtn" style="flex:1;background:#f1f1f1;color:#333;border:none;padding:12px;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;transition:0.3s;">Nahi (Cancel)</button>
-                            <button id="confirmPopupBtn" style="flex:1;background:#28a745;color:#fff;border:none;padding:12px;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;transition:0.3s;">Haan (Send)</button>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(popupOverlay);
-
-                // 3. Agar User "Haan (Send)" dabaye -> FIREBASE MEIN SAVE
-                document.getElementById("confirmPopupBtn").addEventListener("click", async () => {
-                    document.body.removeChild(popupOverlay);
-                    placeOrderBtn.innerText = "Saving Order...";
-                    
-                    try {
-                        const orderReference = await addDoc(collection(db, "orders"), {
-                            userEmail: user.email,
-                            customerName: name,
-                            customerPhone: phone,
-                            deliveryAddress: `${address}, ${city} - ${pincode}`,
-                            paymentMode: payment,
-                            items: itemNames,
-                            totalPrice: finalTotal,
-                            date: new Date().toLocaleDateString(),
-                            createdAt: new Date().toISOString(),
-                            status: "Confirmed", // CHANGED TO CONFIRMED
-                            orderId: tempOrderId 
-                        });
-
-                        await syncOrderToGoogleSheet({
-                            orderId: orderReference.id,
-                            orderedAt: new Date().toISOString(),
-                            customerName: name,
-                            phone,
-                            email: user.email,
-                            address: `${address}, ${city} - ${pincode}`,
-                            items: itemNames,
-                            subtotal,
-                            deliveryFee: 40,
-                            total: finalTotal,
-                            payment,
-                            status: "Confirmed", // CHANGED TO CONFIRMED
-                            restaurant: "FoodHub"
-                        });
-
-                        localStorage.setItem("lastOrder", JSON.stringify({
-                            id: orderReference.id,
-                            total: finalTotal,
-                            address: `${address}, ${city} - ${pincode}`,
-                            payment,
-                            itemCount: cartItems.reduce((count, item) => count + Number(item.quantity), 0)
-                        }));
-
-                        document.dispatchEvent(new Event("foodhub-clear-cart"));
-                        window.location.href = "order-success.html"; 
-
-                    } catch (err) {
-                        console.error("Firebase Save Error:", err);
-                        window.showToast?.("Error saving order. Try again.", "error");
-                        isPlacingOrder = false;
-                        placeOrderBtn.disabled = false;
-                        placeOrderBtn.innerText = "Place Order";
-                    }
-                });
-
-                // 4. Agar User "Nahi (Cancel)" dabaye -> KUCH SAVE NAHI HOGA
-                document.getElementById("cancelPopupBtn").addEventListener("click", () => {
-                    document.body.removeChild(popupOverlay);
-                    isPlacingOrder = false;
-                    placeOrderBtn.disabled = false;
-                    placeOrderBtn.innerText = "Place Order";
-                    window.showToast?.("Order cancelled. Aapka cart safe hai.", "info");
-                });
-
-            } catch (error) {
-                console.error("Checkout Error: ", error);
-                window.showToast?.("Something went wrong.", "error");
-                isPlacingOrder = false;
-                placeOrderBtn.disabled = false;
-                placeOrderBtn.innerText = "Place Order";
+            if (payment === "COD" || payment === "Cash on Delivery") {
+                // Direct Save for COD
+                await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, tempOrderId, "Cash on Delivery", "Pending");
+            } else {
+                // Trigger Razorpay for Online Payment
+                triggerRazorpay(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, tempOrderId, payment);
             }
         }
     });
+}
+
+function triggerRazorpay(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, method) {
+    const options = {
+        key: "rzp_test_YourAPIKeyHere", // Testing API Key
+        amount: finalTotal * 100, // Paise mein
+        currency: "INR",
+        name: "FoodHub",
+        description: `Order ID: ${orderId}`,
+        image: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png", 
+        handler: async function (response) {
+            // Payment success hone par DB mein save karein
+            const paymentStatus = `Paid Online (${method}) - ID: ${response.razorpay_payment_id}`;
+            await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, paymentStatus, "Paid & Pending");
+        },
+        prefill: { name: name, contact: phone, email: user.email },
+        theme: { color: "#ff5722" }
+    };
+    
+    if (window.Razorpay) {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+    } else {
+        window.showToast?.("Razorpay script not loaded. Check internet.", "error");
+    }
+}
+
+async function processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, paymentStatus, orderStatus) {
+    try {
+        isPlacingOrder = true;
+        placeOrderBtn.innerText = "Saving Order...";
+        placeOrderBtn.disabled = true;
+
+        const fullAddress = `${address}, ${city} - ${pincode}`;
+
+        // 1. Firebase mein Save
+        const orderReference = await addDoc(collection(db, "orders"), {
+            userEmail: user.email,
+            customerName: name,
+            customerPhone: phone,
+            deliveryAddress: fullAddress,
+            paymentMode: paymentStatus,
+            items: itemNames,
+            totalPrice: finalTotal,
+            date: new Date().toLocaleDateString(),
+            orderTime: serverTimestamp(), // Cancel Timer ke liye!
+            status: "Pending", // Admin ise change karega
+            orderId: orderId 
+        });
+
+        // 2. Google Sheets mein Sync
+        await syncOrderToGoogleSheet({
+            orderId: orderReference.id,
+            orderedAt: new Date().toISOString(),
+            customerName: name,
+            phone: phone,
+            email: user.email,
+            address: fullAddress,
+            items: itemNames,
+            subtotal: subtotal,
+            deliveryFee: 40,
+            total: finalTotal,
+            payment: paymentStatus,
+            status: "Pending",
+            restaurant: "FoodHub"
+        });
+
+        // 3. Last order update for success page
+        localStorage.setItem("lastOrder", JSON.stringify({
+            id: orderReference.id,
+            total: finalTotal,
+            address: fullAddress,
+            payment: paymentStatus,
+            itemCount: itemNames.split(",").length
+        }));
+
+        // 4. Cart khali karein aur Success page par bhejein
+        document.dispatchEvent(new Event("foodhub-clear-cart"));
+        window.showToast?.("Order Placed Successfully!", "success");
+        setTimeout(() => {
+            window.location.href = "profile.html"; // Ya order-success.html
+        }, 1500);
+
+    } catch (err) {
+        console.error("Firebase Save Error:", err);
+        window.showToast?.("Error saving order. Try again.", "error");
+        isPlacingOrder = false;
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.innerText = "Place Order";
+    }
 }
