@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 👇 AAPKA ASLI FIREBASE CONFIG YAHAN HAI 👇
 const firebaseConfig = {
     apiKey: "AIzaSyBN4o_xEuTEIDqALYWQNRDB5Bj2CoyK4eY",
     authDomain: "foodhub-6a986.firebaseapp.com",
@@ -15,7 +14,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Browser ka title padh kar page pata lagana
 const pageTitle = document.title.toLowerCase();
 let currentPageTag = "";
 
@@ -28,13 +26,12 @@ else if (pageTitle.includes("menu")) currentPageTag = "menu";
 if (currentPageTag !== "") {
     onSnapshot(collection(db, "menu"), (snapshot) => {
         
-        // Purane dynamic items hatao refresh hone par
+        // Purane dynamic items hatao taaki duplicate na ho
         document.querySelectorAll('.firebase-dynamic-item').forEach(el => el.remove());
 
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
             
-            // Customer View Card Structure
             const card = document.createElement('div');
             card.className = 'food-card firebase-dynamic-item';
             card.innerHTML = `
@@ -48,31 +45,34 @@ if (currentPageTag !== "") {
                 </button>
             `;
 
-            // 1. Agar hum individual restaurant page par hain (Jaise kfc.html)
+            // 1. Agar user individual restaurant page par hai (jaise kfc.html)
             if (currentPageTag === data.restaurant) {
                 const container = document.querySelector('.food-container') || document.querySelector('.menu-container');
-                if (container) {
-                    container.prepend(card);
-                }
+                if (container) container.prepend(card);
             }
             
-            // 2. Agar hum main menu.html par hain
+            // 2. Agar user main menu.html page par hai
             else if (currentPageTag === "menu") {
-                // Alag-alag options check karega taaki item kahan load hona hai miss na ho
-                const targetSection = 
-                    document.getElementById(data.restaurant + '-menu') || 
-                    document.querySelector(`.${data.restaurant}-menu`) || 
-                    document.querySelector(`[data-restaurant="${data.restaurant}"]`) ||
-                    document.querySelector(`#${data.restaurant} .food-container`);
+                let targetContainer = null;
 
-                if (targetSection) {
-                    targetSection.prepend(card);
+                // Restaurant category ke hisaab se sahi container dhoondna
+                if (data.restaurant === "kfc") {
+                    targetContainer = document.getElementById("kfc-menu") || document.querySelector(".restaurant-section:nth-of-type(1) .food-container");
+                } else if (data.restaurant === "dominoes") {
+                    targetContainer = document.getElementById("dominoes-menu") || document.querySelector(".restaurant-section:nth-of-type(2) .food-container");
+                } else if (data.restaurant === "burgerking") {
+                    targetContainer = document.getElementById("burgerking-menu") || document.querySelector(".restaurant-section:nth-of-type(3) .food-container");
+                } else if (data.restaurant === "biryanihouse") {
+                    targetContainer = document.getElementById("biryanihouse-menu") || document.querySelector(".restaurant-section:nth-of-type(4) .food-container");
+                }
+
+                // Agar container mil gaya toh item wahan daal do
+                if (targetContainer) {
+                    targetContainer.prepend(card);
                 } else {
-                    // Fallback: Agar specific section na mile toh general menu container mein daal dega
-                    const generalContainer = document.querySelector('.menu-container') || document.querySelector('.food-container');
-                    if (generalContainer) {
-                        generalContainer.prepend(card);
-                    }
+                    // Fallback: Agar kuch na mile toh pehle wale container mein daal do
+                    const fallbackContainer = document.querySelector('.food-container');
+                    if (fallbackContainer) fallbackContainer.prepend(card);
                 }
             }
         });
