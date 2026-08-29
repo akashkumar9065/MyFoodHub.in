@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub | Admin Dashboard</title>
+    <!-- Aapki main CSS file -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body class="admin-dashboard-body">
 
+    <aside class="admin-sidebar">
+        <div class="admin-profile-img"><i class="fa-solid fa-user"></i></div>
+        <h2>ADMIN PANEL</h2>
+        <p>admin@foodhub.com</p>
+        <ul class="admin-nav-menu">
+            <li><a href="#" class="active"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+            <li><a href="index.html"><i class="fa-solid fa-globe"></i> View Website</a></li>
+        </ul>
+    </aside>
+
+    <main class="admin-main-content">
+        <header class="admin-header">
+            <h1>Live Dashboard</h1>
+        </header>
+
+        <section class="admin-kpi-grid">
+            <div class="admin-kpi-card dark">
+                <span>Total Revenue</span>
+                <h3 id="totalRevenue">₹ 0</h3>
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+            </div>
+            <div class="admin-kpi-card">
+                <span>Total Orders</span>
+                <h3 id="totalOrders">0</h3>
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div class="admin-kpi-card">
+                <span>Pending Orders</span>
+                <h3 id="pendingOrders">0</h3>
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="admin-kpi-card">
+                <span>Delivered</span>
+                <h3 id="deliveredOrders">0</h3>
+                <i class="fa-solid fa-check-circle"></i>
+            </div>
+        </section>
+
+        <section class="admin-panel">
+            <h3>Recent Orders Tracker</h3>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr><td colspan="7" style="text-align: center;">Loading Live Orders...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- JS jisme order fetch karne ka logic hoga -->
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
