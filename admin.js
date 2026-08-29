@@ -12,14 +12,18 @@ onSnapshot(q, (snapshot) => {
     let delivered = 0;
     let total = snapshot.size;
 
+    if (!ordersTableBody) return; // Safety check
+
     ordersTableBody.innerHTML = "";
 
     if (snapshot.empty) {
         ordersTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No orders found.</td></tr>';
-        document.getElementById("totalOrders").innerText = 0;
-        document.getElementById("totalRevenue").innerText = "₹ 0";
-        document.getElementById("pendingOrders").innerText = 0;
-        document.getElementById("deliveredOrders").innerText = 0;
+        
+        // Safety checks for dashboard cards
+        if (document.getElementById("totalOrders")) document.getElementById("totalOrders").innerText = 0;
+        if (document.getElementById("totalRevenue")) document.getElementById("totalRevenue").innerText = "₹ 0";
+        if (document.getElementById("pendingOrders")) document.getElementById("pendingOrders").innerText = 0;
+        if (document.getElementById("deliveredOrders")) document.getElementById("deliveredOrders").innerText = 0;
         return;
     }
 
@@ -36,20 +40,20 @@ onSnapshot(q, (snapshot) => {
 
         // Status Badge Styling
         let statusClass = "admin-bg-pending";
-        if(data.status === "Delivered") statusClass = "admin-bg-delivered";
-        if(data.status === "Cancelled") statusClass = "admin-bg-cancelled";
+        if (data.status === "Delivered") statusClass = "admin-bg-delivered";
+        if (data.status === "Cancelled") statusClass = "admin-bg-cancelled";
 
-        // Table Row Render
+        // Table Row Render (Added fallbacks like "Guest" or "N/A" if data is missing)
         const row = `
             <tr>
                 <td><strong>${data.orderId || docId.substring(0,8)}</strong></td>
-                <td>${data.customerName}<br><small>${data.customerPhone}</small></td>
+                <td>${data.customerName || "Guest"}<br><small>${data.customerPhone || "N/A"}</small></td>
                 <td title="${data.items}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${data.items}
+                    ${data.items || "No items"}
                 </td>
-                <td>₹${data.totalPrice}</td>
-                <td><small>${data.paymentMode}</small></td>
-                <td><span class="admin-badge ${statusClass}">${data.status}</span></td>
+                <td>₹${data.totalPrice || 0}</td>
+                <td><small>${data.paymentMode || "COD"}</small></td>
+                <td><span class="admin-badge ${statusClass}">${data.status || "Pending"}</span></td>
                 <td>
                     <select class="admin-status-select" data-id="${docId}">
                         <option value="Pending" ${data.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -64,11 +68,11 @@ onSnapshot(q, (snapshot) => {
         ordersTableBody.insertAdjacentHTML("beforeend", row);
     });
 
-    // Update Dashboard Cards
-    document.getElementById("totalOrders").innerText = total;
-    document.getElementById("totalRevenue").innerText = `₹ ${revenue}`;
-    document.getElementById("pendingOrders").innerText = pending;
-    document.getElementById("deliveredOrders").innerText = delivered;
+    // Update Dashboard Cards with Safety Checks
+    if (document.getElementById("totalOrders")) document.getElementById("totalOrders").innerText = total;
+    if (document.getElementById("totalRevenue")) document.getElementById("totalRevenue").innerText = `₹ ${revenue}`;
+    if (document.getElementById("pendingOrders")) document.getElementById("pendingOrders").innerText = pending;
+    if (document.getElementById("deliveredOrders")) document.getElementById("deliveredOrders").innerText = delivered;
 
     // Dropdown change hone par Firebase mein status update karna
     document.querySelectorAll('.admin-status-select').forEach(select => {
@@ -80,7 +84,7 @@ onSnapshot(q, (snapshot) => {
                 // Dropdown disable karein jab tak update ho raha ho
                 e.target.disabled = true;
                 await updateDoc(doc(db, "orders", id), { status: newStatus });
-                // Note: onSnapshot apne aap naya data fetch kar lega aur dropdown wapas enable/refresh ho jayega
+                // Note: onSnapshot apne aap naya data fetch kar lega aur dropdown wapas enable ho jayega
             } catch (error) {
                 console.error("Error updating status:", error);
                 alert("Failed to update status. Check your connection or permissions.");
