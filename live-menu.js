@@ -23,14 +23,18 @@ else if (pageTitle.includes("burger")) currentPageTag = "burgerking";
 else if (pageTitle.includes("biryani")) currentPageTag = "biryanihouse";
 else if (pageTitle.includes("menu")) currentPageTag = "menu";
 
+console.log("Current Page Tag:", currentPageTag);
+
 if (currentPageTag !== "") {
     onSnapshot(collection(db, "menu"), (snapshot) => {
+        console.log("Total menu items fetched from Firebase:", snapshot.size);
         
         // Purane dynamic items hatao taaki duplicate na ho
         document.querySelectorAll('.firebase-dynamic-item').forEach(el => el.remove());
 
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
+            console.log("Processing item:", data.name, "Restaurant in DB:", data.restaurant);
             
             const card = document.createElement('div');
             card.className = 'food-card firebase-dynamic-item';
@@ -45,34 +49,43 @@ if (currentPageTag !== "") {
                 </button>
             `;
 
-            // 1. Agar user individual restaurant page par hai (jaise kfc.html)
-            if (currentPageTag === data.restaurant) {
+            // Restaurant name ko lowercase karke match karenge taaki spelling ya capital letter ki galti na ho
+            const dbRestaurant = String(data.restaurant || "").toLowerCase().trim();
+
+            // 1. Individual restaurant page ke liye (jaise kfc.html)
+            if (currentPageTag === dbRestaurant) {
                 const container = document.querySelector('.food-container') || document.querySelector('.menu-container');
-                if (container) container.prepend(card);
+                if (container) {
+                    container.prepend(card);
+                    console.log("Added to individual page:", data.name);
+                }
             }
             
-            // 2. Agar user main menu.html page par hai
+            // 2. Main menu.html page ke liye
             else if (currentPageTag === "menu") {
-                let targetContainer = null;
+                let targetContainer = document.getElementById(dbRestaurant + '-menu');
 
-                // Restaurant category ke hisaab se sahi container dhoondna
-                if (data.restaurant === "kfc") {
-                    targetContainer = document.getElementById("kfc-menu") || document.querySelector(".restaurant-section:nth-of-type(1) .food-container");
-                } else if (data.restaurant === "dominoes") {
-                    targetContainer = document.getElementById("dominoes-menu") || document.querySelector(".restaurant-section:nth-of-type(2) .food-container");
-                } else if (data.restaurant === "burgerking") {
-                    targetContainer = document.getElementById("burgerking-menu") || document.querySelector(".restaurant-section:nth-of-type(3) .food-container");
-                } else if (data.restaurant === "biryanihouse") {
-                    targetContainer = document.getElementById("biryanihouse-menu") || document.querySelector(".restaurant-section:nth-of-type(4) .food-container");
+                // Agar ID na mile, toh heading se dhoond lo
+                if (!targetContainer) {
+                    const sections = document.querySelectorAll('.restaurant-section');
+                    sections.forEach(sec => {
+                        const headingText = sec.querySelector('h2')?.textContent.toLowerCase() || "";
+                        if (headingText.includes(dbRestaurant)) {
+                            targetContainer = sec.querySelector('.food-container');
+                        }
+                    });
                 }
 
-                // Agar container mil gaya toh item wahan daal do
                 if (targetContainer) {
                     targetContainer.prepend(card);
+                    console.log("Added to menu.html section:", dbRestaurant, data.name);
                 } else {
-                    // Fallback: Agar kuch na mile toh pehle wale container mein daal do
-                    const fallbackContainer = document.querySelector('.food-container');
-                    if (fallbackContainer) fallbackContainer.prepend(card);
+                    // Fallback container
+                    const generalContainer = document.querySelector('.food-container');
+                    if (generalContainer) {
+                        generalContainer.prepend(card);
+                        console.log("Added to fallback container:", data.name);
+                    }
                 }
             }
         });
