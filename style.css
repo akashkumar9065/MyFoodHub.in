@@ -3550,3 +3550,38 @@ textarea#editAddress::placeholder {
 .btn-edit:hover { background: #e0a800; }
 .btn-delete { background: #dc3545; }
 .btn-delete:hover { background: #c82333; }
+/* =========================================================
+   ORDER STATUS PROGRESS TRACKER CSS
+   ========================================================= */
+.order-tracker {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0 5px 0;
+    position: relative;
+    font-size: 11px;
+    color: #888;
+}
+
+.tracker-step {
+    text-align: center;
+    flex: 1;
+    position: relative;
+}
+
+.tracker-step div {
+    width: 16px;
+    height: 16px;
+    background: #ccc;
+    border-radius: 50%;
+    margin: 0 auto 4px auto;
+    transition: background 0.3s;
+}
+
+.tracker-step.active div {
+    background: #ff5722;
+}
+
+.tracker-step.active {
+    color: #ff5722;
+    font-weight: bold;
+}
