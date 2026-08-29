@@ -4,28 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FoodHub | Admin Dashboard</title>
-    <!-- Aapki main CSS file -->
+    <!-- Link to your main CSS file -->
     <link rel="stylesheet" href="style.css">
-    <!-- Font Awesome Icons -->
+    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body class="admin-dashboard-body">
 
+    <!-- LEFT SIDEBAR -->
     <aside class="admin-sidebar">
-        <div class="admin-profile-img"><i class="fa-solid fa-user"></i></div>
+        <div class="admin-profile-img"><i class="fa-solid fa-user-shield"></i></div>
         <h2>ADMIN PANEL</h2>
-        <p>admin@foodhub.com</p>
+        <p id="adminEmailDisplay">Loading...</p>
         <ul class="admin-nav-menu">
-            <li><a href="#" class="active"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+            <li><a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
             <li><a href="index.html"><i class="fa-solid fa-globe"></i> View Website</a></li>
+            <li style="margin-top: auto;">
+                <button id="adminLogoutBtn" class="admin-logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </li>
         </ul>
     </aside>
 
+    <!-- RIGHT MAIN CONTENT -->
     <main class="admin-main-content">
         <header class="admin-header">
-            <h1>Live Dashboard</h1>
+            <h1>Live Orders Dashboard</h1>
         </header>
 
+        <!-- KPI CARDS (Business Stats) -->
         <section class="admin-kpi-grid">
             <div class="admin-kpi-card dark">
                 <span>Total Revenue</span>
@@ -40,37 +48,40 @@
             <div class="admin-kpi-card">
                 <span>Pending Orders</span>
                 <h3 id="pendingOrders">0</h3>
-                <i class="fa-solid fa-clock"></i>
+                <i class="fa-solid fa-clock" style="color: #ff9800;"></i>
             </div>
             <div class="admin-kpi-card">
                 <span>Delivered</span>
                 <h3 id="deliveredOrders">0</h3>
-                <i class="fa-solid fa-check-circle"></i>
+                <i class="fa-solid fa-check-circle" style="color: #28a745;"></i>
             </div>
         </section>
 
+        <!-- LIVE ORDERS TABLE -->
         <section class="admin-panel">
             <h3>Recent Orders Tracker</h3>
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Items</th>
-                        <th>Amount</th>
-                        <th>Payment</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="ordersTableBody">
-                    <tr><td colspan="7" style="text-align: center;">Loading Live Orders...</td></tr>
-                </tbody>
-            </table>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Amount</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr><td colspan="7" style="text-align: center; padding: 20px;">Loading Live Orders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
-    <!-- JS jisme order fetch karne ka logic hoga -->
+    <!-- Admin Logic File -->
     <script type="module" src="admin.js"></script>
 </body>
 </html>
