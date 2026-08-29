@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-import { collection, query, where, getDocs, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { collection, query, where, onSnapshot, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const displayImage = document.getElementById("displayImage");
 const displayName = document.getElementById("displayName");
@@ -14,13 +14,11 @@ const savedAddressSummary = document.getElementById("savedAddressSummary");
 const editAddressBtn = document.getElementById("editAddressBtn");
 const defaultProfileImage = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
+let cancelTimers = {}; // Timer track karne ke liye
+
 function escapeHTML(value) {
     return String(value || "").replace(/[&<>'"]/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "'": "&#39;",
-        '"': "&quot;"
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
     }[character]));
 }
 
@@ -52,7 +50,7 @@ function showProfileDetails(user, userInfo = null) {
     const name = userInfo?.name?.trim() || user.displayName || "Foodie";
 
     if (displayName) displayName.innerText = name;
-    if (profileGreeting) profileGreeting.innerText = name.split(" ")[0]; // Sirf First Name
+    if (profileGreeting) profileGreeting.innerText = name.split(" ")[0]; 
     if (document.getElementById("editName")) document.getElementById("editName").value = userInfo?.name || "";
     if (document.getElementById("editPhone")) document.getElementById("editPhone").value = userInfo?.phone || "";
     if (document.getElementById("editAddress")) document.getElementById("editAddress").value = userInfo?.address || "";
@@ -63,12 +61,11 @@ function showProfileDetails(user, userInfo = null) {
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // 1. User ki basic details set karein
         if(displayName) displayName.innerText = user.displayName || "Foodie";
         if(displayEmail) displayEmail.innerText = user.email;
         if(profileGreeting) profileGreeting.innerText = (user.displayName || "Foodie").split(" ")[0];
 
-        // 2. User ki apni photo load karein
+        // Profile Photo Logic
         const savedPic = localStorage.getItem("userProfilePic_" + user.email);
         if (savedPic) {
             if (displayImage) displayImage.src = savedPic;
@@ -77,7 +74,6 @@ onAuthStateChanged(auth, (user) => {
             if (displayImage) displayImage.src = defaultProfileImage;
         }
 
-        // 3. Nayi Photo sirf is user ke liye save karein
         if (uploadPic) {
             uploadPic.onchange = function () {
                 const file = this.files[0];
@@ -87,7 +83,6 @@ onAuthStateChanged(auth, (user) => {
                         const base64Image = e.target.result;
                         if (displayImage) displayImage.src = base64Image;
                         if (navProfileImg) navProfileImg.src = base64Image;
-                        
                         localStorage.setItem("userProfilePic_" + user.email, base64Image); 
                     };
                     reader.readAsDataURL(file);
@@ -98,7 +93,6 @@ onAuthStateChanged(auth, (user) => {
         if (removePhotoBtn) {
             removePhotoBtn.addEventListener("click", () => {
                 if (!confirm("Remove your profile photo?")) return;
-
                 localStorage.removeItem("userProfilePic_" + user.email);
                 if (uploadPic) uploadPic.value = "";
                 if (displayImage) displayImage.src = defaultProfileImage;
@@ -106,12 +100,15 @@ onAuthStateChanged(auth, (user) => {
             });
         }
 
-        // 4. Sirf IS USER ke Previous Orders Firebase se layein
+        // LIVE ORDERS FETCHING (onSnapshot)
         if(orderList) {
-            // UserId ke hisab se order search karega (Best Practice)
             const q = query(collection(db, "orders"), where("userId", "==", user.uid));
             
-            getDocs(q).then((querySnapshot) => {
+            onSnapshot(q, (querySnapshot) => {
+                // Puraane timers clear karo
+                Object.values(cancelTimers).forEach(clearInterval);
+                cancelTimers = {};
+                
                 orderList.innerHTML = ""; 
                 
                 if(querySnapshot.empty) {
@@ -125,31 +122,25 @@ onAuthStateChanged(auth, (user) => {
                     return;
                 }
 
-                // Convert snapshot to array to sort by date
                 const ordersArray = [];
                 querySnapshot.forEach((doc) => {
                     ordersArray.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // Sort orders: Latest first
-                ordersArray.sort((a, b) => (b.orderDate || 0) - (a.orderDate || 0));
+                ordersArray.sort((a, b) => (b.orderTime?.seconds || 0) - (a.orderTime?.seconds || 0));
 
                 ordersArray.forEach((order) => {
                     const status = String(order.status || "Pending");
-                    
-                    // Dynamic styling based on status
-                    let statusColor = status.toLowerCase() === "delivered" ? "#28a745" : (status.toLowerCase() === "confirmed" ? "#007bff" : "#ff9800");
-                    let statusBg = status.toLowerCase() === "delivered" ? "#e6f4ea" : (status.toLowerCase() === "confirmed" ? "#e7f1ff" : "#fff3e0");
+                    let statusColor = status.toLowerCase() === "delivered" ? "#28a745" : (status.toLowerCase() === "confirmed" ? "#007bff" : status.toLowerCase() === "cancelled" ? "#dc3545" : "#ff9800");
+                    let statusBg = status.toLowerCase() === "delivered" ? "#e6f4ea" : (status.toLowerCase() === "confirmed" ? "#e7f1ff" : status.toLowerCase() === "cancelled" ? "#ffebe8" : "#fff3e0");
 
-                    // Date formatting (Handle both Firestore Timestamp and String)
                     let dateStr = "Date unavailable";
-                    if (order.orderDate && typeof order.orderDate.toDate === 'function') {
-                        dateStr = order.orderDate.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+                    if (order.orderTime && order.orderTime.seconds) {
+                        dateStr = new Date(order.orderTime.seconds * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
                     } else if (order.date) {
                         dateStr = order.date;
                     }
 
-                    // Items formatting (Handle Array or String)
                     let itemsStr = "Order details unavailable";
                     if (Array.isArray(order.items)) {
                         itemsStr = order.items.map(i => `${i.name} (x${i.quantity || 1})`).join(", ");
@@ -159,7 +150,6 @@ onAuthStateChanged(auth, (user) => {
                     
                     const totalPrice = order.totalAmount || order.totalPrice || "0";
 
-                    // Premium Order Card Design
                     orderList.innerHTML += `
                     <div class="order-card" style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #eaeaea; border-radius:10px; padding:20px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                         <div class="order-details-left">
@@ -169,33 +159,38 @@ onAuthStateChanged(auth, (user) => {
                         </div>
                         <div class="order-details-right" style="text-align:right;">
                             <h3 style="margin:0 0 8px 0; color:#ff5722; font-size:18px;">₹${escapeHTML(String(totalPrice))}</h3>
-                            <span style="background:${statusBg}; color:${statusColor}; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600;">
+                            <span style="background:${statusBg}; color:${statusColor}; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; display:inline-block;">
                                 ${escapeHTML(status)}
                             </span>
+                            <div id="actions-${order.id}" style="margin-top: 12px;"></div>
                         </div>
                     </div>`;
                 });
-            }).catch((error) => {
+
+                // Render hone ke baad Timers start karo
+                ordersArray.forEach((order) => {
+                    const status = String(order.status || "Pending");
+                    if (status.toLowerCase() === "pending" && order.orderTime) {
+                        startCancelTimer(order.orderTime.seconds, order.id);
+                    }
+                });
+
+            }, (error) => {
                 console.error("Order load error: ", error);
-                orderList.innerHTML = "<p class=\"orders-error\" style='color:red;'>Orders could not be loaded. Please refresh and try again.</p>";
+                orderList.innerHTML = "<p class=\"orders-error\" style='color:red;'>Orders could not be loaded.</p>";
             });
         }
 
-        // ==========================================
-        // 5. PROFILE UPDATE LOGIC
-        // ==========================================
+        // PROFILE UPDATE LOGIC
         const updateProfileForm = document.getElementById("updateProfileForm");
-
-        localStorage.removeItem("userInfo_" + user.email);
         const profileRef = doc(db, "users", user.uid);
+        
         getDoc(profileRef).then(snapshot => {
             showProfileDetails(user, snapshot.exists() ? snapshot.data() : null);
         }).catch(() => {
             showProfileDetails(user, null);
-            if (typeof showToast === "function") showToast("Profile could not be loaded. You can still save your details.", "info");
         });
 
-        // Final Data Save karne ka logic
         if (updateProfileForm) {
             const phoneInput = document.getElementById("editPhone");
             const pincodeInput = document.getElementById("editPincode");
@@ -209,36 +204,14 @@ onAuthStateChanged(auth, (user) => {
 
             updateProfileForm.addEventListener("submit", async function(e) {
                 e.preventDefault(); 
-
                 const name = document.getElementById("editName").value.trim();
                 const address = document.getElementById("editAddress").value.trim();
                 const city = document.getElementById("editCity").value.trim();
                 const phone = phoneInput.value.trim();
                 const pincode = pincodeInput.value.trim();
 
-                if (!name || !phone || !address || !city || !pincode) {
-                    if (typeof showToast === "function") showToast("Please fill all the fields.", "error");
-                    else if (window.showToast) window.showToast("Please fill all the fields.", "error");
-                    else alert("Please fill all the fields before updating your profile.");
-                    return;
-                }
-
-                if (!/^\d{10}$/.test(phone)) {
-                    phoneInput.setCustomValidity("Please enter a valid 10-digit mobile number.");
-                    phoneInput.reportValidity();
-                    phoneInput.focus();
-                    return;
-                }
-
-                if (!/^\d{6}$/.test(pincode)) {
-                    pincodeInput.setCustomValidity("Please enter a valid 6-digit pincode.");
-                    pincodeInput.reportValidity();
-                    pincodeInput.focus();
-                    return;
-                }
-
-                phoneInput.setCustomValidity("");
-                pincodeInput.setCustomValidity("");
+                if (!/^\d{10}$/.test(phone)) return phoneInput.reportValidity();
+                if (!/^\d{6}$/.test(pincode)) return pincodeInput.reportValidity();
                 
                 const userInfo = { name, phone, address, city, pincode };
                 const button = document.getElementById("updateProfileBtn");
@@ -247,13 +220,9 @@ onAuthStateChanged(auth, (user) => {
                 try {
                     await setDoc(profileRef, { ...userInfo, email: user.email, updatedAt: serverTimestamp() }, { merge: true });
                     showProfileDetails(user, userInfo);
-                    
-                    if (typeof showToast === "function") showToast("Profile details saved successfully!", "success");
-                    else if (window.showToast) window.showToast("Profile details saved successfully!", "success");
+                    if (window.showToast) window.showToast("Profile details saved successfully!", "success");
                 } catch (error) {
                     console.error("Profile save failed:", error);
-                    if (typeof showToast === "function") showToast("Profile could not be saved.", "error");
-                    else if (window.showToast) window.showToast("Profile could not be saved.", "error");
                 } finally {
                     if (button) button.disabled = false;
                 }
@@ -261,11 +230,8 @@ onAuthStateChanged(auth, (user) => {
         }
 
         if (editAddressBtn) {
-            editAddressBtn.addEventListener("click", () => {
-                document.getElementById("editAddress")?.focus();
-            });
+            editAddressBtn.addEventListener("click", () => document.getElementById("editAddress")?.focus());
         }
-
         document.body.classList.remove("profile-loading");
 
     } else {
@@ -273,7 +239,50 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Logout ka button
+// CANCEL TIMER LOGIC
+function startCancelTimer(orderTimeSeconds, docId) {
+    const actionsContainer = document.getElementById(`actions-${docId}`);
+    if(!actionsContainer) return;
+
+    const updateTimer = () => {
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        const elapsed = nowSeconds - orderTimeSeconds;
+        const remaining = 120 - elapsed; 
+
+        if (remaining > 0) {
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            actionsContainer.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+                    <small style="color: #dc3545; font-weight: bold;"><i class="fa-regular fa-clock"></i> Cancel in: ${minutes}m ${seconds}s</small>
+                    <button onclick="cancelOrder('${docId}')" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                        Cancel Order
+                    </button>
+                </div>
+            `;
+        } else {
+            actionsContainer.innerHTML = `<small style="color: #28a745;"><i class="fa-solid fa-fire-burner"></i> Preparing</small>`; 
+            clearInterval(cancelTimers[docId]);
+        }
+    };
+
+    updateTimer(); 
+    cancelTimers[docId] = setInterval(updateTimer, 1000);
+}
+
+// GLOBAL CANCEL FUNCTION
+window.cancelOrder = async function(docId) {
+    if (confirm("Are you sure you want to cancel this order?")) {
+        try {
+            await updateDoc(doc(db, "orders", docId), { status: "Cancelled" });
+            if(window.showToast) window.showToast("Order cancelled successfully.", "info");
+        } catch (error) {
+            console.error("Cancel failed:", error);
+            alert("Failed to cancel order. Time might have expired.");
+        }
+    }
+};
+
 const logoutBtn = document.getElementById("logoutBtn");
 if(logoutBtn) {
     logoutBtn.addEventListener("click", () => {
