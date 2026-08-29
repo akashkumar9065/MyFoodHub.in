@@ -227,43 +227,42 @@ if (menuTableBody) {
             `;
             menuTableBody.insertAdjacentHTML("beforeend", row);
         });
+    });
 
-        // DELETE BUTTON LISTENER
-        document.querySelectorAll(".delete-menu-btn").forEach(button => {
-            button.addEventListener("click", async (e) => {
-                const id = e.target.getAttribute("data-id");
-                if (confirm("Are you sure you want to delete this food item?")) {
-                    try {
-                        await deleteDoc(doc(db, "menu", id));
-                        alert("Item deleted successfully!");
-                    } catch (err) {
-                        console.error("Delete error:", err);
-                        alert("Failed to delete item.");
-                    }
+    // EVENT DELEGATION: Robust listener for Delete & Edit clicks
+    menuTableBody.addEventListener("click", async (e) => {
+        // DELETE BUTTON CLICKED
+        if (e.target.classList.contains("delete-menu-btn")) {
+            const id = e.target.getAttribute("data-id");
+            if (confirm("Are you sure you want to delete this food item?")) {
+                try {
+                    await deleteDoc(doc(db, "menu", id));
+                    alert("Item deleted successfully!");
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    alert("Failed to delete item.");
                 }
-            });
-        });
+            }
+        }
 
-        // EDIT BUTTON LISTENER (Loads data back into the form)
-        document.querySelectorAll(".edit-menu-btn").forEach(button => {
-            button.addEventListener("click", (e) => {
-                const btn = e.target;
-                editFoodId.value = btn.getAttribute("data-id");
-                document.getElementById("foodName").value = btn.getAttribute("data-name");
-                document.getElementById("foodPrice").value = btn.getAttribute("data-price");
-                document.getElementById("foodRestaurant").value = btn.getAttribute("data-restaurant");
-                document.getElementById("foodImage").value = btn.getAttribute("data-image");
-                document.getElementById("foodDesc").value = btn.getAttribute("data-desc");
+        // EDIT BUTTON CLICKED
+        if (e.target.classList.contains("edit-menu-btn")) {
+            const btn = e.target;
+            editFoodId.value = btn.getAttribute("data-id");
+            document.getElementById("foodName").value = btn.getAttribute("data-name");
+            document.getElementById("foodPrice").value = btn.getAttribute("data-price");
+            document.getElementById("foodRestaurant").value = btn.getAttribute("data-restaurant");
+            document.getElementById("foodImage").value = btn.getAttribute("data-image");
+            document.getElementById("foodDesc").value = btn.getAttribute("data-desc");
 
-                if (menuSubmitBtn) {
-                    menuSubmitBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Item';
-                    menuSubmitBtn.className = "admin-btn admin-btn-primary";
-                }
-                if (cancelEditBtn) cancelEditBtn.style.display = "inline-block";
+            if (menuSubmitBtn) {
+                menuSubmitBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Item';
+                menuSubmitBtn.className = "admin-btn admin-btn-primary";
+            }
+            if (cancelEditBtn) cancelEditBtn.style.display = "inline-block";
 
-                // Form section par smooth scroll karna
-                document.getElementById("manage-menu-section").scrollIntoView({ behavior: 'smooth' });
-            });
-        });
+            // Scroll to form section smoothly
+            document.getElementById("manage-menu-section").scrollIntoView({ behavior: 'smooth' });
+        }
     });
 }
