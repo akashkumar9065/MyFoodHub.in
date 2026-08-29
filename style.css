@@ -3480,3 +3480,73 @@ textarea#editAddress::placeholder {
     .admin-nav-menu li { width: auto; }
     .admin-logout-btn { margin-top: 0; padding: 10px 15px; border-radius: 6px;}
 }
+/* ========================================= */
+/* ADMIN MENU FORM STYLES                    */
+/* ========================================= */
+
+.admin-mb-40 { margin-bottom: 40px; }
+.admin-menu-title { margin-bottom: 20px; color: #333; }
+.admin-menu-title i { color: #ff5722; margin-right: 8px; }
+
+.admin-form-container {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border: 1px solid #eee;
+}
+
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.admin-form-group.full-width { grid-column: 1 / -1; }
+
+.admin-form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.admin-form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    background: white;
+    box-sizing: border-box;
+    outline: none;
+    transition: 0.3s;
+}
+.admin-form-input:focus { border-color: #ff5722; box-shadow: 0 0 5px rgba(255, 87, 34, 0.2); }
+
+.admin-form-actions { display: flex; gap: 15px; }
+
+.admin-btn {
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: inherit;
+}
+
+.admin-btn-success { background: #28a745; color: white; }
+.admin-btn-success:hover { background: #218838; }
+
+.admin-btn-secondary { background: #6c757d; color: white; }
+.admin-btn-secondary:hover { background: #5a6268; }
+
+/* Table Action Buttons & Image */
+.admin-menu-img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
+.admin-action-btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; margin-right: 8px; font-size: 13px;}
+.btn-edit { background: #ffc107; color: #000; }
+.btn-edit:hover { background: #e0a800; }
+.btn-delete { background: #dc3545; }
+.btn-delete:hover { background: #c82333; }
