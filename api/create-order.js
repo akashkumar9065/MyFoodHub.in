@@ -27,20 +27,20 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json",
                 "x-client-id": clientId,
                 "x-client-secret": clientSecret,
-                "x-api-version": "2022-01-01"
+                "x-api-version": "2022-09-01"
             },
             body: JSON.stringify(orderData)
         });
 
         const data = await response.json();
 
-        if (!data.payment_session_id) {
-            return res.status(400).json({ error: data.message || "Failed to generate session ID" });
+        if (!response.ok) {
+            return res.status(response.status).json({ error: data.message || "Cashfree authentication or request failed" });
         }
 
-        return res.status(200).json({ payment_session_id: data.payment_session_id });
-
+        return res.status(200).json(data);
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        console.error("Order creation error:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 }
