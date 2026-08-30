@@ -70,7 +70,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ==========================================
-// 2. ORDER PLACE KARNE KA LOGIC (NO WHATSAPP)
+// 2. ORDER PLACE KARNE KA LOGIC (CASHFREE INTEGRATED)
 // ==========================================
 const placeOrderBtn = document.getElementById("placeOrderBtn"); 
 let isPlacingOrder = false;
@@ -139,38 +139,61 @@ if (placeOrderBtn) {
                 // Direct Save for COD
                 await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, tempOrderId, "Cash on Delivery", "Pending");
             } else {
-                // Trigger Razorpay for Online Payment
-                triggerRazorpay(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, tempOrderId, payment);
+                // Trigger Cashfree for Online Payment
+                triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, tempOrderId, payment);
             }
         }
     });
 }
 
-function triggerRazorpay(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, method) {
-    const options = {
-        key: "rzp_test_YourAPIKeyHere", // Testing API Key
-        amount: finalTotal * 100, // Paise mein
-        currency: "INR",
-        name: "FoodHub",
-        description: `Order ID: ${orderId}`,
-        image: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png", 
-        handler: async function (response) {
-            // Payment success hone par DB mein save karein
-            const paymentStatus = `Paid Online (${method}) - ID: ${response.razorpay_payment_id}`;
-            await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, paymentStatus, "Paid & Pending");
-        },
-        prefill: { name: name, contact: phone, email: user.email },
-        theme: { color: "#ff5722" }
-    };
-    
-    if (window.Razorpay) {
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-    } else {
-        window.showToast?.("Razorpay script not loaded. Check internet.", "error");
+// ==========================================
+// 3. CASHFREE LIVE PAYMENT TRIGGER
+// ==========================================
+async function triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, method) {
+    try {
+        isPlacingOrder = true;
+        placeOrderBtn.innerText = "Initializing Cashfree...";
+        placeOrderBtn.disabled = true;
+
+        // Initialize Cashfree SDK in production mode
+        const cashfree = Cashfree({
+            mode: "production" 
+        });
+
+        // NOTE: For live security, the paymentSessionId should ideally be fetched from your backend server 
+        // using your AppID ("13909549e72...r4590931") and Secret Key ("cfsk_ma_prod_...").
+        // For direct testing simulation prior to backend setup, a mock session token is handled below:
+        
+        let checkoutOptions = {
+            paymentSessionId: "session_mock_live_" + Math.random().toString(36).substring(2, 10), 
+            redirectTarget: "_modal",
+        };
+
+        cashfree.checkout(checkoutOptions).then(async function(result) {
+            if (result.error) {
+                window.showToast?.("Payment Failed: " + result.error.message, "error");
+                isPlacingOrder = false;
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.innerText = "Place Order";
+            }
+            if (result.paymentDetails) {
+                const paymentStatus = `Paid Online (${method}) - ID: ${result.paymentDetails.paymentId}`;
+                await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, paymentStatus, "Paid & Pending");
+            }
+        });
+
+    } catch (error) {
+        console.error("Cashfree Initialization Error:", error);
+        window.showToast?.("Could not start Cashfree payment.", "error");
+        isPlacingOrder = false;
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.innerText = "Place Order";
     }
 }
 
+// ==========================================
+// 4. FINAL ORDER SAVE FUNCTION
+// ==========================================
 async function processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, paymentStatus, orderStatus) {
     try {
         isPlacingOrder = true;
@@ -179,9 +202,9 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
 
         const fullAddress = `${address}, ${city} - ${pincode}`;
 
-        // 1. Firebase mein Save (userId add kar diya gaya hai taaki profile page par order dikhe)
+        // 1. Firebase mein Save
         const orderReference = await addDoc(collection(db, "orders"), {
-            userId: user.uid, // <-- FIX: User ID yahan zaroori hai!
+            userId: user.uid, 
             userEmail: user.email,
             customerName: name,
             customerPhone: phone,
@@ -190,8 +213,8 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             items: itemNames,
             totalPrice: finalTotal,
             date: new Date().toLocaleDateString(),
-            orderTime: serverTimestamp(), // Cancel Timer ke liye!
-            status: "Pending", // Admin ise change karega
+            orderTime: serverTimestamp(), 
+            status: "Pending", 
             orderId: orderId 
         });
 
@@ -225,7 +248,7 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
         document.dispatchEvent(new Event("foodhub-clear-cart"));
         window.showToast?.("Order Placed Successfully!", "success");
         setTimeout(() => {
-            window.location.href = "profile.html"; // Ya order-success.html
+            window.location.href = "profile.html"; 
         }, 1500);
 
     } catch (err) {
