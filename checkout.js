@@ -132,15 +132,31 @@ if (placeOrderBtn) {
 
             let itemNames = cartItems.map(item => `${item.name} x${item.quantity}`).join(", ");
             let subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
-            let finalTotal = subtotal + 40; // Delivery charge
+            
+            // ==========================================
+            // PROFESSIONAL DYNAMIC DELIVERY FEE LOGIC
+            // ==========================================
+            let deliveryFee = 0;
+            if (subtotal >= 100) {
+                deliveryFee = Math.round(subtotal * 0.10); // 10% of subtotal
+                if (deliveryFee < 15) {
+                    deliveryFee = 15; // Minimum ₹15
+                } else if (deliveryFee > 50) {
+                    deliveryFee = 50; // Maximum ₹50
+                }
+            } else {
+                deliveryFee = 0; // Free delivery if under ₹100
+            }
+
+            let finalTotal = subtotal + deliveryFee;
             let tempOrderId = "ORD-" + Math.floor(Math.random() * 1000000);
 
             if (payment === "COD" || payment === "Cash on Delivery") {
                 // Direct Save for COD
-                await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, tempOrderId, "Cash on Delivery", "Pending");
+                await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, tempOrderId, "Cash on Delivery", "Pending");
             } else {
                 // Trigger Cashfree for Online Payment
-                triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, tempOrderId, payment);
+                triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, tempOrderId, payment);
             }
         }
     });
@@ -149,21 +165,16 @@ if (placeOrderBtn) {
 // ==========================================
 // 3. CASHFREE LIVE PAYMENT TRIGGER
 // ==========================================
-async function triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, method) {
+async function triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, orderId, method) {
     try {
         isPlacingOrder = true;
         placeOrderBtn.innerText = "Initializing Cashfree...";
         placeOrderBtn.disabled = true;
 
-        // Initialize Cashfree SDK in production mode
         const cashfree = Cashfree({
             mode: "production" 
         });
 
-        // NOTE: For live security, the paymentSessionId should ideally be fetched from your backend server 
-        // using your AppID ("13909549e72...r4590931") and Secret Key ("cfsk_ma_prod_...").
-        // For direct testing simulation prior to backend setup, a mock session token is handled below:
-        
         let checkoutOptions = {
             paymentSessionId: "session_mock_live_" + Math.random().toString(36).substring(2, 10), 
             redirectTarget: "_modal",
@@ -178,7 +189,7 @@ async function triggerCashfreePayment(user, name, phone, address, city, pincode,
             }
             if (result.paymentDetails) {
                 const paymentStatus = `Paid Online (${method}) - ID: ${result.paymentDetails.paymentId}`;
-                await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, paymentStatus, "Paid & Pending");
+                await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, orderId, paymentStatus, "Paid & Pending");
             }
         });
 
@@ -194,7 +205,7 @@ async function triggerCashfreePayment(user, name, phone, address, city, pincode,
 // ==========================================
 // 4. FINAL ORDER SAVE FUNCTION
 // ==========================================
-async function processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, finalTotal, orderId, paymentStatus, orderStatus) {
+async function processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, orderId, paymentStatus, orderStatus) {
     try {
         isPlacingOrder = true;
         placeOrderBtn.innerText = "Saving Order...";
@@ -211,6 +222,8 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             deliveryAddress: fullAddress,
             paymentMode: paymentStatus,
             items: itemNames,
+            subtotal: subtotal,
+            deliveryFee: deliveryFee,
             totalPrice: finalTotal,
             date: new Date().toLocaleDateString(),
             orderTime: serverTimestamp(), 
@@ -228,7 +241,7 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             address: fullAddress,
             items: itemNames,
             subtotal: subtotal,
-            deliveryFee: 40,
+            deliveryFee: deliveryFee,
             total: finalTotal,
             payment: paymentStatus,
             status: "Pending",
