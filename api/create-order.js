@@ -9,6 +9,10 @@ export default async function handler(req, res) {
         const clientId = process.env.CASHFREE_CLIENT_ID;
         const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
 
+        if (!clientId || !clientSecret) {
+            return res.status(400).json({ error: "Missing Cashfree API credentials in environment variables." });
+        }
+
         const orderData = {
             order_id: orderId,
             order_amount: amount,
@@ -25,9 +29,9 @@ export default async function handler(req, res) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "x-client-id": clientId,
-                "x-client-secret": clientSecret,
-                "x-api-version": "2022-09-01"
+                "x-client-id": clientId.trim(),
+                "x-client-secret": clientSecret.trim(),
+                "x-api-version": "2023-08-01"
             },
             body: JSON.stringify(orderData)
         });
@@ -35,12 +39,13 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
-            return res.status(response.status).json({ error: data.message || "Cashfree authentication or request failed" });
+            console.error("Cashfree API Error:", data);
+            return res.status(response.status).json({ error: data.message || "Authentication failed" });
         }
 
         return res.status(200).json(data);
     } catch (error) {
-        console.error("Order creation error:", error);
+        console.error("Internal Server Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }
