@@ -155,29 +155,53 @@ if (placeOrderBtn) {
                 // Direct Save for COD
                 await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, tempOrderId, "Cash on Delivery", "Pending");
             } else {
-                // Trigger Cashfree for Online Payment
-                triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, tempOrderId, payment);
+                // Trigger Cashfree for Online Payment via Backend API
+                await triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, tempOrderId, payment);
             }
         }
     });
 }
 
 // ==========================================
-// 3. CASHFREE PAYMENT TRIGGER (SECURE MODE)
+// 3. CASHFREE PAYMENT TRIGGER (BACKEND SECURE API)
 // ==========================================
 async function triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, orderId, method) {
     try {
         isPlacingOrder = true;
-        placeOrderBtn.innerText = "Initializing Cashfree...";
+        placeOrderBtn.innerText = "Creating Payment Session...";
         placeOrderBtn.disabled = true;
 
-        // Initialize Cashfree SDK safely without exposing secret keys on frontend
+        // Call Vercel Backend API to create Cashfree Order & get Session ID securely
+        const apiResponse = await fetch("/api/create-order", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                orderId: orderId,
+                amount: finalTotal,
+                customerId: user.uid,
+                customerName: name,
+                customerEmail: user.email,
+                customerPhone: phone
+            })
+        });
+
+        const apiData = await apiResponse.json();
+
+        if (!apiResponse.ok || !apiData.payment_session_id) {
+            throw new Error(apiData.error || "Failed to fetch payment session from server.");
+        }
+
+        placeOrderBtn.innerText = "Initializing Cashfree...";
+
+        // Initialize Cashfree SDK safely
         const cashfree = Cashfree({
             mode: "production" 
         });
 
         let checkoutOptions = {
-            paymentSessionId: "session_live_" + orderId, // Secure session handle placeholder for backend routing
+            paymentSessionId: apiData.payment_session_id,
             redirectTarget: "_modal",
         };
 
@@ -196,7 +220,7 @@ async function triggerCashfreePayment(user, name, phone, address, city, pincode,
 
     } catch (error) {
         console.error("Cashfree Initialization Error:", error);
-        window.showToast?.("Could not start Cashfree payment.", "error");
+        window.showToast?.(error.message || "Could not start Cashfree payment.", "error");
         isPlacingOrder = false;
         placeOrderBtn.disabled = false;
         placeOrderBtn.innerText = "Place Order";
@@ -258,7 +282,7 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             itemCount: itemNames.split(",").length
         }));
 
-        // 4. Cart khali karein aur Success page par bhejein
+        // 4. Cart khali karein aur Profile/Success page par bhejein
         document.dispatchEvent(new Event("foodhub-clear-cart"));
         window.showToast?.("Order Placed Successfully!", "success");
         setTimeout(() => {
