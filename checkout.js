@@ -2,12 +2,8 @@ import { auth, db } from "./firebase.js";
 import { collection, addDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
-// Google Sheets order-report endpoint (Secure Vercel Proxy)
 const GOOGLE_SHEETS_ORDER_ENDPOINT = "/api/sync-google-sheet";
 
-// ==========================================
-// HELPER FUNCTION: GOOGLE SHEETS SYNC
-// ==========================================
 async function syncOrderToGoogleSheet(orderData) {
     try {
         await fetch(GOOGLE_SHEETS_ORDER_ENDPOINT, {
@@ -20,9 +16,6 @@ async function syncOrderToGoogleSheet(orderData) {
     }
 }
 
-// ==========================================
-// STATE VARIABLES
-// ==========================================
 let isPlacingOrder = false;
 let currentSubtotal = 0;
 let currentDeliveryFee = 0;
@@ -32,23 +25,22 @@ const placeOrderBtn = document.getElementById("placeOrderBtn");
 const useSavedAddress = document.getElementById("useSavedAddress");
 const deliveryPhoneInput = document.getElementById("phone");
 const deliveryPincodeInput = document.getElementById("pincode");
-const checkoutItemsListEl = document.getElementById("checkout-items-list"); // Naya ID for UI
-const summaryDeliveryFeeEl = document.getElementById("summary-delivery-fee"); // Naya ID for UI
-const summaryTotalEl = document.getElementById("summary-total-price"); // Naya ID for UI
+
+const orderItemsEl = document.getElementById("orderItems");
+const deliveryFeeEl = document.getElementById("deliveryFee");
+const grandTotalEl = document.getElementById("grandTotal");
 
 // ==========================================
 // 1. AUTHENTICATION & AUTO-FILL LOGIC
 // ==========================================
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Auto-fill email and make it read-only
         const emailInput = document.getElementById("email");
         if (emailInput) {
             emailInput.value = user.email;
             emailInput.readOnly = true; 
         }
 
-        // Saved Address Logic
         if (useSavedAddress) {
             useSavedAddress.addEventListener("change", async function() {
                 const name = document.getElementById("name");
@@ -92,26 +84,20 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ==========================================
-// 2. INITIALIZATION & DYNAMIC DELIVERY FEE LOGIC
+// 2. INITIALIZATION & DYNAMIC DELIVERY FEE
 // ==========================================
-document.addEventListener("DOMContentLoaded", () => {
-    updateOrderSummaryUI();
-});
-
-function updateOrderSummaryUI() {
-    // Load Cart Data
+function calculateAndUpdateSummary() {
     let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
     
     if (cartItems.length === 0) {
-        if (checkoutItemsListEl) checkoutItemsListEl.innerHTML = "<p>Your cart is empty.</p>";
+        if (orderItemsEl) orderItemsEl.innerHTML = "<p>Your cart is empty.</p>";
         currentSubtotal = 0;
         currentDeliveryFee = 0;
         currentFinalTotal = 0;
     } else {
-        // Render Items & Calculate Subtotal
         let subtotal = 0;
-        if (checkoutItemsListEl) {
-            checkoutItemsListEl.innerHTML = cartItems.map(item => {
+        if (orderItemsEl) {
+            orderItemsEl.innerHTML = cartItems.map(item => {
                 const itemTotal = Number(item.price) * Number(item.quantity);
                 subtotal += itemTotal;
                 return `
@@ -125,18 +111,13 @@ function updateOrderSummaryUI() {
 
         currentSubtotal = subtotal;
 
-        // ==========================================
-        // DYNAMIC DELIVERY FEE LOGIC (FIXED)
-        // ==========================================
+        // Delivery Fee Logic: < 100 -> ₹0, >= 100 -> 10% (min 15, max 50)
         let deliveryFee = 0;
         if (currentSubtotal >= 100) {
-            // Greater than 100: 10% charge
             deliveryFee = Math.round(currentSubtotal * 0.10);
-            // Min/Max limit (Optional - jaise cart mein ho)
             if (deliveryFee < 15) deliveryFee = 15;
             else if (deliveryFee > 50) deliveryFee = 50;
         } else {
-            // Less than 100: Free Delivery
             deliveryFee = 0;
         }
         
@@ -144,13 +125,19 @@ function updateOrderSummaryUI() {
         currentFinalTotal = currentSubtotal + currentDeliveryFee;
     }
 
-    // Update UI Elements
-    if (summaryDeliveryFeeEl) summaryDeliveryFeeEl.innerText = `₹${currentDeliveryFee}`;
-    if (summaryTotalEl) summaryTotalEl.innerText = `Total : ₹${currentFinalTotal}`;
+    if (deliveryFeeEl) deliveryFeeEl.innerText = `₹${currentDeliveryFee}`;
+    if (grandTotalEl) grandTotalEl.innerText = `Total : ₹${currentFinalTotal}`;
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    calculateAndUpdateSummary();
+});
+
+// Enforce summary correctness against any conflicting legacy scripts overriding it
+setInterval(calculateAndUpdateSummary, 300);
+
 // ==========================================
-// 3. INPUT VALIDATION (NUMBER ONLY)
+// 3. INPUT VALIDATION
 // ==========================================
 [deliveryPhoneInput, deliveryPincodeInput].forEach(input => {
     input?.addEventListener("input", () => {
@@ -160,7 +147,7 @@ function updateOrderSummaryUI() {
 });
 
 // ==========================================
-// 4. PLACE ORDER CLICK HANDLER
+// 4. PLACE ORDER HANDLER
 // ==========================================
 if (placeOrderBtn) {
     placeOrderBtn.addEventListener("click", async function(e) {
@@ -171,7 +158,6 @@ if (placeOrderBtn) {
         const user = auth.currentUser;
         let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
 
-        // Basic Checks
         if (cartItems.length === 0) {
             window.showToast?.("Your cart is empty. Please add some food first.", "info");
             window.location.href = "menu.html";
@@ -183,7 +169,6 @@ if (placeOrderBtn) {
             return;
         }
 
-        // Form Data
         const name = document.getElementById("name").value.trim();
         const phone = document.getElementById("phone").value.trim();
         const address = document.getElementById("address").value.trim();
@@ -192,7 +177,6 @@ if (placeOrderBtn) {
         const paymentElement = document.querySelector('input[name="paymentMethod"]:checked') || document.querySelector('input[name="payment"]:checked');
         const payment = paymentElement ? paymentElement.value : "COD";
 
-        // Validation
         if (!name || !phone || !address || !city || !pincode) {
             window.showToast?.("Please fill all delivery details, including city and pincode.", "error");
             return;
@@ -206,17 +190,14 @@ if (placeOrderBtn) {
             return;
         }
 
-        // Final Totals Re-calculation before processing
-        updateOrderSummaryUI();
+        calculateAndUpdateSummary();
 
         const itemNames = cartItems.map(item => `${item.name} x${item.quantity}`).join(", ");
         const tempOrderId = "ORD-" + Date.now();
 
         if (payment === "COD" || payment === "Cash on Delivery") {
-            // Process COD
             await processFinalOrder(user, name, phone, address, city, pincode, itemNames, currentSubtotal, currentDeliveryFee, currentFinalTotal, tempOrderId, "Cash on Delivery", "Pending");
         } else {
-            // Process Online Payment
             await triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, currentSubtotal, currentDeliveryFee, currentFinalTotal, tempOrderId, payment);
         }
     });
@@ -291,7 +272,6 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
 
         const fullAddress = `${address}, ${city} - ${pincode}`;
 
-        // 1. Firebase Save
         const orderReference = await addDoc(collection(db, "orders"), {
             userId: user.uid,
             userEmail: user.email,
@@ -309,7 +289,6 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             orderId: orderId
         });
 
-        // 2. Google Sheets Sync (via Secure Proxy)
         await syncOrderToGoogleSheet({
             orderId: orderReference.id,
             orderedAt: new Date().toISOString(),
@@ -326,7 +305,6 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             restaurant: "FoodHub"
         });
 
-        // 3. Success Page Data
         localStorage.setItem("lastOrder", JSON.stringify({
             id: orderReference.id,
             total: finalTotal,
@@ -335,7 +313,6 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             itemCount: itemNames.split(",").length
         }));
 
-        // 4. Clear Cart & Redirect
         document.dispatchEvent(new Event("foodhub-clear-cart"));
         window.showToast?.("Order Placed Successfully!", "success");
         setTimeout(() => {
