@@ -5,6 +5,15 @@ import { collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, order
 const ADMIN_EMAIL = "akashkumar906552@gmail.com";
 
 // ==========================================
+// UTILITY: Safe HTML Escape
+// ==========================================
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ==========================================
 // 1. ADMIN AUTHENTICATION SECURITY GUARD
 // ==========================================
 onAuthStateChanged(auth, (user) => {
@@ -63,12 +72,12 @@ if (ordersTableBody) {
 
             const row = `
                 <tr>
-                    <td><strong>${data.orderId || docId.substring(0,8)}</strong></td>
-                    <td>${data.customerName || "Guest"}<br><small>${data.customerPhone || "N/A"}</small></td>
-                    <td title="${data.items}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.items || "No items"}</td>
-                    <td>₹${data.totalPrice || 0}</td>
-                    <td><small>${data.paymentMode || "COD"}</small></td>
-                    <td><span class="admin-badge ${statusClass}">${data.status || "Pending"}</span></td>
+                    <td><strong>${escapeHTML(data.orderId || docId.substring(0,8))}</strong></td>
+                    <td>${escapeHTML(data.customerName || "Guest")}<br><small>${escapeHTML(data.customerPhone || "N/A")}</small></td>
+                    <td title="${escapeHTML(data.items)}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(data.items || "No items")}</td>
+                    <td>₹${Number(data.totalPrice || 0)}</td>
+                    <td><small>${escapeHTML(data.paymentMode || "COD")}</small></td>
+                    <td><span class="admin-badge ${statusClass}">${escapeHTML(data.status || "Pending")}</span></td>
                     <td>
                         <select class="admin-status-select" data-id="${docId}">
                             <option value="Pending" ${data.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -92,6 +101,7 @@ if (ordersTableBody) {
                 try {
                     e.target.disabled = true;
                     await updateDoc(doc(db, "orders", id), { status: newStatus });
+                    console.log("Order status updated successfully!");
                 } catch (error) {
                     console.error("Error updating status:", error);
                     e.target.disabled = false;
@@ -172,8 +182,8 @@ if (cancelEditBtn) {
 }
 
 function resetMenuForm() {
-    menuForm.reset();
-    editFoodId.value = "";
+    if (menuForm) menuForm.reset();
+    if (editFoodId) editFoodId.value = "";
     if (menuSubmitBtn) {
         menuSubmitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add New Item';
         menuSubmitBtn.className = "admin-btn admin-btn-success";
@@ -203,18 +213,18 @@ if (menuTableBody) {
 
             const row = `
                 <tr>
-                    <td><img src="${data.image}" alt="${data.name}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
-                    <td><strong>${data.name}</strong><br><small style="color:#777;">${data.description || ""}</small></td>
-                    <td><span style="text-transform: uppercase; font-weight: 600; color: #ff5722;">${data.restaurant}</span></td>
-                    <td>₹${data.price}</td>
+                    <td><img src="${escapeHTML(data.image)}" alt="${escapeHTML(data.name)}" onerror="this.src='https://via.placeholder.com/45?text=No+Image'" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
+                    <td><strong>${escapeHTML(data.name)}</strong><br><small style="color:#777;">${escapeHTML(data.description || "")}</small></td>
+                    <td><span style="text-transform: uppercase; font-weight: 600; color: #ff5722;">${escapeHTML(data.restaurant)}</span></td>
+                    <td>₹${Number(data.price)}</td>
                     <td>
                         <button class="admin-btn admin-btn-secondary edit-menu-btn" 
                             data-id="${docId}" 
-                            data-name="${data.name}" 
-                            data-price="${data.price}" 
-                            data-restaurant="${data.restaurant}" 
-                            data-image="${data.image}" 
-                            data-desc="${data.description || ''}" 
+                            data-name="${escapeHTML(data.name)}" 
+                            data-price="${Number(data.price)}" 
+                            data-restaurant="${escapeHTML(data.restaurant)}" 
+                            data-image="${escapeHTML(data.image)}" 
+                            data-desc="${escapeHTML(data.description || '')}" 
                             style="padding: 5px 10px; font-size: 12px; margin-right: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
                             Edit
                         </button>
