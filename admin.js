@@ -43,7 +43,7 @@ if (adminLogoutBtn) {
 }
 
 // ==========================================
-// 2. ORDERS DASHBOARD LOGIC
+// 2. ORDERS DASHBOARD LOGIC (Updated with Delivery Address & Scroll Box)
 // ==========================================
 const ordersTableBody = document.getElementById("ordersTableBody");
 
@@ -54,7 +54,7 @@ if (ordersTableBody) {
         ordersTableBody.innerHTML = "";
 
         if (snapshot.empty) {
-            ordersTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No orders found.</td></tr>';
+            ordersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No orders found.</td></tr>';
             updateKPIs(0, 0, 0, 0);
             return;
         }
@@ -74,7 +74,16 @@ if (ordersTableBody) {
                 <tr>
                     <td><strong>${escapeHTML(data.orderId || docId.substring(0,8))}</strong></td>
                     <td>${escapeHTML(data.customerName || "Guest")}<br><small>${escapeHTML(data.customerPhone || "N/A")}</small></td>
-                    <td title="${escapeHTML(data.items)}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(data.items || "No items")}</td>
+                    <td>
+                        <div class="table-scroll-box" title="${escapeHTML(data.deliveryAddress || '')}">
+                            📍 ${escapeHTML(data.deliveryAddress || "Address not available")}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-scroll-box">
+                            🛒 ${escapeHTML(data.items || "No items")}
+                        </div>
+                    </td>
                     <td>₹${Number(data.totalPrice || 0)}</td>
                     <td><small>${escapeHTML(data.paymentMode || "COD")}</small></td>
                     <td><span class="admin-badge ${statusClass}">${escapeHTML(data.status || "Pending")}</span></td>
