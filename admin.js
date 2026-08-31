@@ -1,179 +1,287 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodHub | Admin Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        /* Table cells layout and scroll box for long content */
-        .admin-table td {
-            max-width: 200px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: normal;
-            vertical-align: middle;
-            font-size: 14px;
+import { db, auth } from "./firebase.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import { collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+const ADMIN_EMAIL = "akashkumar906552@gmail.com";
+
+// ==========================================
+// UTILITY: Safe HTML Escape
+// ==========================================
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ==========================================
+// 1. ADMIN AUTHENTICATION SECURITY GUARD
+// ==========================================
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        if (user.email === ADMIN_EMAIL) {
+            const emailDisplay = document.getElementById("adminEmailDisplay");
+            if (emailDisplay) emailDisplay.innerText = user.email;
+        } else {
+            alert("Access Denied! You are not authorized as Admin.");
+            window.location.href = "index.html";
         }
-        .table-scroll-box {
-            max-height: 75px;
-            overflow-y: auto;
-            padding-right: 4px;
+    } else {
+        window.location.href = "login.html";
+    }
+});
+
+// Logout Button Logic
+const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+if (adminLogoutBtn) {
+    adminLogoutBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to logout?")) {
+            signOut(auth).then(() => {
+                window.location.href = "login.html";
+            });
         }
-        .table-scroll-box::-webkit-scrollbar {
-            width: 4px;
+    });
+}
+
+// ==========================================
+// 2. ORDERS DASHBOARD LOGIC (Exact 8-Column Layout)
+// ==========================================
+const ordersTableBody = document.getElementById("ordersTableBody");
+
+if (ordersTableBody) {
+    const qOrders = query(collection(db, "orders"), orderBy("orderTime", "desc"));
+    onSnapshot(qOrders, (snapshot) => {
+        let revenue = 0, pending = 0, delivered = 0, total = snapshot.size;
+        ordersTableBody.innerHTML = "";
+
+        if (snapshot.empty) {
+            ordersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No orders found.</td></tr>';
+            updateKPIs(0, 0, 0, 0);
+            return;
         }
-        .table-scroll-box::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body class="admin-dashboard-body">
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="admin-sidebar">
-        <div class="admin-profile-img"><i class="fa-solid fa-user-shield"></i></div>
-        <h2>ADMIN PANEL</h2>
-        <p id="adminEmailDisplay">Loading...</p>
-        <ul class="admin-nav-menu">
-            <li><a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
-            <li><a href="#manage-menu-section"><i class="fa-solid fa-utensils"></i> Manage Menu</a></li>
-            <li><a href="index.html"><i class="fa-solid fa-globe"></i> View Website</a></li>
-            <li style="margin-top: auto;">
-                <button id="adminLogoutBtn" class="admin-logout-btn">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </button>
-            </li>
-        </ul>
-    </aside>
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const docId = docSnap.id;
 
-    <!-- RIGHT MAIN CONTENT -->
-    <main class="admin-main-content">
-        <header class="admin-header">
-            <h1>Live Dashboard</h1>
-        </header>
+            if (data.status === "Delivered") { revenue += Number(data.totalPrice || 0); delivered++; }
+            if (data.status === "Pending") pending++;
 
-        <!-- KPI CARDS -->
-        <section class="admin-kpi-grid">
-            <div class="admin-kpi-card dark">
-                <span>Total Revenue</span>
-                <h3 id="totalRevenue">₹ 0</h3>
-                <i class="fa-solid fa-indian-rupee-sign"></i>
-            </div>
-            <div class="admin-kpi-card">
-                <span>Total Orders</span>
-                <h3 id="totalOrders">0</h3>
-                <i class="fa-solid fa-cart-shopping"></i>
-            </div>
-            <div class="admin-kpi-card">
-                <span>Pending Orders</span>
-                <h3 id="pendingOrders">0</h3>
-                <i class="fa-solid fa-clock" style="color: #ff9800;"></i>
-            </div>
-            <div class="admin-kpi-card">
-                <span>Delivered</span>
-                <h3 id="deliveredOrders">0</h3>
-                <i class="fa-solid fa-check-circle" style="color: #28a745;"></i>
-            </div>
-        </section>
+            let statusClass = "admin-bg-pending";
+            if (data.status === "Delivered") statusClass = "admin-bg-delivered";
+            if (data.status === "Cancelled") statusClass = "admin-bg-cancelled";
 
-        <!-- LIVE ORDERS TABLE -->
-        <section class="admin-panel admin-mb-40">
-            <h3>Recent Orders Tracker</h3>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Delivery Address</th>
-                            <th>Items</th>
-                            <th>Amount</th>
-                            <th>Payment</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersTableBody">
-                        <tr><td colspan="8" style="text-align: center; padding: 20px;">Loading Live Orders...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- MANAGE MENU (ADD/EDIT/DELETE) -->
-        <section class="admin-panel" id="manage-menu-section">
-            <h3 class="admin-menu-title"><i class="fa-solid fa-pizza-slice"></i> Manage Menu</h3>
-
-            <!-- Add/Edit Form -->
-            <div class="admin-form-container">
-                <form id="menuForm" class="admin-form-grid">
-                    <input type="hidden" id="editFoodId">
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Food Name</label>
-                        <input type="text" id="foodName" class="admin-form-input" required placeholder="e.g., Spicy Zinger Burger">
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Price (₹)</label>
-                        <input type="number" id="foodPrice" class="admin-form-input" required placeholder="e.g., 149">
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Restaurant Category</label>
-                        <select id="foodRestaurant" class="admin-form-input" required>
-                            <option value="">Select Restaurant...</option>
-                            <option value="kfc">KFC</option>
-                            <option value="dominoes">Domino's Pizza</option>
-                            <option value="burgerking">Burger King</option>
-                            <option value="biryanihouse">Biryani House</option>
+            const row = `
+                <tr>
+                    <td><strong>${escapeHTML(data.orderId || docId.substring(0,8))}</strong></td>
+                    <td>${escapeHTML(data.customerName || "Guest")}<br><small>${escapeHTML(data.customerPhone || "N/A")}</small></td>
+                    <td>
+                        <div class="table-scroll-box" title="${escapeHTML(data.deliveryAddress || 'Not Provided')}">
+                            📍 ${escapeHTML(data.deliveryAddress || "Address not provided")}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="table-scroll-box">
+                            🛒 ${escapeHTML(data.items || "No items")}
+                        </div>
+                    </td>
+                    <td>₹${Number(data.totalPrice || 0)}</td>
+                    <td><small>${escapeHTML(data.paymentMode || "COD")}</small></td>
+                    <td><span class="admin-badge ${statusClass}">${escapeHTML(data.status || "Pending")}</span></td>
+                    <td>
+                        <select class="admin-status-select" data-id="${docId}">
+                            <option value="Pending" ${data.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Cooking" ${data.status === 'Cooking' ? 'selected' : ''}>Cooking</option>
+                            <option value="Out for Delivery" ${data.status === 'Out for Delivery' ? 'selected' : ''}>Out for Delivery</option>
+                            <option value="Delivered" ${data.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="Cancelled" ${data.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                         </select>
-                    </div>
+                    </td>
+                </tr>
+            `;
+            ordersTableBody.insertAdjacentHTML("beforeend", row);
+        });
 
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Image Folder Path</label>
-                        <input type="text" id="foodImage" class="admin-form-input" required placeholder="e.g., kfc/zinger-burger.png">
-                    </div>
+        updateKPIs(total, revenue, pending, delivered);
 
-                    <div class="admin-form-group full-width">
-                        <label class="admin-form-label">Short Description</label>
-                        <input type="text" id="foodDesc" class="admin-form-input" required placeholder="e.g., Crispy chicken burger with fresh lettuce.">
-                    </div>
+        document.querySelectorAll('.admin-status-select').forEach(select => {
+            select.addEventListener('change', async (e) => {
+                const id = e.target.getAttribute('data-id');
+                const newStatus = e.target.value;
+                try {
+                    e.target.disabled = true;
+                    await updateDoc(doc(db, "orders", id), { status: newStatus });
+                    console.log("Order status updated successfully!");
+                } catch (error) {
+                    console.error("Error updating status:", error);
+                    e.target.disabled = false;
+                }
+            });
+        });
+    });
+}
 
-                    <div class="admin-form-actions full-width">
-                        <button type="submit" id="menuSubmitBtn" class="admin-btn admin-btn-success">
-                            <i class="fa-solid fa-plus"></i> Add New Item
+function updateKPIs(total, revenue, pending, delivered) {
+    if (document.getElementById("totalOrders")) document.getElementById("totalOrders").innerText = total;
+    if (document.getElementById("totalRevenue")) document.getElementById("totalRevenue").innerText = `₹ ${revenue}`;
+    if (document.getElementById("pendingOrders")) document.getElementById("pendingOrders").innerText = pending;
+    if (document.getElementById("deliveredOrders")) document.getElementById("deliveredOrders").innerText = delivered;
+}
+
+// ==========================================
+// 3. MANAGE MENU: ADD & UPDATE LOGIC
+// ==========================================
+const menuForm = document.getElementById("menuForm");
+const editFoodId = document.getElementById("editFoodId");
+const menuSubmitBtn = document.getElementById("menuSubmitBtn");
+const cancelEditBtn = document.getElementById("cancelEditBtn");
+
+if (menuForm) {
+    menuForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("foodName").value.trim();
+        const price = document.getElementById("foodPrice").value.trim();
+        const restaurant = document.getElementById("foodRestaurant").value;
+        const image = document.getElementById("foodImage").value.trim();
+        const description = document.getElementById("foodDesc").value.trim();
+        const docId = editFoodId.value;
+
+        if (!name || !price || !restaurant || !image) {
+            alert("Please fill out all required fields.");
+            return;
+        }
+
+        try {
+            if (docId) {
+                // Update Existing Item
+                await updateDoc(doc(db, "menu", docId), {
+                    name,
+                    price: Number(price),
+                    restaurant,
+                    image,
+                    description,
+                    updatedAt: serverTimestamp()
+                });
+                alert("Menu item updated successfully!");
+                resetMenuForm();
+            } else {
+                // Add New Item
+                await addDoc(collection(db, "menu"), {
+                    name,
+                    price: Number(price),
+                    restaurant,
+                    image,
+                    description,
+                    createdAt: serverTimestamp()
+                });
+                alert("New menu item added successfully!");
+                menuForm.reset();
+            }
+        } catch (error) {
+            console.error("Error saving menu item: ", error);
+            alert("Operation failed. Check console.");
+        }
+    });
+}
+
+if (cancelEditBtn) {
+    cancelEditBtn.addEventListener("click", () => {
+        resetMenuForm();
+    });
+}
+
+function resetMenuForm() {
+    if (menuForm) menuForm.reset();
+    if (editFoodId) editFoodId.value = "";
+    if (menuSubmitBtn) {
+        menuSubmitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add New Item';
+        menuSubmitBtn.className = "admin-btn admin-btn-success";
+    }
+    if (cancelEditBtn) cancelEditBtn.style.display = "none";
+}
+
+// ==========================================
+// 4. MANAGE MENU: LOAD, DELETE & EDIT LOGIC
+// ==========================================
+const menuTableBody = document.getElementById("menuTableBody");
+
+if (menuTableBody) {
+    const qMenu = query(collection(db, "menu"), orderBy("name"));
+    
+    onSnapshot(qMenu, (snapshot) => {
+        menuTableBody.innerHTML = "";
+
+        if (snapshot.empty) {
+            menuTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No menu items found.</td></tr>';
+            return;
+        }
+
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const docId = docSnap.id;
+
+            const row = `
+                <tr>
+                    <td><img src="${escapeHTML(data.image)}" alt="${escapeHTML(data.name)}" onerror="this.src='https://via.placeholder.com/45?text=No+Image'" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
+                    <td><strong>${escapeHTML(data.name)}</strong><br><small style="color:#777;">${escapeHTML(data.description || "")}</small></td>
+                    <td><span style="text-transform: uppercase; font-weight: 600; color: #ff5722;">${escapeHTML(data.restaurant)}</span></td>
+                    <td>₹${Number(data.price)}</td>
+                    <td>
+                        <button class="admin-btn admin-btn-secondary edit-menu-btn" 
+                            data-id="${docId}" 
+                            data-name="${escapeHTML(data.name)}" 
+                            data-price="${Number(data.price)}" 
+                            data-restaurant="${escapeHTML(data.restaurant)}" 
+                            data-image="${escapeHTML(data.image)}" 
+                            data-desc="${escapeHTML(data.description || '')}" 
+                            style="padding: 5px 10px; font-size: 12px; margin-right: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Edit
                         </button>
-                        <button type="button" id="cancelEditBtn" class="admin-btn admin-btn-secondary" style="display: none;">
-                            Cancel
+                        <button class="admin-btn admin-btn-danger delete-menu-btn" data-id="${docId}" 
+                            style="padding: 5px 10px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Delete
                         </button>
-                    </div>
-                </form>
-            </div>
+                    </td>
+                </tr>
+            `;
+            menuTableBody.insertAdjacentHTML("beforeend", row);
+        });
+    });
 
-            <!-- Menu Table -->
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Food Name</th>
-                            <th>Restaurant</th>
-                            <th>Price</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="menuTableBody">
-                        <tr><td colspan="5" style="text-align: center; padding: 20px;">Loading Menu Items...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+    // EVENT DELEGATION: Robust listener for Delete & Edit clicks
+    menuTableBody.addEventListener("click", async (e) => {
+        // DELETE BUTTON CLICKED
+        if (e.target.classList.contains("delete-menu-btn")) {
+            const id = e.target.getAttribute("data-id");
+            if (confirm("Are you sure you want to delete this food item?")) {
+                try {
+                    await deleteDoc(doc(db, "menu", id));
+                    alert("Item deleted successfully!");
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    alert("Failed to delete item.");
+                }
+            }
+        }
 
-    <script type="module" src="admin.js"></script>
-</body>
-</html>
+        // EDIT BUTTON CLICKED
+        if (e.target.classList.contains("edit-menu-btn")) {
+            const btn = e.target;
+            editFoodId.value = btn.getAttribute("data-id");
+            document.getElementById("foodName").value = btn.getAttribute("data-name");
+            document.getElementById("foodPrice").value = btn.getAttribute("data-price");
+            document.getElementById("foodRestaurant").value = btn.getAttribute("data-restaurant");
+            document.getElementById("foodImage").value = btn.getAttribute("data-image");
+            document.getElementById("foodDesc").value = btn.getAttribute("data-desc");
+
+            if (menuSubmitBtn) {
+                menuSubmitBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Item';
+                menuSubmitBtn.className = "admin-btn admin-btn-primary";
+            }
+            if (cancelEditBtn) cancelEditBtn.style.display = "inline-block";
+
+            // Scroll to form section smoothly
+            document.getElementById("manage-menu-section").scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+}
