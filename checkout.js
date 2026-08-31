@@ -2,31 +2,53 @@ import { auth, db } from "./firebase.js";
 import { collection, addDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
-// Google Sheets order-report endpoint
-const GOOGLE_SHEETS_ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwFKIG-mikHTdm_CZwwgGWv-zLZAOiCDjac1E_oK3GtCBsHqmOg6kIjNZIKPqcrhh4lTQ/exec";
+// Google Sheets order-report endpoint (Secure Vercel Proxy)
+const GOOGLE_SHEETS_ORDER_ENDPOINT = "/api/sync-google-sheet";
 
-function syncOrderToGoogleSheet(order) {
-    return fetch(GOOGLE_SHEETS_ORDER_ENDPOINT, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(order)
-    }).catch(error => console.warn("Google Sheet sync failed:", error));
+// ==========================================
+// HELPER FUNCTION: GOOGLE SHEETS SYNC
+// ==========================================
+async function syncOrderToGoogleSheet(orderData) {
+    try {
+        await fetch(GOOGLE_SHEETS_ORDER_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderData)
+        });
+    } catch (error) {
+        console.warn("Google Sheet sync failed:", error);
+    }
 }
 
 // ==========================================
-// 1. AUTO-FILL SAVED ADDRESS KA LOGIC
+// STATE VARIABLES
+// ==========================================
+let isPlacingOrder = false;
+let currentSubtotal = 0;
+let currentDeliveryFee = 0;
+let currentFinalTotal = 0;
+
+const placeOrderBtn = document.getElementById("placeOrderBtn");
+const useSavedAddress = document.getElementById("useSavedAddress");
+const deliveryPhoneInput = document.getElementById("phone");
+const deliveryPincodeInput = document.getElementById("pincode");
+const checkoutItemsListEl = document.getElementById("checkout-items-list"); // Naya ID for UI
+const summaryDeliveryFeeEl = document.getElementById("summary-delivery-fee"); // Naya ID for UI
+const summaryTotalEl = document.getElementById("summary-total-price"); // Naya ID for UI
+
+// ==========================================
+// 1. AUTHENTICATION & AUTO-FILL LOGIC
 // ==========================================
 onAuthStateChanged(auth, (user) => {
     if (user) {
+        // Auto-fill email and make it read-only
         const emailInput = document.getElementById("email");
         if (emailInput) {
             emailInput.value = user.email;
             emailInput.readOnly = true; 
         }
 
-        const useSavedAddress = document.getElementById("useSavedAddress");
-        
+        // Saved Address Logic
         if (useSavedAddress) {
             useSavedAddress.addEventListener("change", async function() {
                 const name = document.getElementById("name");
@@ -70,14 +92,66 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ==========================================
-// 2. ORDER PLACE KARNE KA LOGIC (CASHFREE INTEGRATED)
+// 2. INITIALIZATION & DYNAMIC DELIVERY FEE LOGIC
 // ==========================================
-const placeOrderBtn = document.getElementById("placeOrderBtn"); 
-let isPlacingOrder = false;
+document.addEventListener("DOMContentLoaded", () => {
+    updateOrderSummaryUI();
+});
 
-const deliveryPhoneInput = document.getElementById("phone");
-const deliveryPincodeInput = document.getElementById("pincode");
+function updateOrderSummaryUI() {
+    // Load Cart Data
+    let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+    
+    if (cartItems.length === 0) {
+        if (checkoutItemsListEl) checkoutItemsListEl.innerHTML = "<p>Your cart is empty.</p>";
+        currentSubtotal = 0;
+        currentDeliveryFee = 0;
+        currentFinalTotal = 0;
+    } else {
+        // Render Items & Calculate Subtotal
+        let subtotal = 0;
+        if (checkoutItemsListEl) {
+            checkoutItemsListEl.innerHTML = cartItems.map(item => {
+                const itemTotal = Number(item.price) * Number(item.quantity);
+                subtotal += itemTotal;
+                return `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 15px; color: #555;">
+                        <span>${item.name} × ${item.quantity}</span>
+                        <span>₹${itemTotal}</span>
+                    </div>
+                `;
+            }).join("");
+        }
 
+        currentSubtotal = subtotal;
+
+        // ==========================================
+        // DYNAMIC DELIVERY FEE LOGIC (FIXED)
+        // ==========================================
+        let deliveryFee = 0;
+        if (currentSubtotal >= 100) {
+            // Greater than 100: 10% charge
+            deliveryFee = Math.round(currentSubtotal * 0.10);
+            // Min/Max limit (Optional - jaise cart mein ho)
+            if (deliveryFee < 15) deliveryFee = 15;
+            else if (deliveryFee > 50) deliveryFee = 50;
+        } else {
+            // Less than 100: Free Delivery
+            deliveryFee = 0;
+        }
+        
+        currentDeliveryFee = deliveryFee;
+        currentFinalTotal = currentSubtotal + currentDeliveryFee;
+    }
+
+    // Update UI Elements
+    if (summaryDeliveryFeeEl) summaryDeliveryFeeEl.innerText = `₹${currentDeliveryFee}`;
+    if (summaryTotalEl) summaryTotalEl.innerText = `Total : ₹${currentFinalTotal}`;
+}
+
+// ==========================================
+// 3. INPUT VALIDATION (NUMBER ONLY)
+// ==========================================
 [deliveryPhoneInput, deliveryPincodeInput].forEach(input => {
     input?.addEventListener("input", () => {
         input.value = input.value.replace(/\D/g, "");
@@ -85,85 +159,71 @@ const deliveryPincodeInput = document.getElementById("pincode");
     });
 });
 
+// ==========================================
+// 4. PLACE ORDER CLICK HANDLER
+// ==========================================
 if (placeOrderBtn) {
     placeOrderBtn.addEventListener("click", async function(e) {
-        e.preventDefault(); 
+        e.preventDefault();
 
         if (isPlacingOrder) return;
 
         const user = auth.currentUser;
         let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
 
+        // Basic Checks
         if (cartItems.length === 0) {
             window.showToast?.("Your cart is empty. Please add some food first.", "info");
             window.location.href = "menu.html";
             return;
         }
 
-        if (user) {
-            const name = document.getElementById("name").value.trim();
-            const phone = document.getElementById("phone").value.trim();
-            const address = document.getElementById("address").value.trim();
-            const city = document.getElementById("city") ? document.getElementById("city").value.trim() : "";
-            const pincode = document.getElementById("pincode") ? document.getElementById("pincode").value.trim() : "";
-            
-            // Payment method check
-            const paymentElement = document.querySelector('input[name="paymentMethod"]:checked') || document.querySelector('input[name="payment"]:checked');
-            const payment = paymentElement ? paymentElement.value : "COD";
-            
-            if (!name || !phone || !address || !city || !pincode) {
-                window.showToast?.("Please fill all delivery details, including city and pincode.", "error");
-                return;
-            }
+        if (!user) {
+            window.showToast?.("Please log in to place an order.", "warning");
+            return;
+        }
 
-            if (!/^\d{10}$/.test(phone)) {
-                deliveryPhoneInput.setCustomValidity("Please enter a valid 10-digit mobile number.");
-                deliveryPhoneInput.reportValidity();
-                window.showToast?.("Mobile number must contain exactly 10 digits.", "error");
-                return;
-            }
+        // Form Data
+        const name = document.getElementById("name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const address = document.getElementById("address").value.trim();
+        const city = document.getElementById("city")?.value.trim() || "";
+        const pincode = document.getElementById("pincode")?.value.trim() || "";
+        const paymentElement = document.querySelector('input[name="paymentMethod"]:checked') || document.querySelector('input[name="payment"]:checked');
+        const payment = paymentElement ? paymentElement.value : "COD";
 
-            if (!/^\d{6}$/.test(pincode)) {
-                deliveryPincodeInput.setCustomValidity("Please enter a valid 6-digit pincode.");
-                deliveryPincodeInput.reportValidity();
-                window.showToast?.("Pincode must contain exactly 6 digits.", "error");
-                return;
-            }
+        // Validation
+        if (!name || !phone || !address || !city || !pincode) {
+            window.showToast?.("Please fill all delivery details, including city and pincode.", "error");
+            return;
+        }
+        if (!/^\d{10}$/.test(phone)) {
+            window.showToast?.("Mobile number must contain exactly 10 digits.", "error");
+            return;
+        }
+        if (!/^\d{6}$/.test(pincode)) {
+            window.showToast?.("Pincode must contain exactly 6 digits.", "error");
+            return;
+        }
 
-            let itemNames = cartItems.map(item => `${item.name} x${item.quantity}`).join(", ");
-            let subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
-            
-            // ==========================================
-            // PROFESSIONAL DYNAMIC DELIVERY FEE LOGIC
-            // ==========================================
-            let deliveryFee = 0;
-            if (subtotal >= 100) {
-                deliveryFee = Math.round(subtotal * 0.10); // 10% of subtotal
-                if (deliveryFee < 15) {
-                    deliveryFee = 15; // Minimum ₹15
-                } else if (deliveryFee > 50) {
-                    deliveryFee = 50; // Maximum ₹50
-                }
-            } else {
-                deliveryFee = 0; // Free delivery if under ₹100
-            }
+        // Final Totals Re-calculation before processing
+        updateOrderSummaryUI();
 
-            let finalTotal = subtotal + deliveryFee;
-            let tempOrderId = "ORD-" + Math.floor(Math.random() * 1000000);
+        const itemNames = cartItems.map(item => `${item.name} x${item.quantity}`).join(", ");
+        const tempOrderId = "ORD-" + Date.now();
 
-            if (payment === "COD" || payment === "Cash on Delivery") {
-                // Direct Save for COD
-                await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, tempOrderId, "Cash on Delivery", "Pending");
-            } else {
-                // Trigger Cashfree for Online Payment via Backend API
-                await triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, tempOrderId, payment);
-            }
+        if (payment === "COD" || payment === "Cash on Delivery") {
+            // Process COD
+            await processFinalOrder(user, name, phone, address, city, pincode, itemNames, currentSubtotal, currentDeliveryFee, currentFinalTotal, tempOrderId, "Cash on Delivery", "Pending");
+        } else {
+            // Process Online Payment
+            await triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, currentSubtotal, currentDeliveryFee, currentFinalTotal, tempOrderId, payment);
         }
     });
 }
 
 // ==========================================
-// 3. CASHFREE PAYMENT TRIGGER (BACKEND SECURE API)
+// 5. CASHFREE PAYMENT TRIGGER
 // ==========================================
 async function triggerCashfreePayment(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, orderId, method) {
     try {
@@ -171,12 +231,9 @@ async function triggerCashfreePayment(user, name, phone, address, city, pincode,
         placeOrderBtn.innerText = "Creating Payment Session...";
         placeOrderBtn.disabled = true;
 
-        // Call Vercel Backend API to create Cashfree Order & get Session ID securely
         const apiResponse = await fetch("/api/create-order", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 orderId: orderId,
                 amount: finalTotal,
@@ -195,10 +252,7 @@ async function triggerCashfreePayment(user, name, phone, address, city, pincode,
 
         placeOrderBtn.innerText = "Initializing Cashfree...";
 
-        // Initialize Cashfree SDK safely
-        const cashfree = Cashfree({
-            mode: "production" 
-        });
+        const cashfree = Cashfree({ mode: "production" });
 
         let checkoutOptions = {
             paymentSessionId: apiData.payment_session_id,
@@ -211,8 +265,7 @@ async function triggerCashfreePayment(user, name, phone, address, city, pincode,
                 isPlacingOrder = false;
                 placeOrderBtn.disabled = false;
                 placeOrderBtn.innerText = "Place Order";
-            }
-            if (result.paymentDetails) {
+            } else if (result.paymentDetails) {
                 const paymentStatus = `Paid Online (${method}) - ID: ${result.paymentDetails.paymentId}`;
                 await processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, orderId, paymentStatus, "Paid & Pending");
             }
@@ -228,7 +281,7 @@ async function triggerCashfreePayment(user, name, phone, address, city, pincode,
 }
 
 // ==========================================
-// 4. FINAL ORDER SAVE FUNCTION
+// 6. FINAL ORDER SAVE FUNCTION
 // ==========================================
 async function processFinalOrder(user, name, phone, address, city, pincode, itemNames, subtotal, deliveryFee, finalTotal, orderId, paymentStatus, orderStatus) {
     try {
@@ -238,9 +291,9 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
 
         const fullAddress = `${address}, ${city} - ${pincode}`;
 
-        // 1. Firebase mein Save
+        // 1. Firebase Save
         const orderReference = await addDoc(collection(db, "orders"), {
-            userId: user.uid, 
+            userId: user.uid,
             userEmail: user.email,
             customerName: name,
             customerPhone: phone,
@@ -251,12 +304,12 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             deliveryFee: deliveryFee,
             totalPrice: finalTotal,
             date: new Date().toLocaleDateString(),
-            orderTime: serverTimestamp(), 
-            status: "Pending", 
-            orderId: orderId 
+            orderTime: serverTimestamp(),
+            status: "Pending",
+            orderId: orderId
         });
 
-        // 2. Google Sheets mein Sync
+        // 2. Google Sheets Sync (via Secure Proxy)
         await syncOrderToGoogleSheet({
             orderId: orderReference.id,
             orderedAt: new Date().toISOString(),
@@ -273,7 +326,7 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             restaurant: "FoodHub"
         });
 
-        // 3. Last order update for success page
+        // 3. Success Page Data
         localStorage.setItem("lastOrder", JSON.stringify({
             id: orderReference.id,
             total: finalTotal,
@@ -282,11 +335,11 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
             itemCount: itemNames.split(",").length
         }));
 
-        // 4. Cart khali karein aur Profile/Success page par bhejein
+        // 4. Clear Cart & Redirect
         document.dispatchEvent(new Event("foodhub-clear-cart"));
         window.showToast?.("Order Placed Successfully!", "success");
         setTimeout(() => {
-            window.location.href = "profile.html"; 
+            window.location.href = "profile.html";
         }, 1500);
 
     } catch (err) {
