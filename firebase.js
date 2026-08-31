@@ -1,12 +1,8 @@
-// Sabse upar saare imports honge
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
-// Beech mein aapki config hogi
-
 const firebaseConfig = {
-    // ... aapki API keys wagerah ...
     apiKey: "AIzaSyBN4o_xEuTEIDqALYWQNRDB5Bj2CoyK4eY",
     authDomain: "foodhub-6a986.firebaseapp.com",
     projectId: "foodhub-6a986",
@@ -16,9 +12,7 @@ const firebaseConfig = {
     measurementId: "G-J8JXSW5P3S"
 };
 
-// Sabse last mein variables export honge
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
 
 export { app, auth };
