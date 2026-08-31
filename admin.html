@@ -6,6 +6,29 @@
     <title>FoodHub | Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* Long text aur address ke liye safe table styling aur scroll box */
+        .admin-table td {
+            max-width: 220px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+        .table-scroll-box {
+            max-height: 75px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .table-scroll-box::-webkit-scrollbar {
+            width: 4px;
+        }
+        .table-scroll-box::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body class="admin-dashboard-body">
 
@@ -65,6 +88,7 @@
                         <tr>
                             <th>Order ID</th>
                             <th>Customer</th>
+                            <th>Delivery Address</th> <!-- Naya column add kiya gaya hai -->
                             <th>Items</th>
                             <th>Amount</th>
                             <th>Payment</th>
@@ -73,7 +97,7 @@
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
-                        <tr><td colspan="7" style="text-align: center; padding: 20px;">Loading Live Orders...</td></tr>
+                        <tr><td colspan="8" style="text-align: center; padding: 20px;">Loading Live Orders...</td></tr>
                     </tbody>
                 </table>
             </div>
