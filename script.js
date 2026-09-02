@@ -1,5 +1,5 @@
 // ===============================
-// FOODHUB - script.js (Ultimate URL & Case-Insensitive Fix)
+// FOODHUB - script.js (Final Corrected Version with Direct Navigation & Search)
 // ===============================
 
 // ---------- RESPONSIVE NAVIGATION ----------
@@ -44,7 +44,7 @@ if (navbar) {
 }
 
 
-// ---------- SEARCH ----------
+// ---------- SEARCH & RESTAURANT ROUTING ----------
 const searchBox = document.getElementById("searchBox");
 const homeSearchResults = document.getElementById("homeSearchResults");
 const searchBtn = document.getElementById("searchBtn");
@@ -89,13 +89,31 @@ function showHomeSearchResults(query) {
         : '<p class="no-search-result"><i class="fa-solid fa-bowl-food"></i> No food item found. Try pizza, burger or biryani.</p>';
 }
 
+function handleSearchSubmission(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) return;
+
+    // Smart Keyword Routing to specific restaurant views if desired, or send standard query parameter
+    if (q.includes("pizza") || q.includes("domino")) {
+        window.location.href = `menu.html?search=${encodeURIComponent(query)}`;
+    } else if (q.includes("biryani")) {
+        window.location.href = `menu.html?search=${encodeURIComponent(query)}`;
+    } else if (q.includes("kfc") || q.includes("zinger") || q.includes("chicken bucket")) {
+        window.location.href = `menu.html?search=${encodeURIComponent(query)}`;
+    } else if (q.includes("burger") || q.includes("whopper")) {
+        window.location.href = `menu.html?search=${encodeURIComponent(query)}`;
+    } else {
+        window.location.href = `menu.html?search=${encodeURIComponent(query)}`;
+    }
+}
+
 function showMenuSearchResults(query) {
     const searchTerm = query.trim().toLowerCase();
     const sections = document.querySelectorAll(".restaurant-section");
     const cards = document.querySelectorAll(".food-card, .menu-item-card, .restaurant-card");
     
     let matchCount = 0;
-    const searchWords = searchTerm.split(/\s+/).filter(Boolean); // Har word ko alag karke flexible match banate hain
+    const searchWords = searchTerm.split(/\s+/).filter(Boolean);
 
     if (sections.length > 0) {
         sections.forEach(section => {
@@ -107,7 +125,6 @@ function showMenuSearchResults(query) {
                 const foodName = card.querySelector("h3, h4, .food-title")?.textContent.toLowerCase() || "";
                 const foodDesc = card.querySelector("p, .food-desc")?.textContent.toLowerCase() || "";
                 
-                // Flexible word-by-word or complete query inclusion match (Case-Insensitive)
                 const cardText = `${foodName} ${foodDesc} ${restaurant}`;
                 const isMatch = !searchTerm || searchWords.every(word => cardText.includes(word));
                 
@@ -151,7 +168,7 @@ if (searchBox) {
 if (searchBtn && searchBox) {
     searchBtn.addEventListener("click", function () {
         if (homeSearchResults) {
-            showHomeSearchResults(searchBox.value);
+            handleSearchSubmission(searchBox.value);
         } else {
             showMenuSearchResults(searchBox.value);
         }
@@ -161,9 +178,9 @@ if (searchBtn && searchBox) {
         if (event.key === "Enter") {
             event.preventDefault();
             if (homeSearchResults) {
-                showHomeSearchResults(this.value);
+                handleSearchSubmission(searchBox.value);
             } else {
-                showMenuSearchResults(this.value);
+                showMenuSearchResults(searchBox.value);
             }
         }
     });
@@ -177,7 +194,6 @@ if (searchBox && !homeSearchResults) {
         const decodedQuery = decodeURIComponent(menuSearch).replace(/\+/g, ' ');
         searchBox.value = decodedQuery;
         
-        // Multi-stage triggers to ensure complete layout and dynamic elements synchronization
         setTimeout(() => showMenuSearchResults(decodedQuery), 100);
         setTimeout(() => showMenuSearchResults(decodedQuery), 400);
         setTimeout(() => showMenuSearchResults(decodedQuery), 1200);
