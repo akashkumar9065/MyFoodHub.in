@@ -189,7 +189,6 @@ function attachStatusChangeEvent() {
 // ==========================================
 const restaurantForm = document.getElementById("restaurantForm");
 const foodRestaurantSelect = document.getElementById("foodRestaurant");
-const menuRestaurantFilter = document.getElementById("menuRestaurantFilter");
 
 if (restaurantForm) {
     restaurantForm.addEventListener("submit", async (e) => {
@@ -234,9 +233,6 @@ function loadDynamicDropdowns() {
         if (foodRestaurantSelect) {
             foodRestaurantSelect.innerHTML = '<option value="">Select Restaurant...</option>';
         }
-        if (menuRestaurantFilter) {
-            menuRestaurantFilter.innerHTML = '<option value="All">All Restaurants</option>';
-        }
 
         if (snapshot.empty) return;
 
@@ -246,17 +242,10 @@ function loadDynamicDropdowns() {
             const restName = rest.name;
 
             if (foodRestaurantSelect) {
-                const opt1 = document.createElement("option");
-                opt1.value = restSlug;
-                opt1.textContent = restName;
-                foodRestaurantSelect.appendChild(opt1);
-            }
-
-            if (menuRestaurantFilter) {
-                const opt2 = document.createElement("option");
-                opt2.value = restSlug;
-                opt2.textContent = restName;
-                menuRestaurantFilter.appendChild(opt2);
+                const opt = document.createElement("option");
+                opt.value = restSlug;
+                opt.textContent = restName;
+                foodRestaurantSelect.appendChild(opt);
             }
         });
     });
@@ -265,7 +254,7 @@ function loadDynamicDropdowns() {
 loadDynamicDropdowns();
 
 // ==========================================
-// 4. MANAGE MENU: ADD & UPDATE LOGIC (With Rating)
+// 4. MANAGE MENU: ADD & UPDATE LOGIC
 // ==========================================
 const menuForm = document.getElementById("menuForm");
 const editFoodId = document.getElementById("editFoodId");
@@ -278,7 +267,7 @@ if (menuForm) {
 
         const name = document.getElementById("foodName").value.trim();
         const price = document.getElementById("foodPrice").value.trim();
-        const restaurant = document.getElementById("foodRestaurant").value;
+        const restaurant = document.getElementById("foodRestaurant").value.trim().toLowerCase();
         const image = document.getElementById("foodImage").value.trim();
         const rating = document.getElementById("foodRating").value.trim();
         const description = document.getElementById("foodDesc").value.trim();
@@ -330,82 +319,115 @@ function resetMenuForm() {
         menuSubmitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add New Item';
         menuSubmitBtn.className = "admin-btn admin-btn-success";
     }
+    if (document.getElementById("formTitle")) document.getElementById("formTitle").innerText = "Add New Food Item";
     if (cancelEditBtn) cancelEditBtn.style.display = "none";
 }
 
 // ==========================================
-// 5. MANAGE MENU: LOAD, DELETE & EDIT LOGIC (Restaurant Filtered)
+// 5. RESTAURANT-WISE MENU DISPLAY & ACTIONS
 // ==========================================
-const menuTableBody = document.getElementById("menuTableBody");
-let allMenuItems = [];
+const restaurantWiseMenuContainer = document.getElementById("restaurantWiseMenuContainer");
+let allRestaurantsData = [];
+let allMenuItemsData = [];
 
-if (menuTableBody) {
-    const qMenu = query(collection(db, "menu"), orderBy("name"));
-    
-    onSnapshot(qMenu, (snapshot) => {
-        allMenuItems = [];
-        snapshot.forEach((docSnap) => {
-            allMenuItems.push({ id: docSnap.id, ...docSnap.data() });
+if (restaurantWiseMenuContainer) {
+    // Real-time listener for Restaurants
+    onSnapshot(query(collection(db, "restaurants"), orderBy("name")), (restSnap) => {
+        allRestaurantsData = [];
+        restSnap.forEach((docSnap) => {
+            allRestaurantsData.push({ id: docSnap.id, ...docSnap.data() });
         });
-        renderMenuTable();
+        renderRestaurantWiseMenu();
     });
 
-    document.getElementById("menuRestaurantFilter")?.addEventListener("change", () => {
-        renderMenuTable();
+    // Real-time listener for Menu Items
+    onSnapshot(query(collection(db, "menu"), orderBy("name")), (menuSnap) => {
+        allMenuItemsData = [];
+        menuSnap.forEach((docSnap) => {
+            allMenuItemsData.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        renderRestaurantWiseMenu();
     });
 }
 
-function renderMenuTable() {
-    if (!menuTableBody) return;
+function renderRestaurantWiseMenu() {
+    if (!restaurantWiseMenuContainer) return;
 
-    const selectedRestaurant = document.getElementById("menuRestaurantFilter")?.value || "All";
-    
-    const filteredMenu = allMenuItems.filter(item => {
-        if (selectedRestaurant === "All") return true;
-        return item.restaurant === selectedRestaurant;
-    });
-
-    menuTableBody.innerHTML = "";
-
-    if (filteredMenu.length === 0) {
-        menuTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No menu items found for this restaurant.</td></tr>';
+    if (allRestaurantsData.length === 0) {
+        restaurantWiseMenuContainer.innerHTML = '<p style="text-align:center; color:#777; padding: 20px;">No restaurants found. Please add a restaurant first.</p>';
         return;
     }
 
-    filteredMenu.forEach((data) => {
-        const docId = data.id;
+    restaurantWiseMenuContainer.innerHTML = "";
 
-        const row = `
-            <tr>
-                <td><img src="${escapeHTML(data.image)}" alt="${escapeHTML(data.name)}" onerror="this.src='https://via.placeholder.com/45?text=No+Image'" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
-                <td><strong>${escapeHTML(data.name)}</strong><br><small style="color:#777;">⭐ ${data.rating || 4.5} | ${escapeHTML(data.description || "")}</small></td>
-                <td><span style="text-transform: uppercase; font-weight: 600; color: #ff5722;">${escapeHTML(data.restaurant)}</span></td>
-                <td>₹${Number(data.price)}</td>
-                <td>
-                    <button class="admin-btn admin-btn-secondary edit-menu-btn" 
-                        data-id="${docId}" 
-                        data-name="${escapeHTML(data.name)}" 
-                        data-price="${Number(data.price)}" 
-                        data-restaurant="${escapeHTML(data.restaurant)}" 
-                        data-image="${escapeHTML(data.image)}" 
-                        data-rating="${data.rating || 4.5}" 
-                        data-desc="${escapeHTML(data.description || '')}" 
-                        style="padding: 5px 10px; font-size: 12px; margin-right: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Edit
+    allRestaurantsData.forEach((rest) => {
+        const restSlug = rest.slug.toLowerCase();
+        
+        // Match items case-insensitively with restaurant slug
+        const matchedItems = allMenuItemsData.filter(item => 
+            item.restaurant && item.restaurant.toLowerCase() === restSlug
+        );
+
+        let itemsHTML = "";
+        if (matchedItems.length === 0) {
+            itemsHTML = `<tr><td colspan="4" style="text-align:center; color:#888; padding: 15px;">No food items added for this restaurant yet.</td></tr>`;
+        } else {
+            matchedItems.forEach(item => {
+                itemsHTML += `
+                    <tr>
+                        <td style="width: 60px;"><img src="${escapeHTML(item.image)}" alt="" onerror="this.src='https://via.placeholder.com/40?text=Img'" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
+                        <td><strong>${escapeHTML(item.name)}</strong><br><small style="color:#666;">⭐ ${item.rating || 4.5} | ${escapeHTML(item.description || '')}</small></td>
+                        <td><strong>₹${Number(item.price)}</strong></td>
+                        <td style="text-align: right;">
+                            <button class="admin-btn admin-btn-secondary edit-menu-btn" 
+                                data-id="${item.id}" 
+                                data-name="${escapeHTML(item.name)}" 
+                                data-price="${item.price}" 
+                                data-restaurant="${escapeHTML(item.restaurant)}" 
+                                data-image="${escapeHTML(item.image)}" 
+                                data-rating="${item.rating || 4.5}" 
+                                data-desc="${escapeHTML(item.description || '')}"
+                                style="padding: 5px 10px; font-size: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                                Edit
+                            </button>
+                            <button class="admin-btn admin-btn-danger delete-menu-btn" data-id="${item.id}" 
+                                style="padding: 5px 10px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Restaurant Card Structure
+        const cardHTML = `
+            <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                <div style="background: #f8f9fa; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="${escapeHTML(rest.image)}" alt="" onerror="this.src='https://via.placeholder.com/40?text=Rest'" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+                        <h4 style="margin: 0; color: #333; font-size: 18px;">${escapeHTML(rest.name)} <span style="font-size: 13px; color: #666; font-weight: normal;">(${rest.slug})</span></h4>
+                    </div>
+                    <button type="button" onclick="document.getElementById('foodRestaurant').value='${rest.slug}'; document.getElementById('formTitle').innerText='Add Item to ${escapeHTML(rest.name)}'; document.getElementById('manage-menu-section').scrollIntoView({behavior: 'smooth'});" style="background: #28a745; color: white; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer;">
+                        <i class="fa-solid fa-plus"></i> Add Item
                     </button>
-                    <button class="admin-btn admin-btn-danger delete-menu-btn" data-id="${docId}" 
-                        style="padding: 5px 10px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Delete
-                    </button>
-                </td>
-            </tr>
+                </div>
+                <div style="padding: 0 15px;">
+                    <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                        <tbody>
+                            ${itemsHTML}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         `;
-        menuTableBody.insertAdjacentHTML("beforeend", row);
+        restaurantWiseMenuContainer.insertAdjacentHTML("beforeend", cardHTML);
     });
 }
 
-if (menuTableBody) {
-    menuTableBody.addEventListener("click", async (e) => {
+// EVENT DELEGATION: Delete & Edit clicks inside Restaurant-Wise Menu Cards
+if (restaurantWiseMenuContainer) {
+    restaurantWiseMenuContainer.addEventListener("click", async (e) => {
         if (e.target.classList.contains("delete-menu-btn")) {
             const id = e.target.getAttribute("data-id");
             if (confirm("Are you sure you want to delete this food item?")) {
@@ -424,7 +446,7 @@ if (menuTableBody) {
             editFoodId.value = btn.getAttribute("data-id");
             document.getElementById("foodName").value = btn.getAttribute("data-name");
             document.getElementById("foodPrice").value = btn.getAttribute("data-price");
-            document.getElementById("foodRestaurant").value = btn.getAttribute("data-restaurant");
+            document.getElementById("foodRestaurant").value = btn.getAttribute("data-restaurant").toLowerCase();
             document.getElementById("foodImage").value = btn.getAttribute("data-image");
             document.getElementById("foodRating").value = btn.getAttribute("data-rating");
             document.getElementById("foodDesc").value = btn.getAttribute("data-desc");
@@ -433,6 +455,7 @@ if (menuTableBody) {
                 menuSubmitBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Item';
                 menuSubmitBtn.className = "admin-btn admin-btn-primary";
             }
+            if (document.getElementById("formTitle")) document.getElementById("formTitle").innerText = "Edit Food Item";
             if (cancelEditBtn) cancelEditBtn.style.display = "inline-block";
 
             document.getElementById("manage-menu-section").scrollIntoView({ behavior: 'smooth' });
