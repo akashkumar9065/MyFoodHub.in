@@ -1,5 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBN4o_xEuTEIDqALYWQNRDB5Bj2CoyK4eY",
@@ -14,71 +14,87 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// URL path se detect karenge ki kaun sa page khula hai
-const path = window.location.pathname.toLowerCase();
-let currentPageTag = "";
+// URL se query parameter read karna (e.g., menu.html?restaurant=kfc)
+const urlParams = new URLSearchParams(window.location.search);
+const targetRestaurantSlug = urlParams.get("restaurant")?.toLowerCase().trim() || "";
 
-if (path.includes("kfc")) currentPageTag = "kfc";
-else if (path.includes("domino")) currentPageTag = "dominoes";
-else if (path.includes("burger")) currentPageTag = "burgerking";
-else if (path.includes("biryani")) currentPageTag = "biryanihouse";
-else if (path.includes("menu")) currentPageTag = "menu";
+async function loadDynamicMenu() {
+    const container = document.getElementById("dynamicMenuContainer");
+    if (!container) return;
 
-console.log("Detected Page Tag:", currentPageTag);
+    try {
+        // 1. Fetch Restaurants & Menu items simultaneously from Firebase
+        const [restSnapshot, menuSnapshot] = await Promise.all([
+            getDocs(query(collection(db, "restaurants"), orderBy("name"))),
+            getDocs(query(collection(db, "menu"), orderBy("name")))
+        ]);
 
-if (currentPageTag !== "") {
-    onSnapshot(query(collection(db, "menu"), orderBy("name")), (snapshot) => {
-        console.log("Total menu items from Firebase:", snapshot.size);
-        
-        // Purane dynamic items hatao taaki duplicate na ho
-        document.querySelectorAll('.firebase-dynamic-item').forEach(el => el.remove());
+        let restaurants = [];
+        restSnapshot.forEach(doc => restaurants.push({ id: doc.id, ...doc.data() }));
 
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const dbRestaurant = String(data.restaurant || "").toLowerCase().trim();
-            
-            const card = document.createElement('div');
-            card.className = 'food-card firebase-dynamic-item';
-            card.innerHTML = `
-                <img src="${data.image}" alt="${data.name}" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
-                <h3>${data.name}</h3>
-                <p>${data.description || ""}</p>
-                <div class="rating">⭐ ${data.rating || 4.5}</div>
-                <span class="price">₹${data.price}</span>
-                <button type="button" class="add-to-cart" data-name="${data.name}" data-price="${data.price}" data-image="${data.image}">
-                    Add to Cart
-                </button>
+        let menuItems = [];
+        menuSnapshot.forEach(doc => menuItems.push({ id: doc.id, ...doc.data() }));
+
+        if (restaurants.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:40px;"><p>No restaurants available.</p></div>';
+            return;
+        }
+
+        // Agar URL mein koi specific restaurant pass kiya hai, toh sirf usi ko filter karo
+        if (targetRestaurantSlug) {
+            restaurants = restaurants.filter(r => String(r.slug || "").toLowerCase().trim() === targetRestaurantSlug);
+        }
+
+        container.innerHTML = "";
+
+        if (restaurants.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:40px;"><p>Restaurant not found.</p></div>';
+            return;
+        }
+
+        // 2. Render each restaurant with its banner and food items grid
+        restaurants.forEach(rest => {
+            const restSlug = String(rest.slug || "").toLowerCase().trim();
+            const matchedItems = menuItems.filter(item => String(item.restaurant || "").toLowerCase().trim() === restSlug);
+
+            let itemsHTML = "";
+            if (matchedItems.length === 0) {
+                itemsHTML = '<p style="color: #777; padding: 20px; text-align: center;">No food items found for this restaurant.</p>';
+            } else {
+                itemsHTML = `<div class="food-container">` + matchedItems.map(data => `
+                    <div class="food-card">
+                        <img src="${data.image}" alt="${data.name}" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
+                        <h3>${data.name}</h3>
+                        <p>${data.description || ""}</p>
+                        <div class="rating">⭐ ${data.rating || 4.5}</div>
+                        <span class="price">₹${data.price}</span>
+                        <button type="button" class="add-to-cart" data-name="${data.name}" data-price="${data.price}" data-image="${data.image}">
+                            Add to Cart
+                        </button>
+                    </div>
+                `).join("") + `</div>`;
+            }
+
+            const sectionHTML = `
+                <section class="restaurant-section" style="margin-bottom: 40px; padding: 0 20px;">
+                    <div class="restaurant-banner" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 2px solid #ff4757; padding-bottom: 10px;">
+                        <img src="${rest.image}" alt="${rest.name}" onerror="this.src='https://via.placeholder.com/60?text=Logo'" style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%;">
+                        <div>
+                            <h2 style="margin: 0; color: #333; font-size: 24px;">${rest.name}</h2>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">⭐ ${rest.rating || 4.5} (${rest.reviews || 'Reviews'}) • <i class="fa-solid fa-clock"></i> ${rest.deliveryTime || '20-30 mins'}</p>
+                        </div>
+                    </div>
+                    ${itemsHTML}
+                </section>
             `;
 
-            // 1. Agar individual restaurant page par hain (jaise kfc.html)
-            if (currentPageTag === dbRestaurant) {
-                const container = document.querySelector('.food-container') || document.querySelector('.menu-container');
-                if (container) container.appendChild(card);
-            }
-            
-            // 2. Agar main menu.html page par hain
-            else if (currentPageTag === "menu") {
-                let targetContainer = document.getElementById(dbRestaurant + '-menu');
-
-                // Agar ID na mile, toh section ke heading se dhoond lo
-                if (!targetContainer) {
-                    const sections = document.querySelectorAll('.restaurant-section');
-                    sections.forEach(sec => {
-                        const headingText = sec.querySelector('h2')?.textContent.toLowerCase() || "";
-                        if (headingText.includes(dbRestaurant)) {
-                            targetContainer = sec.querySelector('.food-container') || sec.querySelector('.menu-container');
-                        }
-                    });
-                }
-
-                if (targetContainer) {
-                    targetContainer.appendChild(card);
-                } else {
-                    // Fallback container
-                    const generalContainer = document.querySelector('.food-container') || document.querySelector('.menu-container');
-                    if (generalContainer) generalContainer.appendChild(card);
-                }
-            }
+            container.insertAdjacentHTML("beforeend", sectionHTML);
         });
-    });
+
+    } catch (error) {
+        console.error("Error loading dynamic menu:", error);
+        container.innerHTML = '<div style="text-align:center; padding:40px;"><p style="color: red;">Failed to load menus. Please try again later.</p></div>';
+    }
 }
+
+document.addEventListener("DOMContentLoaded", loadDynamicMenu);
