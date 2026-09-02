@@ -131,7 +131,20 @@
 
         <!-- MANAGE MENU (ADD/EDIT/DELETE) -->
         <section class="admin-panel" id="manage-menu-section">
-            <h3 class="admin-menu-title"><i class="fa-solid fa-pizza-slice"></i> Manage Menu</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 10px;">
+                <h3 class="admin-menu-title" style="margin: 0;"><i class="fa-solid fa-pizza-slice"></i> Manage Menu</h3>
+                
+                <!-- Restaurant Wise Filter Dropdown -->
+                <div>
+                    <select id="menuRestaurantFilter" class="admin-form-input" style="padding: 6px 12px; width: 200px; font-size: 14px; background: white;">
+                        <option value="All">All Restaurants</option>
+                        <option value="kfc">KFC</option>
+                        <option value="dominoes">Domino's Pizza</option>
+                        <option value="burgerking">Burger King</option>
+                        <option value="biryanihouse">Biryani House</option>
+                    </select>
+                </div>
+            </div>
 
             <!-- Add/Edit Form -->
             <div class="admin-form-container">
