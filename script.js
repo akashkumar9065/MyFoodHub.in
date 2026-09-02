@@ -1,5 +1,5 @@
 // ===============================
-// FOODHUB - script.js (Clean Version without Delete Button)
+// FOODHUB - script.js (Final Fixed Version)
 // ===============================
 
 // ---------- RESPONSIVE NAVIGATION ----------
@@ -71,6 +71,7 @@ function showHomeSearchResults(query) {
     const searchTerm = query.trim().toLowerCase();
     if (!searchTerm) {
         homeSearchResults.innerHTML = "";
+        homeSearchResults.style.display = "none";
         return;
     }
 
@@ -78,6 +79,7 @@ function showHomeSearchResults(query) {
         `${food.name} ${food.restaurant}`.toLowerCase().includes(searchTerm)
     );
 
+    homeSearchResults.style.display = "block";
     homeSearchResults.innerHTML = matches.length
         ? matches.map(food => `
             <a class="home-search-result" href="menu.html?search=${encodeURIComponent(food.name)}">
@@ -88,31 +90,41 @@ function showHomeSearchResults(query) {
 }
 
 function showMenuSearchResults(query) {
-    if (homeSearchResults) return; 
-
     const searchTerm = query.trim().toLowerCase();
+    
+    // Support both static .restaurant-section elements AND dynamic cards
     const sections = document.querySelectorAll(".restaurant-section");
+    const cards = document.querySelectorAll(".food-card, .menu-item-card, .restaurant-card");
+    
     let matchCount = 0;
 
-    sections.forEach(section => {
-        // Updated selector to match the dynamic restaurant banner structure (.restaurant-banner h2 instead of .restaurant-info h2)
-        const restaurant = section.querySelector(".restaurant-banner h2")?.textContent.toLowerCase() || "";
-        const cards = section.querySelectorAll(".food-card");
-        let sectionHasMatch = false;
+    if (sections.length > 0) {
+        sections.forEach(section => {
+            const restaurant = section.querySelector(".restaurant-banner h2, h2, h3")?.textContent.toLowerCase() || "";
+            const sectionCards = section.querySelectorAll(".food-card, .menu-item-card");
+            let sectionHasMatch = false;
 
-        cards.forEach(card => {
-            const foodName = card.querySelector("h3")?.textContent.toLowerCase() || "";
-            const isMatch = !searchTerm || foodName.includes(searchTerm) || restaurant.includes(searchTerm);
-            card.hidden = !isMatch;
-            if (isMatch) {
-                sectionHasMatch = true;
-                matchCount++;
-            }
+            sectionCards.forEach(card => {
+                const foodName = card.querySelector("h3, h4, .food-title")?.textContent.toLowerCase() || "";
+                const isMatch = !searchTerm || foodName.includes(searchTerm) || restaurant.includes(searchTerm);
+                card.style.display = isMatch ? "block" : "none";
+                if (isMatch) {
+                    sectionHasMatch = true;
+                    matchCount++;
+                }
+            });
+
+            section.style.display = (Boolean(searchTerm) && !sectionHasMatch) ? "none" : "block";
         });
-
-        section.hidden = Boolean(searchTerm) && !sectionHasMatch;
-        section.classList.toggle("is-searching", Boolean(searchTerm));
-    });
+    } else if (cards.length > 0) {
+        // Fallback for general cards layout if specific sections aren't present
+        cards.forEach(card => {
+            const textContent = card.textContent.toLowerCase();
+            const isMatch = !searchTerm || textContent.includes(searchTerm);
+            card.style.display = isMatch ? "block" : "none";
+            if (isMatch) matchCount++;
+        });
+    }
 
     if (menuSearchStatus) {
         menuSearchStatus.textContent = searchTerm
@@ -127,38 +139,49 @@ if (searchBox) {
     searchBox.addEventListener("input", function () {
         if (homeSearchResults) {
             showHomeSearchResults(this.value);
-            return;
+        } else {
+            showMenuSearchResults(this.value);
         }
-        showMenuSearchResults(this.value);
     });
 }
 
 if (searchBtn && searchBox) {
     searchBtn.addEventListener("click", function () {
-        if (homeSearchResults) showHomeSearchResults(searchBox.value);
-        else showMenuSearchResults(searchBox.value);
+        if (homeSearchResults) {
+            showHomeSearchResults(searchBox.value);
+        } else {
+            showMenuSearchResults(searchBox.value);
+        }
     });
 
     searchBox.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             event.preventDefault();
-            if (homeSearchResults) showHomeSearchResults(this.value);
-            else showMenuSearchResults(this.value);
+            if (homeSearchResults) {
+                showHomeSearchResults(this.value);
+            } else {
+                showMenuSearchResults(this.value);
+            }
         }
     });
 }
 
+// Auto-trigger search on menu page if query param exists in URL
 if (searchBox && !homeSearchResults) {
-    const menuSearch = new URLSearchParams(window.location.search).get("search");
+    const urlParams = new URLSearchParams(window.location.search);
+    const menuSearch = urlParams.get("search");
     if (menuSearch) {
         searchBox.value = menuSearch;
-        searchBox.dispatchEvent(new Event("input"));
+        // Small timeout to ensure DOM elements are fully loaded before filtering
+        setTimeout(() => {
+            showMenuSearchResults(menuSearch);
+        }, 200);
     }
 }
 
 // ---------- SIMPLE FADE ANIMATION ----------
-const cards = document.querySelectorAll(".food-card, .menu-card, .card, .review, .why-box");
-cards.forEach(card => {
+const interactiveCards = document.querySelectorAll(".food-card, .menu-card, .card, .review, .why-box");
+interactiveCards.forEach(card => {
     card.addEventListener("mouseenter", function () {
         card.style.transform = "scale(1.05)";
         card.style.transition = "transform 0.3s ease";
