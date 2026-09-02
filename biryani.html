@@ -7,16 +7,12 @@
 
     <title>FoodHub | Biryani House</title>
 
-    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
 <body>
-
-    <!-- ================= NAVBAR ================= -->
 
     <header>
 
@@ -70,13 +66,9 @@
     </header>
 
 
-    <!-- ================= RESTAURANT HEADER ================= -->
-
     <section class="restaurant-header">
 
-        <img src="biryanihouse/biryani-banner.png" alt="Biryani House Banner">
-
-        <div class="restaurant-details">
+        <div class="restaurant-details" style="padding: 20px 0; text-align: center;">
 
             <h1>🍛 Biryani House</h1>
 
@@ -94,17 +86,12 @@
     </section>
 
 
-    <!-- ================= BIRYANI HOUSE MENU (DYNAMIC FIREBASE CONTAINER) ================= -->
-
     <section class="menu-container" id="biryanihouse-menu" style="margin-top: 40px;">
-        <!-- Admin panel se add kiye gaye items yahan automatically load honge -->
         <div style="text-align: center; width: 100%; padding: 40px; grid-column: 1 / -1;">
             <p style="color: #777; font-size: 16px;">Loading Biryani House Menu from Admin...</p>
         </div>
     </section>
 
-
-    <!-- ================= FOOTER ================= -->
 
     <footer>
 
@@ -139,14 +126,11 @@
     </footer>
 
 
-    <!-- ================= SCRIPTS ================= -->
-
     <script src="toast.js"></script>
     <script type="module" src="cart-manager.js"></script>
     <script src="script.js"></script>
     <script src="bottom-nav.js"></script>
     
-    <!-- Firebase Dynamic Live Menu Script -->
     <script type="module" src="live-menu.js"></script>
 
 </body>
