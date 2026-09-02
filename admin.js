@@ -128,7 +128,7 @@ function updateKPIs(total, revenue, pending, delivered) {
 }
 
 // ==========================================
-// 3. MANAGE MENU: ADD & UPDATE LOGIC
+// 3. MANAGE MENU: ADD & UPDATE LOGIC (With Rating)
 // ==========================================
 const menuForm = document.getElementById("menuForm");
 const editFoodId = document.getElementById("editFoodId");
@@ -143,6 +143,7 @@ if (menuForm) {
         const price = document.getElementById("foodPrice").value.trim();
         const restaurant = document.getElementById("foodRestaurant").value;
         const image = document.getElementById("foodImage").value.trim();
+        const rating = document.getElementById("foodRating").value.trim();
         const description = document.getElementById("foodDesc").value.trim();
         const docId = editFoodId.value;
 
@@ -151,29 +152,26 @@ if (menuForm) {
             return;
         }
 
+        const foodPayload = {
+            name,
+            price: Number(price),
+            restaurant,
+            image,
+            rating: rating ? Number(rating) : 4.5,
+            description
+        };
+
         try {
             if (docId) {
                 // Update Existing Item
-                await updateDoc(doc(db, "menu", docId), {
-                    name,
-                    price: Number(price),
-                    restaurant,
-                    image,
-                    description,
-                    updatedAt: serverTimestamp()
-                });
+                foodPayload.updatedAt = serverTimestamp();
+                await updateDoc(doc(db, "menu", docId), foodPayload);
                 alert("Menu item updated successfully!");
                 resetMenuForm();
             } else {
                 // Add New Item
-                await addDoc(collection(db, "menu"), {
-                    name,
-                    price: Number(price),
-                    restaurant,
-                    image,
-                    description,
-                    createdAt: serverTimestamp()
-                });
+                foodPayload.createdAt = serverTimestamp();
+                await addDoc(collection(db, "menu"), foodPayload);
                 alert("New menu item added successfully!");
                 menuForm.reset();
             }
@@ -223,7 +221,7 @@ if (menuTableBody) {
             const row = `
                 <tr>
                     <td><img src="${escapeHTML(data.image)}" alt="${escapeHTML(data.name)}" onerror="this.src='https://via.placeholder.com/45?text=No+Image'" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
-                    <td><strong>${escapeHTML(data.name)}</strong><br><small style="color:#777;">${escapeHTML(data.description || "")}</small></td>
+                    <td><strong>${escapeHTML(data.name)}</strong><br><small style="color:#777;">⭐ ${data.rating || 4.5} | ${escapeHTML(data.description || "")}</small></td>
                     <td><span style="text-transform: uppercase; font-weight: 600; color: #ff5722;">${escapeHTML(data.restaurant)}</span></td>
                     <td>₹${Number(data.price)}</td>
                     <td>
@@ -233,6 +231,7 @@ if (menuTableBody) {
                             data-price="${Number(data.price)}" 
                             data-restaurant="${escapeHTML(data.restaurant)}" 
                             data-image="${escapeHTML(data.image)}" 
+                            data-rating="${data.rating || 4.5}" 
                             data-desc="${escapeHTML(data.description || '')}" 
                             style="padding: 5px 10px; font-size: 12px; margin-right: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
                             Edit
@@ -272,6 +271,7 @@ if (menuTableBody) {
             document.getElementById("foodPrice").value = btn.getAttribute("data-price");
             document.getElementById("foodRestaurant").value = btn.getAttribute("data-restaurant");
             document.getElementById("foodImage").value = btn.getAttribute("data-image");
+            document.getElementById("foodRating").value = btn.getAttribute("data-rating");
             document.getElementById("foodDesc").value = btn.getAttribute("data-desc");
 
             if (menuSubmitBtn) {
