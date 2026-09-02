@@ -79,9 +79,26 @@
             </div>
         </section>
 
-        <!-- LIVE ORDERS TABLE -->
+        <!-- LIVE ORDERS TABLE WITH FILTERS & PAGINATION -->
         <section class="admin-panel admin-mb-40">
-            <h3>Recent Orders Tracker</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 10px;">
+                <h3 style="margin: 0;">Recent Orders Tracker</h3>
+                
+                <!-- Search & Status Filter Controls -->
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="orderSearchInput" placeholder="Search ID / Customer..." style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+                    
+                    <select id="statusFilterSelect" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background: white;">
+                        <option value="All">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Cooking">Cooking</option>
+                        <option value="Out for Delivery">Out for Delivery</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="admin-table-wrapper">
                 <table class="admin-table">
                     <thead>
@@ -100,6 +117,15 @@
                         <tr><td colspan="8" style="text-align: center; padding: 20px;">Loading Live Orders...</td></tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Pagination Bottom Controls -->
+            <div id="paginationContainer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 0 5px;">
+                <span id="pageInfo" style="font-size: 14px; color: #666;">Showing page 1</span>
+                <div style="display: flex; gap: 8px;">
+                    <button id="prevPageBtn" class="admin-btn admin-btn-secondary" style="padding: 5px 12px; font-size: 13px;" disabled>Previous</button>
+                    <button id="nextPageBtn" class="admin-btn admin-btn-secondary" style="padding: 5px 12px; font-size: 13px;" disabled>Next</button>
+                </div>
             </div>
         </section>
 
@@ -138,7 +164,7 @@
                         <input type="text" id="foodImage" class="admin-form-input" required placeholder="e.g., kfc/zinger-burger.png">
                     </div>
 
-                    <!-- Naya Rating Input Field -->
+                    <!-- Rating Input Field -->
                     <div class="admin-form-group">
                         <label class="admin-form-label">Rating (e.g., 4.5)</label>
                         <input type="number" step="0.1" min="1" max="5" id="foodRating" class="admin-form-input" placeholder="4.5">
