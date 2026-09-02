@@ -43,15 +43,18 @@ if (adminLogoutBtn) {
 }
 
 // ==========================================
-// 2. ORDERS DASHBOARD LOGIC (Exact 8-Column Layout)
+// 2. ORDERS DASHBOARD & PAGINATION LOGIC
 // ==========================================
 const ordersTableBody = document.getElementById("ordersTableBody");
+let allOrdersData = [];
+let currentPage = 1;
+const rowsPerPage = 10; // Ek page par sirf 10 orders dikhenge
 
 if (ordersTableBody) {
     const qOrders = query(collection(db, "orders"), orderBy("orderTime", "desc"));
     onSnapshot(qOrders, (snapshot) => {
+        allOrdersData = [];
         let revenue = 0, pending = 0, delivered = 0, total = snapshot.size;
-        ordersTableBody.innerHTML = "";
 
         if (snapshot.empty) {
             ordersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No orders found.</td></tr>';
@@ -62,10 +65,48 @@ if (ordersTableBody) {
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const docId = docSnap.id;
+            allOrdersData.push({ id: docId, ...data });
 
             if (data.status === "Delivered") { revenue += Number(data.totalPrice || 0); delivered++; }
             if (data.status === "Pending") pending++;
+        });
 
+        updateKPIs(total, revenue, pending, delivered);
+        renderFilteredAndPaginatedOrders();
+    });
+}
+
+function renderFilteredAndPaginatedOrders() {
+    const searchTerm = document.getElementById("orderSearchInput")?.value.toLowerCase() || "";
+    const statusFilter = document.getElementById("statusFilterSelect")?.value || "All";
+
+    // 1. Filter Data based on Search & Status
+    const filteredOrders = allOrdersData.filter(order => {
+        const orderId = (order.orderId || order.id).toLowerCase();
+        const customerName = (order.customerName || "").toLowerCase();
+        const customerPhone = (order.customerPhone || "").toLowerCase();
+        
+        const matchesSearch = orderId.includes(searchTerm) || customerName.includes(searchTerm) || customerPhone.includes(searchTerm);
+        const matchesStatus = (statusFilter === "All") || (order.status === statusFilter);
+
+        return matchesSearch && matchesStatus;
+    });
+
+    // 2. Pagination Calculation
+    const totalPages = Math.ceil(filteredOrders.length / rowsPerPage) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const paginatedData = filteredOrders.slice(start, start + rowsPerPage);
+
+    // 3. Render Table Rows
+    ordersTableBody.innerHTML = "";
+    if (paginatedData.length === 0) {
+        ordersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No matching orders found.</td></tr>';
+    } else {
+        paginatedData.forEach((data) => {
+            const docId = data.id;
             let statusClass = "admin-bg-pending";
             if (data.status === "Delivered") statusClass = "admin-bg-delivered";
             if (data.status === "Cancelled") statusClass = "admin-bg-cancelled";
@@ -100,31 +141,52 @@ if (ordersTableBody) {
             `;
             ordersTableBody.insertAdjacentHTML("beforeend", row);
         });
+    }
 
-        updateKPIs(total, revenue, pending, delivered);
+    // Update Pagination UI Info
+    const pageInfo = document.getElementById("pageInfo");
+    const prevBtn = document.getElementById("prevPageBtn");
+    const nextBtn = document.getElementById("nextPageBtn");
 
-        document.querySelectorAll('.admin-status-select').forEach(select => {
-            select.addEventListener('change', async (e) => {
-                const id = e.target.getAttribute('data-id');
-                const newStatus = e.target.value;
-                try {
-                    e.target.disabled = true;
-                    await updateDoc(doc(db, "orders", id), { status: newStatus });
-                    console.log("Order status updated successfully!");
-                } catch (error) {
-                    console.error("Error updating status:", error);
-                    e.target.disabled = false;
-                }
-            });
-        });
-    });
+    if (pageInfo) pageInfo.innerText = `Page ${currentPage} of ${totalPages} (Total: ${filteredOrders.length} orders)`;
+    if (prevBtn) prevBtn.disabled = currentPage === 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+
+    attachStatusChangeEvent();
 }
+
+// Search and Filter Event Listeners
+document.getElementById("orderSearchInput")?.addEventListener("input", () => { currentPage = 1; renderFilteredAndPaginatedOrders(); });
+document.getElementById("statusFilterSelect")?.addEventListener("change", () => { currentPage = 1; renderFilteredAndPaginatedOrders(); });
+
+document.getElementById("prevPageBtn")?.addEventListener("click", () => {
+    if (currentPage > 1) { currentPage--; renderFilteredAndPaginatedOrders(); }
+});
+document.getElementById("nextPageBtn")?.addEventListener("click", () => {
+    currentPage++; renderFilteredAndPaginatedOrders();
+});
 
 function updateKPIs(total, revenue, pending, delivered) {
     if (document.getElementById("totalOrders")) document.getElementById("totalOrders").innerText = total;
     if (document.getElementById("totalRevenue")) document.getElementById("totalRevenue").innerText = `₹ ${revenue}`;
     if (document.getElementById("pendingOrders")) document.getElementById("pendingOrders").innerText = pending;
     if (document.getElementById("deliveredOrders")) document.getElementById("deliveredOrders").innerText = delivered;
+}
+
+function attachStatusChangeEvent() {
+    document.querySelectorAll('.admin-status-select').forEach(select => {
+        select.addEventListener('change', async (e) => {
+            const id = e.target.getAttribute('data-id');
+            const newStatus = e.target.value;
+            try {
+                e.target.disabled = true;
+                await updateDoc(doc(db, "orders", id), { status: newStatus });
+            } catch (error) {
+                console.error("Error updating status:", error);
+                e.target.disabled = false;
+            }
+        });
+    });
 }
 
 // ==========================================
@@ -163,13 +225,11 @@ if (menuForm) {
 
         try {
             if (docId) {
-                // Update Existing Item
                 foodPayload.updatedAt = serverTimestamp();
                 await updateDoc(doc(db, "menu", docId), foodPayload);
                 alert("Menu item updated successfully!");
                 resetMenuForm();
             } else {
-                // Add New Item
                 foodPayload.createdAt = serverTimestamp();
                 await addDoc(collection(db, "menu"), foodPayload);
                 alert("New menu item added successfully!");
@@ -247,9 +307,7 @@ if (menuTableBody) {
         });
     });
 
-    // EVENT DELEGATION: Robust listener for Delete & Edit clicks
     menuTableBody.addEventListener("click", async (e) => {
-        // DELETE BUTTON CLICKED
         if (e.target.classList.contains("delete-menu-btn")) {
             const id = e.target.getAttribute("data-id");
             if (confirm("Are you sure you want to delete this food item?")) {
@@ -263,7 +321,6 @@ if (menuTableBody) {
             }
         }
 
-        // EDIT BUTTON CLICKED
         if (e.target.classList.contains("edit-menu-btn")) {
             const btn = e.target;
             editFoodId.value = btn.getAttribute("data-id");
@@ -280,7 +337,6 @@ if (menuTableBody) {
             }
             if (cancelEditBtn) cancelEditBtn.style.display = "inline-block";
 
-            // Scroll to form section smoothly
             document.getElementById("manage-menu-section").scrollIntoView({ behavior: 'smooth' });
         }
     });
