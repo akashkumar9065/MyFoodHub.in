@@ -1,5 +1,5 @@
 // ===============================
-// FOODHUB - script.js (Absolute Final Fixed Version)
+// FOODHUB - script.js (Ultimate URL & Case-Insensitive Fix)
 // ===============================
 
 // ---------- RESPONSIVE NAVIGATION ----------
@@ -91,12 +91,11 @@ function showHomeSearchResults(query) {
 
 function showMenuSearchResults(query) {
     const searchTerm = query.trim().toLowerCase();
-    
-    // Target both static and dynamic sections/cards across the entire menu document
     const sections = document.querySelectorAll(".restaurant-section");
     const cards = document.querySelectorAll(".food-card, .menu-item-card, .restaurant-card");
     
     let matchCount = 0;
+    const searchWords = searchTerm.split(/\s+/).filter(Boolean); // Har word ko alag karke flexible match banate hain
 
     if (sections.length > 0) {
         sections.forEach(section => {
@@ -108,10 +107,10 @@ function showMenuSearchResults(query) {
                 const foodName = card.querySelector("h3, h4, .food-title")?.textContent.toLowerCase() || "";
                 const foodDesc = card.querySelector("p, .food-desc")?.textContent.toLowerCase() || "";
                 
-                // Case-insensitive inclusion match covering name, description, and restaurant titles
-                const isMatch = !searchTerm || foodName.includes(searchTerm) || foodDesc.includes(searchTerm) || restaurant.includes(searchTerm);
+                // Flexible word-by-word or complete query inclusion match (Case-Insensitive)
+                const cardText = `${foodName} ${foodDesc} ${restaurant}`;
+                const isMatch = !searchTerm || searchWords.every(word => cardText.includes(word));
                 
-                // Use standard layout display block instead of forcing flex/grid override changes
                 card.style.display = isMatch ? "" : "none";
                 if (isMatch) {
                     sectionHasMatch = true;
@@ -124,7 +123,7 @@ function showMenuSearchResults(query) {
     } else if (cards.length > 0) {
         cards.forEach(card => {
             const textContent = card.textContent.toLowerCase();
-            const isMatch = !searchTerm || textContent.includes(searchTerm);
+            const isMatch = !searchTerm || searchWords.every(word => textContent.includes(word));
             card.style.display = isMatch ? "" : "none";
             if (isMatch) matchCount++;
         });
@@ -170,19 +169,18 @@ if (searchBtn && searchBox) {
     });
 }
 
-// Auto-trigger search on menu page if query param exists in URL
+// Auto-trigger search on menu page if query param exists in URL (Fully decoded & lowercased-safe)
 if (searchBox && !homeSearchResults) {
     const urlParams = new URLSearchParams(window.location.search);
     const menuSearch = urlParams.get("search");
     if (menuSearch) {
-        searchBox.value = menuSearch;
-        // Periodic check to ensure dynamic items fetched via Firebase snapshot render fully before applying filter
-        setTimeout(() => {
-            showMenuSearchResults(menuSearch);
-        }, 300);
-        setTimeout(() => {
-            showMenuSearchResults(menuSearch);
-        }, 1000);
+        const decodedQuery = decodeURIComponent(menuSearch).replace(/\+/g, ' ');
+        searchBox.value = decodedQuery;
+        
+        // Multi-stage triggers to ensure complete layout and dynamic elements synchronization
+        setTimeout(() => showMenuSearchResults(decodedQuery), 100);
+        setTimeout(() => showMenuSearchResults(decodedQuery), 400);
+        setTimeout(() => showMenuSearchResults(decodedQuery), 1200);
     }
 }
 
