@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
     const activeSection = currentPage === "index.html" ? "home"
-        : ["menu.html", "dominos.html", "kfc.html", "burgerking.html", "biryani.html"].includes(currentPage) ? "menu"
+        : ["menu.html"].includes(currentPage) || currentPage.includes("restaurant") ? "menu"
         : ["cart.html", "checkout.html"].includes(currentPage) ? "cart"
         : currentPage === "profile.html" ? "profile"
         : "";
@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     navigation.setAttribute("aria-label", "Mobile navigation");
     navigation.innerHTML = `
         <a href="index.html" data-section="home"><i class="fa-solid fa-house"></i><span>Home</span></a>
-        <a href="menu.html" data-section="menu"><i class="fa-solid fa-utensils"></i><span>Menu</span></a>
+        <a href="menu.html" data-section="menu"><i class="fa-solid fa-utensils"><span>Menu</span></a>
         <a href="cart.html" data-section="cart" class="mobile-cart-link"><i class="fa-solid fa-bag-shopping"></i><b class="mobile-cart-count" hidden>0</b><span>Cart</span></a>
         <a href="profile.html" data-section="profile"><i class="fa-solid fa-user"></i><span>Profile</span></a>`;
 
