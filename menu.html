@@ -73,7 +73,7 @@
 
 
     <!-- ================================================= -->
-    <!--                    1. KFC                         -->
+    <!--                   1. KFC                          -->
     <!-- ================================================= -->
 
     <section class="restaurant-section">
@@ -103,121 +103,11 @@
             KFC Menu
         </h2>
 
-        <!-- KFC MENU CONTAINER -->
+        <!-- KFC MENU CONTAINER (DYNAMIC FIREBASE) -->
         <div class="food-container" id="kfc-menu">
-
-            <!-- Zinger Burger -->
-            <div class="food-card">
-                <img src="kfc/zinger-burger.png" alt="Zinger Burger">
-                <h3>Zinger Burger</h3>
-                <p>Crispy chicken burger with fresh ingredients.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹159</span>
-                <button class="add-to-cart" data-name="Zinger Burger" data-price="159" data-image="kfc/zinger-burger.png">
-                    Add to Cart
-                </button>
+            <div style="text-align: center; width: 100%; padding: 40px; grid-column: 1 / -1;">
+                <p style="color: #777; font-size: 16px;">Loading KFC Menu from Admin...</p>
             </div>
-
-            <!-- Chicken Bucket -->
-            <div class="food-card">
-                <img src="kfc/chicken-bucket.png" alt="Chicken Bucket">
-                <h3>Chicken Bucket</h3>
-                <p>Crispy and delicious chicken pieces.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹399</span>
-                <button class="add-to-cart" data-name="Chicken Bucket" data-price="399" data-image="kfc/chicken-bucket.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Popcorn Chicken -->
-            <div class="food-card">
-                <img src="kfc/popcorn-chicken.png" alt="Popcorn Chicken">
-                <h3>Popcorn Chicken</h3>
-                <p>Crispy bite-sized chicken pieces.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.7</div>
-                <span class="price">₹199</span>
-                <button class="add-to-cart" data-name="Popcorn Chicken" data-price="199" data-image="kfc/popcorn-chicken.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Hot Wings -->
-            <div class="food-card">
-                <img src="kfc/hot-wings.png" alt="Hot Wings">
-                <h3>Hot Wings</h3>
-                <p>Spicy and crispy chicken wings.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹249</span>
-                <button class="add-to-cart" data-name="Hot Wings" data-price="249" data-image="kfc/hot-wings.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- French Fries -->
-            <div class="food-card">
-                <img src="kfc/french-fries.png" alt="French Fries">
-                <h3>French Fries</h3>
-                <p>Crispy golden potato fries.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.6</div>
-                <span class="price">₹99</span>
-                <button class="add-to-cart" data-name="French Fries" data-price="99" data-image="kfc/french-fries.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Pepsi -->
-            <div class="food-card">
-                <img src="kfc/kpepsi.png" alt="Pepsi">
-                <h3>Pepsi</h3>
-                <p>Cold and refreshing soft drink.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.5</div>
-                <span class="price">₹49</span>
-                <button class="add-to-cart" data-name="Pepsi" data-price="49" data-image="kfc/pepsi.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Crispy Chicken Sandwich -->
-            <div class="food-card">
-                <img src="kfc/Crispy Chicken Sandwich.png" alt="Crispy Chicken Sandwich">
-                <h3>Crispy Chicken Sandwich</h3>
-                <p>Crispy chicken fillet with creamy sauce.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹229</span>
-                <button class="add-to-cart" data-name="Crispy Chicken Sandwich" data-price="229" data-image="kfc/Crispy Chicken Sandwich.png">Add to Cart</button>
-            </div>
-
-            <!-- Chicken Strips -->
-            <div class="food-card">
-                <img src="kfc/Chicken Strips.png" alt="Chicken Strips">
-                <h3>Chicken Strips</h3>
-                <p>Tender and crispy chicken strips.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.7</div>
-                <span class="price">₹279</span>
-                <button class="add-to-cart" data-name="Chicken Strips" data-price="279" data-image="kfc/Chicken Strips.png">Add to Cart</button>
-            </div>
-
-            <!-- Chocolate Brownie -->
-            <div class="food-card">
-                <img src="kfc/Chocolate Brownie.png" alt="Chocolate Brownie">
-                <h3>Chocolate Brownie</h3>
-                <p>Soft and delicious chocolate brownie.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹149</span>
-                <button class="add-to-cart" data-name="Chocolate Brownie" data-price="149" data-image="kfc/Chocolate Brownie.png">Add to Cart</button>
-            </div>
-
-            <!-- Coleslaw -->
-            <div class="food-card">
-                <img src="kfc/Coleslaw.png" alt="Coleslaw">
-                <h3>Coleslaw</h3>
-                <p>Fresh and creamy crunchy salad.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.6</div>
-                <span class="price">₹99</span>
-                <button class="add-to-cart" data-name="Coleslaw" data-price="99" data-image="kfc/Coleslaw.png">Add to Cart</button>
-            </div>
-
         </div>
 
     </section>
@@ -255,121 +145,11 @@
             Domino's Menu
         </h2>
 
-        <!-- DOMINO'S MENU CONTAINER -->
+        <!-- DOMINO'S MENU CONTAINER (DYNAMIC FIREBASE) -->
         <div class="food-container" id="dominoes-menu">
-
-            <!-- Margherita Pizza -->
-            <div class="food-card">
-                <img src="dominoes/margherita.png" alt="Margherita Pizza">
-                <h3>Margherita Pizza</h3>
-                <p>Classic pizza with fresh cheese and tomato.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹249</span>
-                <button class="add-to-cart" data-name="Margherita Pizza" data-price="249" data-image="dominos/margherita.png">
-                    Add to Cart
-                </button>
+            <div style="text-align: center; width: 100%; padding: 40px; grid-column: 1 / -1;">
+                <p style="color: #777; font-size: 16px;">Loading Domino's Menu from Admin...</p>
             </div>
-
-            <!-- Cheese Pizza -->
-            <div class="food-card">
-                <img src="dominoes/cheese-pizza.png" alt="Cheese Pizza">
-                <h3>Cheese Pizza</h3>
-                <p>Loaded with delicious melted cheese.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.6</div>
-                <span class="price">₹269</span>
-                <button class="add-to-cart" data-name="Cheese Pizza" data-price="269" data-image="dominos/cheese-pizza.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Farmhouse Pizza -->
-            <div class="food-card">
-                <img src="dominoes/farmhose.png" alt="Farmhouse Pizza">
-                <h3>Farmhouse Pizza</h3>
-                <p>Pizza loaded with fresh vegetables.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹299</span>
-                <button class="add-to-cart" data-name="Farmhouse Pizza" data-price="299" data-image="dominos/farmhouse.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Garlic Bread -->
-            <div class="food-card">
-                <img src="dominoes/garlic-bread.png" alt="Garlic Bread">
-                <h3>Garlic Bread</h3>
-                <p>Delicious Garlic Bread.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹149</span>
-                <button class="add-to-cart" data-name="Garlic Bread" data-price="149" data-image="dominos/garlic-bread.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Choco Lava -->
-            <div class="food-card">
-                <img src="dominoes/choco-lava.png" alt="Choco Lava Cake">
-                <h3>Choco Lava Cake</h3>
-                <p>Soft and delicious chocolate dessert.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹129</span>
-                <button class="add-to-cart" data-name="Choco Lava Cake" data-price="129" data-image="dominos/choco-lava.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Pepsi -->
-            <div class="food-card">
-                <img src="dominoes/pepsi.png" alt="Pepsi">
-                <h3>Pepsi</h3>
-                <p>Cold and refreshing soft drink.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.5</div>
-                <span class="price">₹59</span>
-                <button class="add-to-cart" data-name="dominoes Pepsi" data-price="59" data-image="dominoes/pepsi.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Pepper Barbecue Chicken -->
-            <div class="food-card">
-                <img src="dominoes/Pepper Barbecue Chicken.png" alt="Pepper Barbecue Chicken">
-                <h3>Pepper Barbecue Chicken</h3>
-                <p>Smoky chicken loaded with delicious toppings.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.7</div>
-                <span class="price">₹399</span>
-                <button class="add-to-cart" data-name="Pepper Barbecue Chicken" data-price="399" data-image="dominoes/Pepper Barbecue Chicken.png">Add to Cart</button>
-            </div>
-
-            <!-- Paneer Makhani Pizza -->
-            <div class="food-card">
-                <img src="dominoes/Paneer Makhani Pizza.png" alt="Paneer Makhani Pizza">
-                <h3>Paneer Makhani Pizza</h3>
-                <p>Creamy paneer with rich makhani sauce.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.6</div>
-                <span class="price">₹329</span>
-                <button class="add-to-cart" data-name="Paneer Makhani Pizza" data-price="329" data-image="dominoes/Paneer Makhani Pizza.png">Add to Cart</button>
-            </div>
-
-            <!-- Cheese Burst Pizza -->
-            <div class="food-card">
-                <img src="dominoes/Cheese Burst Pizza.png" alt="Cheese Burst Pizza">
-                <h3>Cheese Burst Pizza</h3>
-                <p>Extra cheesy pizza with a cheese-filled crust.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹379</span>
-                <button class="add-to-cart" data-name="Cheese Burst Pizza" data-price="379" data-image="dominoes/Cheese Burst Pizza.png">Add to Cart</button>
-            </div>
-
-            <!-- Chocolate Brownie -->
-            <div class="food-card">
-                <img src="dominoes/Chocolate Brownie.png" alt="Chocolate Brownie">
-                <h3>Chocolate Brownie</h3>
-                <p>Soft, rich and delicious chocolate brownie.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.5</div>
-                <span class="price">₹99</span>
-                <button class="add-to-cart" data-name="Chocolate Brownie" data-price="99" data-image="dominoes/Chocolate Brownie.png">Add to Cart</button>
-            </div>
-
         </div>
 
     </section>
@@ -407,121 +187,11 @@
             Burger King Menu
         </h2>
 
-        <!-- BURGER KING MENU CONTAINER -->
+        <!-- BURGER KING MENU CONTAINER (DYNAMIC FIREBASE) -->
         <div class="food-container" id="burgerking-menu">
-
-            <!-- Whopper -->
-            <div class="food-card">
-                <img src="burgerking/whopper.png" alt="Whopper">
-                <h3>Whopper</h3>
-                <p>Burger King's classic signature burger.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹199</span>
-                <button class="add-to-cart" data-name="Whopper" data-price="199" data-image="burgerking/whopper.png">
-                    Add to Cart
-                </button>
+            <div style="text-align: center; width: 100%; padding: 40px; grid-column: 1 / -1;">
+                <p style="color: #777; font-size: 16px;">Loading Burger King Menu from Admin...</p>
             </div>
-
-            <!-- Chicken Whopper -->
-            <div class="food-card">
-                <img src="burgerking/chicken-whopper.png" alt="Chicken Whopper">
-                <h3>Chicken Whopper</h3>
-                <p>Delicious chicken burger with fresh ingredients.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹229</span>
-                <button class="add-to-cart" data-name="Chicken Whopper" data-price="229" data-image="burgerking/chicken-whopper.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Crispy Veg -->
-            <div class="food-card">
-                <img src="burgerking/crispy-veg.png" alt="Crispy Veg Burger">
-                <h3>Crispy Veg Burger</h3>
-                <p>Crispy vegetable patty with fresh vegetables.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.6</div>
-                <span class="price">₹129</span>
-                <button class="add-to-cart" data-name="Crispy Veg Burger" data-price="129" data-image="burgerking/crispy-veg.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Fries -->
-            <div class="food-card">
-                <img src="burgerking/fries.png" alt="French Fries">
-                <h3>French Fries</h3>
-                <p>Crispy golden French fries.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹99</span>
-                <button class="add-to-cart" data-name="Burger King Fries" data-price="99" data-image="burgerking/fries.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Coke -->
-            <div class="food-card">
-                <img src="burgerking/bcoke.png" alt="Coke">
-                <h3>Coke</h3>
-                <p>Cold and refreshing Coca-Cola.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.5</div>
-                <span class="price">₹49</span>
-                <button class="add-to-cart" data-name="Coke" data-price="49" data-image="burgerking/coke.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Chocolate Shake -->
-            <div class="food-card">
-                <img src="burgerking/choclate-shake.png" alt="Chocolate Shake">
-                <h3>Chocolate Shake</h3>
-                <p>Thick and creamy chocolate shake.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹149</span>
-                <button class="add-to-cart" data-name="Chocolate Shake" data-price="149" data-image="burgerking/chocolate-shake.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Onion Rings -->
-            <div class="food-card">
-                <img src="burgerking/onion-ring.png" alt="Onion Rings">
-                <h3>Onion Rings</h3>
-                <p>Crispy golden onion rings.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.7</div>
-                <span class="price">₹129</span>
-                <button class="add-to-cart" data-name="Onion Rings" data-price="129" data-image="burgerking/onion-ring.png">Add to Cart</button>
-            </div>
-
-            <!-- Veg Wrap -->
-            <div class="food-card">
-                <img src="burgerking/veg-wrap.png" alt="Veg Wrap">
-                <h3>Veg Wrap</h3>
-                <p>Fresh vegetables wrapped with tasty sauce.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.6</div>
-                <span class="price">₹159</span>
-                <button class="add-to-cart" data-name="Veg Wrap" data-price="159" data-image="burgerking/veg-wrap.png">Add to Cart</button>
-            </div>
-
-            <!-- Chicken Nuggets -->
-            <div class="food-card">
-                <img src="burgerking/chicken-nuggets.png" alt="Chicken Nuggets">
-                <h3>Chicken Nuggets</h3>
-                <p>Crispy and delicious chicken nuggets.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹199</span>
-                <button class="add-to-cart" data-name="Chicken Nuggets" data-price="199" data-image="burgerking/chicken-nuggets.png">Add to Cart</button>
-            </div>
-
-            <!-- Vanilla Ice Cream -->
-            <div class="food-card">
-                <img src="burgerking/ice-cream.png" alt="Vanilla Ice Cream">
-                <h3>Vanilla Ice Cream</h3>
-                <p>Creamy and refreshing vanilla ice cream.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.5</div>
-                <span class="price">₹99</span>
-                <button class="add-to-cart" data-name="Vanilla Ice Cream" data-price="99" data-image="burgerking/ice-cream.png">Add to Cart</button>
-            </div>
-
         </div>
 
     </section>
@@ -529,7 +199,7 @@
 
 
     <!-- ================================================= -->
-    <!--                  4. BIRYANI HOUSE                 -->
+    <!--                4. BIRYANI HOUSE                   -->
     <!-- ================================================= -->
 
     <section class="restaurant-section">
@@ -559,121 +229,11 @@
             Biryani House Menu
         </h2>
 
-        <!-- BIRYANI HOUSE MENU CONTAINER -->
+        <!-- BIRYANI HOUSE MENU CONTAINER (DYNAMIC FIREBASE) -->
         <div class="food-container" id="biryanihouse-menu">
-
-            <!-- Chicken Biryani -->
-            <div class="food-card">
-                <img src="biryanihouse/chicken-biryani.png" alt="Chicken Biryani">
-                <h3>Chicken Biryani</h3>
-                <p>Aromatic rice with delicious chicken.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹209</span>
-                <button class="add-to-cart" data-name="Chicken Biryani" data-price="209" data-image="biryani/chicken-biryani.png">
-                    Add to Cart
-                </button>
+            <div style="text-align: center; width: 100%; padding: 40px; grid-column: 1 / -1;">
+                <p style="color: #777; font-size: 16px;">Loading Biryani House Menu from Admin...</p>
             </div>
-
-            <!-- Mutton Biryani -->
-            <div class="food-card">
-                <img src="biryanihouse/mutton-biryani.png" alt="Mutton Biryani">
-                <h3>Mutton Biryani</h3>
-                <p>Rich and flavourful mutton biryani.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹299</span>
-                <button class="add-to-cart" data-name="Mutton Biryani" data-price="299" data-image="biryani/mutton-biryani.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Veg Biryani -->
-            <div class="food-card">
-                <img src="biryanihouse/bveg-biryani.png" alt="Veg Biryani">
-                <h3>Veg Biryani</h3>
-                <p>Fresh vegetables with aromatic rice.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.7</div>
-                <span class="price">₹179</span>
-                <button class="add-to-cart" data-name="Veg Biryani" data-price="179" data-image="biryani/veg-biryani.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Chicken Curry -->
-            <div class="food-card">
-                <img src="biryanihouse/chicken-curry.png" alt="Chicken Curry">
-                <h3>Chicken Curry</h3>
-                <p>Traditional spicy chicken curry.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹189</span>
-                <button class="add-to-cart" data-name="Chicken Curry" data-price="189" data-image="biryani/chicken-curry.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Raita -->
-            <div class="food-card">
-                <img src="biryanihouse/raita.png" alt="Raita">
-                <h3>Raita</h3>
-                <p>Fresh and creamy raita.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.6</div>
-                <span class="price">₹59</span>
-                <button class="add-to-cart" data-name="Raita" data-price="59" data-image="biryani/raita.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Soft Drink -->
-            <div class="food-card">
-                <img src="biryanihouse/soft-drink.png" alt="Soft Drink">
-                <h3>Soft Drink</h3>
-                <p>Cold and refreshing soft drink.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.5</div>
-                <span class="price">₹49</span>
-                <button class="add-to-cart" data-name="Biryani House Soft Drink" data-price="49" data-image="biryani/soft-drink.png">
-                    Add to Cart
-                </button>
-            </div>
-
-            <!-- Chicken Tikka -->
-            <div class="food-card">
-                <img src="biryanihouse/chicken-tikka.png" alt="Chicken Tikka">
-                <h3>Chicken Tikka</h3>
-                <p>Tender grilled chicken marinated with spicy Indian spices.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.9</div>
-                <span class="price">₹279</span>
-                <button class="add-to-cart" data-name="Chicken Tikka" data-price="279" data-image="biryanihouse/chicken-tikka.png">Add to Cart</button>
-            </div>
-
-            <!-- Chicken 65 -->
-            <div class="food-card">
-                <img src="biryanihouse/chicken65.png" alt="Chicken 65">
-                <h3>Chicken 65</h3>
-                <p>Crispy spicy chicken pieces with Indian spices.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.8</div>
-                <span class="price">₹249</span>
-                <button class="add-to-cart" data-name="Chicken 65" data-price="249" data-image="biryanihouse/chicken65.png">Add to Cart</button>
-            </div>
-
-            <!-- Paneer Tikka -->
-            <div class="food-card">
-                <img src="biryanihouse/panner-tikka.png" alt="Paneer Tikka">
-                <h3>Paneer Tikka</h3>
-                <p>Grilled paneer cubes marinated with aromatic spices.</p>
-                <div class="rating">⭐⭐⭐⭐☆ 4.7</div>
-                <span class="price">₹219</span>
-                <button class="add-to-cart" data-name="Paneer Tikka" data-price="219" data-image="biryanihouse/panner-tikka.png">Add to Cart</button>
-            </div>
-
-            <!-- Ice Cream -->
-            <div class="food-card">
-                <img src="biryanihouse/ice-cream.png" alt="Ice Cream">
-                <h3>Ice Cream</h3>
-                <p>Creamy and delicious ice cream for a sweet finish.</p>
-                <div class="rating">⭐⭐⭐⭐⭐ 4.6</div>
-                <span class="price">₹99</span>
-                <button class="add-to-cart" data-name="Ice Cream" data-price="99" data-image="biryanihouse/ice-cream.png">Add to Cart</button>
-            </div>
-
         </div>
 
     </section>
