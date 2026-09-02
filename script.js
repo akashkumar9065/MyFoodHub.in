@@ -1,5 +1,5 @@
 // ===============================
-// FOODHUB - script.js (Final Fixed Version)
+// FOODHUB - script.js (Absolute Final Fixed Version)
 // ===============================
 
 // ---------- RESPONSIVE NAVIGATION ----------
@@ -92,7 +92,7 @@ function showHomeSearchResults(query) {
 function showMenuSearchResults(query) {
     const searchTerm = query.trim().toLowerCase();
     
-    // Support both static .restaurant-section elements AND dynamic cards
+    // Target both static and dynamic sections/cards across the entire menu document
     const sections = document.querySelectorAll(".restaurant-section");
     const cards = document.querySelectorAll(".food-card, .menu-item-card, .restaurant-card");
     
@@ -106,22 +106,26 @@ function showMenuSearchResults(query) {
 
             sectionCards.forEach(card => {
                 const foodName = card.querySelector("h3, h4, .food-title")?.textContent.toLowerCase() || "";
-                const isMatch = !searchTerm || foodName.includes(searchTerm) || restaurant.includes(searchTerm);
-                card.style.display = isMatch ? "block" : "none";
+                const foodDesc = card.querySelector("p, .food-desc")?.textContent.toLowerCase() || "";
+                
+                // Case-insensitive inclusion match covering name, description, and restaurant titles
+                const isMatch = !searchTerm || foodName.includes(searchTerm) || foodDesc.includes(searchTerm) || restaurant.includes(searchTerm);
+                
+                // Use standard layout display block instead of forcing flex/grid override changes
+                card.style.display = isMatch ? "" : "none";
                 if (isMatch) {
                     sectionHasMatch = true;
                     matchCount++;
                 }
             });
 
-            section.style.display = (Boolean(searchTerm) && !sectionHasMatch) ? "none" : "block";
+            section.style.display = (Boolean(searchTerm) && !sectionHasMatch) ? "none" : "";
         });
     } else if (cards.length > 0) {
-        // Fallback for general cards layout if specific sections aren't present
         cards.forEach(card => {
             const textContent = card.textContent.toLowerCase();
             const isMatch = !searchTerm || textContent.includes(searchTerm);
-            card.style.display = isMatch ? "block" : "none";
+            card.style.display = isMatch ? "" : "none";
             if (isMatch) matchCount++;
         });
     }
@@ -172,10 +176,13 @@ if (searchBox && !homeSearchResults) {
     const menuSearch = urlParams.get("search");
     if (menuSearch) {
         searchBox.value = menuSearch;
-        // Small timeout to ensure DOM elements are fully loaded before filtering
+        // Periodic check to ensure dynamic items fetched via Firebase snapshot render fully before applying filter
         setTimeout(() => {
             showMenuSearchResults(menuSearch);
-        }, 200);
+        }, 300);
+        setTimeout(() => {
+            showMenuSearchResults(menuSearch);
+        }, 1000);
     }
 }
 
