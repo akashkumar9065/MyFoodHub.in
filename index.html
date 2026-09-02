@@ -126,123 +126,21 @@
 
     </section>
 
-    <!-- ================= POPULAR RESTAURANTS ================= -->
-
-    <!-- ================= POPULAR RESTAURANTS ================= -->
+    <!-- ================= POPULAR RESTAURANTS (DYNAMIC FIREBASE CONTAINER) ================= -->
 
     <section id="restaurants">
 
         <h2>Popular Restaurants</h2>
 
-        <div class="restaurant-container">
-
-            <!-- Restaurant 1 -->
-            <div class="restaurant-card">
-
-                <img src="indexImage/dominos-resturent.png" alt="Domino's Pizza">
-
-                <div class="restaurant-info">
-
-                    <h3>Domino's Pizza</h3>
-
-                    <p class="rating">
-                        ⭐ 4.7 <span>(2.5k Reviews)</span>
-                    </p>
-
-                    <p class="time">
-                        <i class="fa-solid fa-clock"></i>
-                        25-30 mins
-                    </p>
-
-                    <button onclick="location.href='dominos.html'">
-                        View Menu
-                    </button>
-
-                </div>
-
+        <!-- Admin panel se add kiye gaye restaurants yahan automatically load honge -->
+        <div class="restaurant-container" id="dynamicRestaurantsContainer">
+            <div style="text-align: center; width: 100%; padding: 30px;">
+                <p style="color: #777;">Loading Restaurants from Admin...</p>
             </div>
-
-            <!-- Restaurant 2 -->
-            <div class="restaurant-card">
-
-                <img src="kfc/kfc-banner.png" alt="KFC">
-
-                <div class="restaurant-info">
-
-                    <h3>KFC</h3>
-
-                    <p class="rating">
-                        ⭐ 4.6 <span>(3k Reviews)</span>
-                    </p>
-
-                    <p class="time">
-                        <i class="fa-solid fa-clock"></i>
-                        20-25 mins
-                    </p>
-
-                    <button onclick="location.href='kfc.html'">
-                        View Menu
-                    </button>
-
-                </div>
-
-            </div>
-
-            <!-- Restaurant 3 -->
-            <div class="restaurant-card">
-
-                <img src="burgerking/burgerKing-banner.png" alt="Burger King">
-
-                <div class="restaurant-info">
-
-                    <h3>Burger King</h3>
-
-                    <p class="rating">
-                        ⭐ 4.5 <span>(1.8k Reviews)</span>
-                    </p>
-
-                    <p class="time">
-                        <i class="fa-solid fa-clock"></i>
-                        20-30 mins
-                    </p>
-
-                    <button onclick="location.href='burgerking.html'">
-                        View Menu
-                    </button>
-
-                </div>
-
-            </div>
-
-            <!-- Restaurant 4 -->
-            <div class="restaurant-card">
-
-                <img src="biryanihouse/biryani-banner.png" alt="Biryani House">
-
-                <div class="restaurant-info">
-
-                    <h3>Biryani House</h3>
-
-                    <p class="rating">
-                        ⭐ 4.8 <span>(4.2k Reviews)</span>
-                    </p>
-
-                    <p class="time">
-                        <i class="fa-solid fa-clock"></i>
-                        30-35 mins
-                    </p>
-
-                    <button onclick="location.href='biryani.html'">
-                        View Menu
-                    </button>
-
-                </div>
-
-            </div>
-
         </div>
 
     </section>
+
     <!-- ================= WHY CHOOSE US ================= -->
 
     <section id="why-us">
@@ -374,8 +272,50 @@
     <script type="module" src="cart-manager.js"></script>
     <script src="script.js"></script>
     <script type="module" src="navbar.js"></script>
-
     <script src="bottom-nav.js"></script>
+
+    <!-- Live Dynamic Restaurants Loader Script -->
+    <script type="module">
+        import { db } from "./firebase.js";
+        import { collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+        const container = document.getElementById("dynamicRestaurantsContainer");
+
+        if (container) {
+            const qRest = query(collection(db, "restaurants"), orderBy("name"));
+            onSnapshot(qRest, (snapshot) => {
+                container.innerHTML = "";
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<div style="text-align: center; width: 100%; padding: 20px;"><p style="color: #777;">No restaurants found.</p></div>';
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const r = docSnap.data();
+                    const card = `
+                        <div class="restaurant-card">
+                            <img src="${r.image}" alt="${r.name}" onerror="this.src='https://via.placeholder.com/250x150?text=No+Banner'">
+                            <div class="restaurant-info">
+                                <h3>${r.name}</h3>
+                                <p class="rating">
+                                    ⭐ ${r.rating || 4.5} <span>(${r.reviews || 'Reviews'})</span>
+                                </p>
+                                <p class="time">
+                                    <i class="fa-solid fa-clock"></i>
+                                    ${r.deliveryTime || '20-30 mins'}
+                                </p>
+                                <button onclick="location.href='${r.slug}.html'">
+                                    View Menu
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML("beforeend", card);
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>
