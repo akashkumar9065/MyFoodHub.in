@@ -227,7 +227,6 @@ if (restaurantForm) {
     });
 }
 
-// Fetch Restaurants and Populate Dropdowns Dynamically
 function loadDynamicDropdowns() {
     const qRest = query(collection(db, "restaurants"), orderBy("name"));
     
