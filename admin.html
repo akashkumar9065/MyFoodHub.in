@@ -129,19 +129,60 @@
             </div>
         </section>
 
+        <!-- MANAGE RESTAURANTS & BANNERS SECTION -->
+        <section class="admin-panel admin-mb-40">
+            <h3 class="admin-menu-title"><i class="fa-solid fa-store"></i> Add Restaurant & Banner</h3>
+
+            <div class="admin-form-container">
+                <form id="restaurantForm" class="admin-form-grid">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Restaurant Name</label>
+                        <input type="text" id="restName" class="admin-form-input" required placeholder="e.g., McDonald's">
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Slug / ID (e.g., mcdonalds)</label>
+                        <input type="text" id="restSlug" class="admin-form-input" required placeholder="mcdonalds">
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Banner Image Path</label>
+                        <input type="text" id="restBanner" class="admin-form-input" required placeholder="e.g., mcdonalds/banner.png">
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Rating</label>
+                        <input type="number" step="0.1" id="restRating" class="admin-form-input" value="4.6" required>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Reviews Count</label>
+                        <input type="text" id="restReviews" class="admin-form-input" value="1.8k Reviews" required>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Delivery Time</label>
+                        <input type="text" id="restTime" class="admin-form-input" value="20-25 Mins" required>
+                    </div>
+
+                    <div class="admin-form-actions full-width">
+                        <button type="submit" class="admin-btn admin-btn-success">
+                            <i class="fa-solid fa-plus"></i> Add Restaurant
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
         <!-- MANAGE MENU (ADD/EDIT/DELETE) -->
         <section class="admin-panel" id="manage-menu-section">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 10px;">
                 <h3 class="admin-menu-title" style="margin: 0;"><i class="fa-solid fa-pizza-slice"></i> Manage Menu</h3>
                 
-                <!-- Restaurant Wise Filter Dropdown -->
+                <!-- Restaurant Wise Filter Dropdown (Dynamic) -->
                 <div>
                     <select id="menuRestaurantFilter" class="admin-form-input" style="padding: 6px 12px; width: 200px; font-size: 14px; background: white;">
                         <option value="All">All Restaurants</option>
-                        <option value="kfc">KFC</option>
-                        <option value="dominoes">Domino's Pizza</option>
-                        <option value="burgerking">Burger King</option>
-                        <option value="biryanihouse">Biryani House</option>
                     </select>
                 </div>
             </div>
@@ -165,10 +206,6 @@
                         <label class="admin-form-label">Restaurant Category</label>
                         <select id="foodRestaurant" class="admin-form-input" required>
                             <option value="">Select Restaurant...</option>
-                            <option value="kfc">KFC</option>
-                            <option value="dominoes">Domino's Pizza</option>
-                            <option value="burgerking">Burger King</option>
-                            <option value="biryanihouse">Biryani House</option>
                         </select>
                     </div>
 
