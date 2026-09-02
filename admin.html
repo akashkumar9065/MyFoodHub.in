@@ -174,21 +174,15 @@
             </div>
         </section>
 
-        <!-- MANAGE MENU (ADD/EDIT/DELETE) -->
+        <!-- MANAGE MENU (RESTAURANT-WISE SECTIONS) -->
         <section class="admin-panel" id="manage-menu-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 10px;">
-                <h3 class="admin-menu-title" style="margin: 0;"><i class="fa-solid fa-pizza-slice"></i> Manage Menu</h3>
-                
-                <!-- Restaurant Wise Filter Dropdown (Dynamic) -->
-                <div>
-                    <select id="menuRestaurantFilter" class="admin-form-input" style="padding: 6px 12px; width: 200px; font-size: 14px; background: white;">
-                        <option value="All">All Restaurants</option>
-                    </select>
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 class="admin-menu-title" style="margin: 0;"><i class="fa-solid fa-utensils"></i> Restaurant-wise Menu Management</h3>
             </div>
 
-            <!-- Add/Edit Form -->
-            <div class="admin-form-container">
+            <!-- Global Add/Edit Form -->
+            <div class="admin-form-container" style="margin-bottom: 30px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                <h4 id="formTitle" style="margin-top: 0; color: #333; margin-bottom: 15px;">Add New Food Item</h4>
                 <form id="menuForm" class="admin-form-grid">
                     <input type="hidden" id="editFoodId">
 
@@ -203,7 +197,7 @@
                     </div>
 
                     <div class="admin-form-group">
-                        <label class="admin-form-label">Restaurant Category</label>
+                        <label class="admin-form-label">Select Restaurant</label>
                         <select id="foodRestaurant" class="admin-form-input" required>
                             <option value="">Select Restaurant...</option>
                         </select>
@@ -236,22 +230,9 @@
                 </form>
             </div>
 
-            <!-- Menu Table -->
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Food Name</th>
-                            <th>Restaurant</th>
-                            <th>Price</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="menuTableBody">
-                        <tr><td colspan="5" style="text-align: center; padding: 20px;">Loading Menu Items...</td></tr>
-                    </tbody>
-                </table>
+            <!-- Restaurant-Wise Menu Cards Container -->
+            <div id="restaurantWiseMenuContainer">
+                <p style="text-align: center; color: #777; padding: 20px;">Loading restaurant menus...</p>
             </div>
         </section>
     </main>
