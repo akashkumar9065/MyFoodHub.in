@@ -131,7 +131,7 @@
 
         <!-- MANAGE RESTAURANTS & BANNERS SECTION -->
         <section class="admin-panel admin-mb-40">
-            <h3 class="admin-menu-title"><i class="fa-solid fa-store"></i> Add / Edit Restaurant & Banner</h3>
+            <h3 class="admin-menu-title" id="restFormTitle"><i class="fa-solid fa-store"></i> Add / Edit Restaurant & Banner</h3>
 
             <div class="admin-form-container">
                 <form id="restaurantForm" class="admin-form-grid">
@@ -168,8 +168,11 @@
                     </div>
 
                     <div class="admin-form-actions full-width">
-                        <button type="submit" class="admin-btn admin-btn-success">
-                            <i class="fa-solid fa-plus"></i> Save Restaurant
+                        <button type="submit" id="restSubmitBtn" class="admin-btn admin-btn-success">
+                            <i class="fa-solid fa-plus"></i> Add Restaurant
+                        </button>
+                        <button type="button" id="cancelRestEditBtn" class="admin-btn admin-btn-secondary" style="display: none;">
+                            Cancel
                         </button>
                     </div>
                 </form>
