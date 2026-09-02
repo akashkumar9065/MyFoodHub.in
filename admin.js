@@ -324,7 +324,7 @@ function resetMenuForm() {
 }
 
 // ==========================================
-// 5. RESTAURANT-WISE MENU DISPLAY & ACTIONS
+// 5. RESTAURANT-WISE MENU DISPLAY & COLLAPSE / EXPAND SYSTEM
 // ==========================================
 const restaurantWiseMenuContainer = document.getElementById("restaurantWiseMenuContainer");
 let allRestaurantsData = [];
@@ -400,19 +400,25 @@ function renderRestaurantWiseMenu() {
             });
         }
 
-        // Restaurant Card Structure
+        // Restaurant Card Structure with Dropdown Toggle & Professional Close Button
         const cardHTML = `
             <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
                 <div style="background: #f8f9fa; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px; cursor: pointer; flex-grow: 1;" onclick="const body = document.getElementById('menu-body-${restSlug}'); const icon = document.getElementById('icon-${restSlug}'); if(body.style.display === 'none'){ body.style.display='block'; icon.className='fa-solid fa-chevron-up'; } else { body.style.display='none'; icon.className='fa-solid fa-chevron-down'; }">
                         <img src="${escapeHTML(rest.image)}" alt="" onerror="this.src='https://via.placeholder.com/40?text=Rest'" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
-                        <h4 style="margin: 0; color: #333; font-size: 18px;">${escapeHTML(rest.name)} <span style="font-size: 13px; color: #666; font-weight: normal;">(${rest.slug})</span></h4>
+                        <h4 style="margin: 0; color: #333; font-size: 18px;">${escapeHTML(rest.name)} <span style="font-size: 13px; color: #666; font-weight: normal;">(${matchedItems.length} items)</span></h4>
+                        <i id="icon-${restSlug}" class="fa-solid fa-chevron-down" style="margin-left: 10px; color: #666; font-size: 14px;"></i>
                     </div>
-                    <button type="button" onclick="document.getElementById('foodRestaurant').value='${rest.slug}'; document.getElementById('formTitle').innerText='Add Item to ${escapeHTML(rest.name)}'; document.getElementById('manage-menu-section').scrollIntoView({behavior: 'smooth'});" style="background: #28a745; color: white; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer;">
-                        <i class="fa-solid fa-plus"></i> Add Item
-                    </button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button type="button" onclick="document.getElementById('foodRestaurant').value='${rest.slug}'; document.getElementById('formTitle').innerText='Add Item to ${escapeHTML(rest.name)}'; document.getElementById('manage-menu-section').scrollIntoView({behavior: 'smooth'});" style="background: #28a745; color: white; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer;">
+                            <i class="fa-solid fa-plus"></i> Add Item
+                        </button>
+                        <button type="button" onclick="const body = document.getElementById('menu-body-${restSlug}'); const icon = document.getElementById('icon-${restSlug}'); if(body.style.display === 'none'){ body.style.display='block'; icon.className='fa-solid fa-chevron-up'; } else { body.style.display='none'; icon.className='fa-solid fa-chevron-down'; }" style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; cursor: pointer;">
+                            <i class="fa-solid fa-eye-slash"></i> Close / View
+                        </button>
+                    </div>
                 </div>
-                <div style="padding: 0 15px;">
+                <div id="menu-body-${restSlug}" style="padding: 0 15px; display: none;">
                     <table class="admin-table" style="width: 100%; border-collapse: collapse;">
                         <tbody>
                             ${itemsHTML}
