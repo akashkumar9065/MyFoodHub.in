@@ -185,15 +185,17 @@ function attachStatusChangeEvent() {
 }
 
 // ==========================================
-// 3. MANAGE RESTAURANTS & DYNAMIC DROPDOWNS
+// 3. MANAGE RESTAURANTS & EDIT LOGIC
 // ==========================================
 const restaurantForm = document.getElementById("restaurantForm");
+const editRestId = document.getElementById("editRestId");
 const foodRestaurantSelect = document.getElementById("foodRestaurant");
 
 if (restaurantForm) {
     restaurantForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
+        const restId = editRestId ? editRestId.value : "";
         const name = document.getElementById("restName").value.trim();
         const slug = document.getElementById("restSlug").value.trim().toLowerCase();
         const image = document.getElementById("restBanner").value.trim();
@@ -206,22 +208,31 @@ if (restaurantForm) {
             return;
         }
 
-        try {
-            await addDoc(collection(db, "restaurants"), {
-                name,
-                slug,
-                image,
-                rating: Number(rating),
-                reviews,
-                deliveryTime,
-                createdAt: serverTimestamp()
-            });
+        const restaurantPayload = {
+            name,
+            slug,
+            image,
+            rating: Number(rating),
+            reviews,
+            deliveryTime
+        };
 
-            alert("Restaurant and Banner added successfully!");
+        try {
+            if (restId) {
+                restaurantPayload.updatedAt = serverTimestamp();
+                await updateDoc(doc(db, "restaurants", restId), restaurantPayload);
+                alert("Restaurant updated successfully!");
+            } else {
+                restaurantPayload.createdAt = serverTimestamp();
+                await addDoc(collection(db, "restaurants"), restaurantPayload);
+                alert("Restaurant and Banner added successfully!");
+            }
+
             restaurantForm.reset();
+            if (editRestId) editRestId.value = "";
         } catch (error) {
-            console.error("Error adding restaurant: ", error);
-            alert("Failed to add restaurant.");
+            console.error("Error saving restaurant: ", error);
+            alert("Failed to save restaurant.");
         }
     });
 }
@@ -331,7 +342,6 @@ let allRestaurantsData = [];
 let allMenuItemsData = [];
 
 if (restaurantWiseMenuContainer) {
-    // Real-time listener for Restaurants
     onSnapshot(query(collection(db, "restaurants"), orderBy("name")), (restSnap) => {
         allRestaurantsData = [];
         restSnap.forEach((docSnap) => {
@@ -340,7 +350,6 @@ if (restaurantWiseMenuContainer) {
         renderRestaurantWiseMenu();
     });
 
-    // Real-time listener for Menu Items
     onSnapshot(query(collection(db, "menu"), orderBy("name")), (menuSnap) => {
         allMenuItemsData = [];
         menuSnap.forEach((docSnap) => {
@@ -363,7 +372,6 @@ function renderRestaurantWiseMenu() {
     allRestaurantsData.forEach((rest) => {
         const restSlug = rest.slug.toLowerCase();
         
-        // Match items case-insensitively with restaurant slug
         const matchedItems = allMenuItemsData.filter(item => 
             item.restaurant && item.restaurant.toLowerCase() === restSlug
         );
@@ -400,7 +408,7 @@ function renderRestaurantWiseMenu() {
             });
         }
 
-        // Restaurant Card Structure with Dropdown Toggle (Without Close / View Button)
+        // Restaurant Card Structure with Professional Edit Restaurant Button & Clean Layout
         const cardHTML = `
             <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
                 <div style="background: #f8f9fa; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd;">
@@ -410,6 +418,17 @@ function renderRestaurantWiseMenu() {
                         <i id="icon-${restSlug}" class="fa-solid fa-chevron-down" style="margin-left: 10px; color: #666; font-size: 14px;"></i>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
+                        <button type="button" class="edit-rest-btn" 
+                            data-id="${rest.id}" 
+                            data-name="${escapeHTML(rest.name)}" 
+                            data-slug="${escapeHTML(rest.slug)}" 
+                            data-image="${escapeHTML(rest.image)}" 
+                            data-rating="${rest.rating || 4.6}" 
+                            data-reviews="${escapeHTML(rest.reviews || '1.8k Reviews')}" 
+                            data-time="${escapeHTML(rest.deliveryTime || '20-25 Mins')}"
+                            style="background: #ffc107; color: #333; border: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: 500;">
+                            <i class="fa-solid fa-pen"></i> Edit Restaurant
+                        </button>
                         <button type="button" onclick="document.getElementById('foodRestaurant').value='${rest.slug}'; document.getElementById('formTitle').innerText='Add Item to ${escapeHTML(rest.name)}'; document.getElementById('manage-menu-section').scrollIntoView({behavior: 'smooth'});" style="background: #28a745; color: white; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer;">
                             <i class="fa-solid fa-plus"></i> Add Item
                         </button>
@@ -428,9 +447,24 @@ function renderRestaurantWiseMenu() {
     });
 }
 
-// EVENT DELEGATION: Delete & Edit clicks inside Restaurant-Wise Menu Cards
+// EVENT DELEGATION: Edit Restaurant, Delete & Edit Menu clicks
 if (restaurantWiseMenuContainer) {
     restaurantWiseMenuContainer.addEventListener("click", async (e) => {
+        // Edit Restaurant Click
+        if (e.target.closest('.edit-rest-btn')) {
+            const btn = e.target.closest('.edit-rest-btn');
+            document.getElementById("editRestId").value = btn.getAttribute("data-id");
+            document.getElementById("restName").value = btn.getAttribute("data-name");
+            document.getElementById("restSlug").value = btn.getAttribute("data-slug");
+            document.getElementById("restBanner").value = btn.getAttribute("data-image");
+            document.getElementById("restRating").value = btn.getAttribute("data-rating");
+            document.getElementById("restReviews").value = btn.getAttribute("data-reviews");
+            document.getElementById("restTime").value = btn.getAttribute("data-time");
+
+            document.getElementById("restaurantForm").scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Delete Menu Item Click
         if (e.target.classList.contains("delete-menu-btn")) {
             const id = e.target.getAttribute("data-id");
             if (confirm("Are you sure you want to delete this food item?")) {
@@ -444,6 +478,7 @@ if (restaurantWiseMenuContainer) {
             }
         }
 
+        // Edit Menu Item Click
         if (e.target.classList.contains("edit-menu-btn")) {
             const btn = e.target;
             editFoodId.value = btn.getAttribute("data-id");
