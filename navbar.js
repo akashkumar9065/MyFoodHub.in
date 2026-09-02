@@ -11,7 +11,8 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         if(loginBtn) loginBtn.style.display = "none";
         if(signupBtn) signupBtn.style.display = "none";
-        if(profileBtn) profileBtn.style.display = "inline-block";
+        // 'inline-block' ki jagah blank string "" chhodein taaki flex layout kharab na ho
+        if(profileBtn) profileBtn.style.display = "";
 
         // HAR USER KI ALAG IMAGE (Email ke hisaab se)
         const savedPic = localStorage.getItem("userProfilePic_" + user.email);
@@ -23,8 +24,8 @@ onAuthStateChanged(auth, (user) => {
         }
         
     } else {
-        if(loginBtn) loginBtn.style.display = "inline-block";
-        if(signupBtn) signupBtn.style.display = "inline-block";
+        if(loginBtn) loginBtn.style.display = "";
+        if(signupBtn) signupBtn.style.display = "";
         if(profileBtn) profileBtn.style.display = "none";
     }
 
