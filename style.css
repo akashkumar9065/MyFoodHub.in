@@ -3585,3 +3585,27 @@ textarea#editAddress::placeholder {
     color: #ff5722;
     font-weight: bold;
 }
+/* ===============================
+   FINAL IMAGE & CARD RESPONSIVE FIX
+   =============================== */
+
+.food-card img, .menu-item-card img, .restaurant-card img {
+    width: 100% !important;
+    height: 200px !important;       /* Image ki height hamesha fix rahegi */
+    object-fit: cover !important;   /* Image kabhi stretch ya fategi nahi, box mein fit hogi */
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    display: block;
+}
+
+/* Jab search karne par single card aaye toh woh behad lamba ya stretch na ho */
+.food-card, .menu-item-card {
+    max-width: 350px;              /* Card ki maximum width fix kar dega */
+    margin: 15px auto;             /* Center align rakhega */
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
