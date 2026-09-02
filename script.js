@@ -95,7 +95,8 @@ function showMenuSearchResults(query) {
     let matchCount = 0;
 
     sections.forEach(section => {
-        const restaurant = section.querySelector(".restaurant-info h2")?.textContent.toLowerCase() || "";
+        // Updated selector to match the dynamic restaurant banner structure (.restaurant-banner h2 instead of .restaurant-info h2)
+        const restaurant = section.querySelector(".restaurant-banner h2")?.textContent.toLowerCase() || "";
         const cards = section.querySelectorAll(".food-card");
         let sectionHasMatch = false;
 
