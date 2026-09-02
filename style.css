@@ -3585,3 +3585,11 @@ textarea#editAddress::placeholder {
     color: #ff5722;
     font-weight: bold;
 }
+/* Food Card Image Fix */
+.food-card img, .menu-item-card img, .restaurant-card img {
+    width: 100%;
+    height: 180px;          /* Isse har image ki height fix ho jayegi */
+    object-fit: cover;      /* Image stretch nahi hogi, box mein perfectly fit ho jayegi */
+    border-radius: 12px 12px 0 0; /* Upar wale corners ko card ke hisaab se round karega */
+    display: block;
+}
