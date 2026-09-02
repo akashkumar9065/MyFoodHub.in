@@ -3586,26 +3586,123 @@ textarea#editAddress::placeholder {
     font-weight: bold;
 }
 /* ===============================
-   FINAL IMAGE & CARD RESPONSIVE FIX
+   FOODHUB - FINAL POLISHED CARD & GRID CSS
    =============================== */
 
-.food-card img, .menu-item-card img, .restaurant-card img {
-    width: 100% !important;
-    height: 200px !important;       /* Image ki height hamesha fix rahegi */
-    object-fit: cover !important;   /* Image kabhi stretch ya fategi nahi, box mein fit hogi */
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    display: block;
+/* Main Container Grid for Menu / Search Results */
+.restaurant-section .food-container, 
+.menu-container, 
+.restaurant-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-content: center;
 }
 
-/* Jab search karne par single card aaye toh woh behad lamba ya stretch na ho */
+/* Individual Food Card Design */
 .food-card, .menu-item-card {
-    max-width: 350px;              /* Card ki maximum width fix kar dega */
-    margin: 15px auto;             /* Center align rakhega */
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 320px;     /* Card ko bahut lamba hone se rokega */
+    margin: 0 auto;       /* Jab single item search ho toh center mein rahega */
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: 1px solid #f0f0f0;
+}
+
+.food-card:hover, .menu-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Perfect Proportional Image Sizing */
+.food-card img, .menu-item-card img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    display: block;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+/* Card Content / Info Section */
+.food-card > div:not(img):not(button), 
+.food-info {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: center; /* Sabhi text elements ko clean center align karega */
+    flex-grow: 1;
+}
+
+/* Food Title */
+.food-card h3, .menu-item-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+}
+
+/* Description */
+.food-card p, .menu-item-card p {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+
+/* Rating & Price Spacing */
+.food-card .rating {
+    font-size: 14px;
+    color: #ffa502;
+    font-weight: 600;
+    margin: 4px 0;
+}
+
+.food-card .price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff4757;
+    margin-bottom: 5px;
+}
+
+/* Add to Cart Button */
+.food-card button, .menu-item-card button {
+    width: calc(100% - 32px);
+    margin: 0 16px 16px 16px;
+    padding: 11px 0;
+    background-color: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.food-card button:hover {
+    background-color: #e84118;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 480px) {
+    .restaurant-section .food-container, 
+    .menu-container, 
+    .restaurant-container {
+        grid-template-columns: 1fr;
+        padding: 12px;
+    }
+    
+    .food-card, .menu-item-card {
+        max-width: 100%; /* Mobile par full width card dikhega */
+    }
 }
