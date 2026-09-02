@@ -48,7 +48,7 @@ if (adminLogoutBtn) {
 const ordersTableBody = document.getElementById("ordersTableBody");
 let allOrdersData = [];
 let currentPage = 1;
-const rowsPerPage = 10; // Ek page par sirf 10 orders dikhenge
+const rowsPerPage = 10;
 
 if (ordersTableBody) {
     const qOrders = query(collection(db, "orders"), orderBy("orderTime", "desc"));
@@ -80,7 +80,6 @@ function renderFilteredAndPaginatedOrders() {
     const searchTerm = document.getElementById("orderSearchInput")?.value.toLowerCase() || "";
     const statusFilter = document.getElementById("statusFilterSelect")?.value || "All";
 
-    // 1. Filter Data based on Search & Status
     const filteredOrders = allOrdersData.filter(order => {
         const orderId = (order.orderId || order.id).toLowerCase();
         const customerName = (order.customerName || "").toLowerCase();
@@ -92,7 +91,6 @@ function renderFilteredAndPaginatedOrders() {
         return matchesSearch && matchesStatus;
     });
 
-    // 2. Pagination Calculation
     const totalPages = Math.ceil(filteredOrders.length / rowsPerPage) || 1;
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
@@ -100,7 +98,6 @@ function renderFilteredAndPaginatedOrders() {
     const start = (currentPage - 1) * rowsPerPage;
     const paginatedData = filteredOrders.slice(start, start + rowsPerPage);
 
-    // 3. Render Table Rows
     ordersTableBody.innerHTML = "";
     if (paginatedData.length === 0) {
         ordersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No matching orders found.</td></tr>';
@@ -143,7 +140,6 @@ function renderFilteredAndPaginatedOrders() {
         });
     }
 
-    // Update Pagination UI Info
     const pageInfo = document.getElementById("pageInfo");
     const prevBtn = document.getElementById("prevPageBtn");
     const nextBtn = document.getElementById("nextPageBtn");
@@ -155,7 +151,6 @@ function renderFilteredAndPaginatedOrders() {
     attachStatusChangeEvent();
 }
 
-// Search and Filter Event Listeners
 document.getElementById("orderSearchInput")?.addEventListener("input", () => { currentPage = 1; renderFilteredAndPaginatedOrders(); });
 document.getElementById("statusFilterSelect")?.addEventListener("change", () => { currentPage = 1; renderFilteredAndPaginatedOrders(); });
 
@@ -190,7 +185,88 @@ function attachStatusChangeEvent() {
 }
 
 // ==========================================
-// 3. MANAGE MENU: ADD & UPDATE LOGIC (With Rating)
+// 3. MANAGE RESTAURANTS & DYNAMIC DROPDOWNS
+// ==========================================
+const restaurantForm = document.getElementById("restaurantForm");
+const foodRestaurantSelect = document.getElementById("foodRestaurant");
+const menuRestaurantFilter = document.getElementById("menuRestaurantFilter");
+
+if (restaurantForm) {
+    restaurantForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("restName").value.trim();
+        const slug = document.getElementById("restSlug").value.trim().toLowerCase();
+        const image = document.getElementById("restBanner").value.trim();
+        const rating = document.getElementById("restRating").value.trim();
+        const reviews = document.getElementById("restReviews").value.trim();
+        const deliveryTime = document.getElementById("restTime").value.trim();
+
+        if (!name || !slug || !image) {
+            alert("Please fill out all required fields.");
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, "restaurants"), {
+                name,
+                slug,
+                image,
+                rating: Number(rating),
+                reviews,
+                deliveryTime,
+                createdAt: serverTimestamp()
+            });
+
+            alert("Restaurant and Banner added successfully!");
+            restaurantForm.reset();
+        } catch (error) {
+            console.error("Error adding restaurant: ", error);
+            alert("Failed to add restaurant.");
+        }
+    });
+}
+
+// Fetch Restaurants and Populate Dropdowns Dynamically
+function loadDynamicDropdowns() {
+    const qRest = query(collection(db, "restaurants"), orderBy("name"));
+    
+    onSnapshot(qRest, (snapshot) => {
+        if (foodRestaurantSelect) {
+            foodRestaurantSelect.innerHTML = '<option value="">Select Restaurant...</option>';
+        }
+        if (menuRestaurantFilter) {
+            menuRestaurantFilter.innerHTML = '<option value="All">All Restaurants</option>';
+        }
+
+        if (snapshot.empty) return;
+
+        snapshot.forEach((docSnap) => {
+            const rest = docSnap.data();
+            const restSlug = rest.slug;
+            const restName = rest.name;
+
+            if (foodRestaurantSelect) {
+                const opt1 = document.createElement("option");
+                opt1.value = restSlug;
+                opt1.textContent = restName;
+                foodRestaurantSelect.appendChild(opt1);
+            }
+
+            if (menuRestaurantFilter) {
+                const opt2 = document.createElement("option");
+                opt2.value = restSlug;
+                opt2.textContent = restName;
+                menuRestaurantFilter.appendChild(opt2);
+            }
+        });
+    });
+}
+
+loadDynamicDropdowns();
+
+// ==========================================
+// 4. MANAGE MENU: ADD & UPDATE LOGIC (With Rating)
 // ==========================================
 const menuForm = document.getElementById("menuForm");
 const editFoodId = document.getElementById("editFoodId");
@@ -259,7 +335,7 @@ function resetMenuForm() {
 }
 
 // ==========================================
-// 4. MANAGE MENU: LOAD, DELETE & EDIT LOGIC (Restaurant Filtered)
+// 5. MANAGE MENU: LOAD, DELETE & EDIT LOGIC (Restaurant Filtered)
 // ==========================================
 const menuTableBody = document.getElementById("menuTableBody");
 let allMenuItems = [];
@@ -275,7 +351,6 @@ if (menuTableBody) {
         renderMenuTable();
     });
 
-    // Dropdown change hone par table update hogi
     document.getElementById("menuRestaurantFilter")?.addEventListener("change", () => {
         renderMenuTable();
     });
@@ -286,7 +361,6 @@ function renderMenuTable() {
 
     const selectedRestaurant = document.getElementById("menuRestaurantFilter")?.value || "All";
     
-    // Filter items based on dropdown selection
     const filteredMenu = allMenuItems.filter(item => {
         if (selectedRestaurant === "All") return true;
         return item.restaurant === selectedRestaurant;
@@ -331,7 +405,6 @@ function renderMenuTable() {
     });
 }
 
-// EVENT DELEGATION: Robust listener for Delete & Edit clicks
 if (menuTableBody) {
     menuTableBody.addEventListener("click", async (e) => {
         if (e.target.classList.contains("delete-menu-btn")) {
