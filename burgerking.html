@@ -7,16 +7,12 @@
 
     <title>FoodHub | Burger King</title>
 
-    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
 <body>
-
-    <!-- ================= NAVBAR ================= -->
 
     <header>
 
@@ -70,13 +66,9 @@
     </header>
 
 
-    <!-- ================= RESTAURANT HEADER ================= -->
-
     <section class="restaurant-header">
 
-        <img src="burgerking/burgerKing-banner.png" alt="Burger King Banner">
-
-        <div class="restaurant-details">
+        <div class="restaurant-details" style="padding: 20px 0; text-align: center;">
 
             <h1>🍔 Burger King</h1>
 
@@ -94,17 +86,12 @@
     </section>
 
 
-    <!-- ================= BURGER KING MENU (DYNAMIC FIREBASE CONTAINER) ================= -->
-
     <section class="food-container" id="burgerking-menu" style="margin-top: 40px;">
-        <!-- Admin panel se add kiye gaye items yahan automatically load honge -->
         <div style="text-align: center; width: 100%; padding: 40px; grid-column: 1 / -1;">
             <p style="color: #777; font-size: 16px;">Loading Burger King Menu from Admin...</p>
         </div>
     </section>
 
-
-    <!-- ================= FOOTER ================= -->
 
     <footer>
 
@@ -139,14 +126,11 @@
     </footer>
 
 
-    <!-- ================= SCRIPTS ================= -->
-
     <script src="toast.js"></script>
     <script type="module" src="cart-manager.js"></script>
     <script src="script.js"></script>
     <script src="bottom-nav.js"></script>
 
-    <!-- Firebase Dynamic Live Menu Script -->
     <script type="module" src="live-menu.js"></script>
 
 </body>
