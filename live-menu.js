@@ -52,7 +52,7 @@ async function loadDynamicMenu() {
             return;
         }
 
-        // 2. Render each restaurant with its banner and food items grid
+        // 2. Render each restaurant with its grand banner and food items grid
         restaurants.forEach(rest => {
             const restSlug = String(rest.slug || "").toLowerCase().trim();
             const matchedItems = menuItems.filter(item => String(item.restaurant || "").toLowerCase().trim() === restSlug);
@@ -76,15 +76,32 @@ async function loadDynamicMenu() {
             }
 
             const sectionHTML = `
-                <section class="restaurant-section" style="margin-bottom: 40px; padding: 0 20px;">
-                    <div class="restaurant-banner" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 2px solid #ff4757; padding-bottom: 10px;">
-                        <img src="${rest.image}" alt="${rest.name}" onerror="this.src='https://via.placeholder.com/60?text=Logo'" style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%;">
-                        <div>
-                            <h2 style="margin: 0; color: #333; font-size: 24px;">${rest.name}</h2>
-                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">⭐ ${rest.rating || 4.5} (${rest.reviews || 'Reviews'}) • <i class="fa-solid fa-clock"></i> ${rest.deliveryTime || '20-30 mins'}</p>
+                <section class="restaurant-section" style="margin-bottom: 50px;">
+                    <div class="restaurant-banner" style="
+                        position: relative;
+                        width: 100%;
+                        height: 260px;
+                        background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.75) 100%), url('${rest.image}') center/cover no-repeat;
+                        display: flex;
+                        align-items: flex-end;
+                        padding: 30px 40px;
+                        box-sizing: border-box;
+                        margin-bottom: 30px;
+                        box-shadow: inset 0 -60px 40px -20px rgba(0,0,0,0.6);
+                    ">
+                        <div style="display: flex; align-items: center; gap: 20px; z-index: 2;">
+                            <img src="${rest.image}" alt="${rest.name}" onerror="this.src='https://via.placeholder.com/80?text=Logo'" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                            <div>
+                                <h2 style="margin: 0; color: white; font-size: 32px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">${rest.name}</h2>
+                                <p style="margin: 8px 0 0 0; color: #f8f8f8; font-size: 16px; font-weight: 500; text-shadow: 1px 1px 3px rgba(0,0,0,0.6);">
+                                    ⭐ ${rest.rating || 4.5} (${rest.reviews || 'Reviews'}) &bull; <i class="fa-solid fa-clock"></i> ${rest.deliveryTime || '20-30 Mins'}
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    ${itemsHTML}
+                    <div style="padding: 0 20px;">
+                        ${itemsHTML}
+                    </div>
                 </section>
             `;
 
