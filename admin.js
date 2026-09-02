@@ -259,54 +259,80 @@ function resetMenuForm() {
 }
 
 // ==========================================
-// 4. MANAGE MENU: LOAD, DELETE & EDIT LOGIC
+// 4. MANAGE MENU: LOAD, DELETE & EDIT LOGIC (Restaurant Filtered)
 // ==========================================
 const menuTableBody = document.getElementById("menuTableBody");
+let allMenuItems = [];
 
 if (menuTableBody) {
     const qMenu = query(collection(db, "menu"), orderBy("name"));
     
     onSnapshot(qMenu, (snapshot) => {
-        menuTableBody.innerHTML = "";
-
-        if (snapshot.empty) {
-            menuTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No menu items found.</td></tr>';
-            return;
-        }
-
+        allMenuItems = [];
         snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            const docId = docSnap.id;
-
-            const row = `
-                <tr>
-                    <td><img src="${escapeHTML(data.image)}" alt="${escapeHTML(data.name)}" onerror="this.src='https://via.placeholder.com/45?text=No+Image'" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
-                    <td><strong>${escapeHTML(data.name)}</strong><br><small style="color:#777;">⭐ ${data.rating || 4.5} | ${escapeHTML(data.description || "")}</small></td>
-                    <td><span style="text-transform: uppercase; font-weight: 600; color: #ff5722;">${escapeHTML(data.restaurant)}</span></td>
-                    <td>₹${Number(data.price)}</td>
-                    <td>
-                        <button class="admin-btn admin-btn-secondary edit-menu-btn" 
-                            data-id="${docId}" 
-                            data-name="${escapeHTML(data.name)}" 
-                            data-price="${Number(data.price)}" 
-                            data-restaurant="${escapeHTML(data.restaurant)}" 
-                            data-image="${escapeHTML(data.image)}" 
-                            data-rating="${data.rating || 4.5}" 
-                            data-desc="${escapeHTML(data.description || '')}" 
-                            style="padding: 5px 10px; font-size: 12px; margin-right: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            Edit
-                        </button>
-                        <button class="admin-btn admin-btn-danger delete-menu-btn" data-id="${docId}" 
-                            style="padding: 5px 10px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            `;
-            menuTableBody.insertAdjacentHTML("beforeend", row);
+            allMenuItems.push({ id: docSnap.id, ...docSnap.data() });
         });
+        renderMenuTable();
     });
 
+    // Dropdown change hone par table update hogi
+    document.getElementById("menuRestaurantFilter")?.addEventListener("change", () => {
+        renderMenuTable();
+    });
+}
+
+function renderMenuTable() {
+    if (!menuTableBody) return;
+
+    const selectedRestaurant = document.getElementById("menuRestaurantFilter")?.value || "All";
+    
+    // Filter items based on dropdown selection
+    const filteredMenu = allMenuItems.filter(item => {
+        if (selectedRestaurant === "All") return true;
+        return item.restaurant === selectedRestaurant;
+    });
+
+    menuTableBody.innerHTML = "";
+
+    if (filteredMenu.length === 0) {
+        menuTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No menu items found for this restaurant.</td></tr>';
+        return;
+    }
+
+    filteredMenu.forEach((data) => {
+        const docId = data.id;
+
+        const row = `
+            <tr>
+                <td><img src="${escapeHTML(data.image)}" alt="${escapeHTML(data.name)}" onerror="this.src='https://via.placeholder.com/45?text=No+Image'" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
+                <td><strong>${escapeHTML(data.name)}</strong><br><small style="color:#777;">⭐ ${data.rating || 4.5} | ${escapeHTML(data.description || "")}</small></td>
+                <td><span style="text-transform: uppercase; font-weight: 600; color: #ff5722;">${escapeHTML(data.restaurant)}</span></td>
+                <td>₹${Number(data.price)}</td>
+                <td>
+                    <button class="admin-btn admin-btn-secondary edit-menu-btn" 
+                        data-id="${docId}" 
+                        data-name="${escapeHTML(data.name)}" 
+                        data-price="${Number(data.price)}" 
+                        data-restaurant="${escapeHTML(data.restaurant)}" 
+                        data-image="${escapeHTML(data.image)}" 
+                        data-rating="${data.rating || 4.5}" 
+                        data-desc="${escapeHTML(data.description || '')}" 
+                        style="padding: 5px 10px; font-size: 12px; margin-right: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Edit
+                    </button>
+                    <button class="admin-btn admin-btn-danger delete-menu-btn" data-id="${docId}" 
+                        style="padding: 5px 10px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+        menuTableBody.insertAdjacentHTML("beforeend", row);
+    });
+}
+
+// EVENT DELEGATION: Robust listener for Delete & Edit clicks
+if (menuTableBody) {
     menuTableBody.addEventListener("click", async (e) => {
         if (e.target.classList.contains("delete-menu-btn")) {
             const id = e.target.getAttribute("data-id");
