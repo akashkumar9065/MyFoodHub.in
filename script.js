@@ -6,41 +6,78 @@
 const navbar = document.getElementById("navbar");
 
 if (navbar) {
-    const navLinks = navbar.querySelector(".nav-links");
+    const navLinks = navbar.querySelector(".nav-links");
 
-    if (navLinks) {
-        const toggle = document.createElement("button");
-        toggle.className = "menu-toggle";
-        toggle.type = "button";
-        toggle.setAttribute("aria-label", "Open navigation menu");
-        toggle.setAttribute("aria-expanded", "false");
-        toggle.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
-        navbar.appendChild(toggle);
+    if (navLinks) {
+        let toggle = navbar.querySelector(".menu-toggle");
+        if (!toggle) {
+            toggle = document.createElement("button");
+            toggle.className = "menu-toggle";
+            toggle.type = "button";
+            toggle.setAttribute("aria-label", "Open navigation menu");
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
+            navbar.appendChild(toggle);
+        }
 
-        const closeMenu = () => {
-            navbar.classList.remove("is-open");
-            toggle.setAttribute("aria-expanded", "false");
-            toggle.setAttribute("aria-label", "Open navigation menu");
-            toggle.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
-        };
+        let overlay = document.querySelector(".nav-backdrop");
+        if (!overlay) {
+            overlay = document.createElement("div");
+            overlay.className = "nav-backdrop";
+            document.body.appendChild(overlay);
+        }
 
-        toggle.addEventListener("click", () => {
-            const isOpen = navbar.classList.toggle("is-open");
-            toggle.setAttribute("aria-expanded", String(isOpen));
-            toggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
-            toggle.innerHTML = isOpen
-                ? '<i class="fa-solid fa-xmark" aria-hidden="true"></i>'
-                : '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
-        });
+        const closeMenu = () => {
+            navbar.classList.remove("is-open");
+            if (overlay) overlay.classList.remove("is-active");
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.setAttribute("aria-label", "Open navigation menu");
+            toggle.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
+            document.body.style.overflow = "";
+        };
 
-        navLinks.addEventListener("click", closeMenu);
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") closeMenu();
-        });
-        window.addEventListener("resize", () => {
-            if (window.innerWidth > 760) closeMenu();
-        });
-    }
+        const openMenu = () => {
+            navbar.classList.add("is-open");
+            if (overlay) overlay.classList.add("is-active");
+            toggle.setAttribute("aria-expanded", "true");
+            toggle.setAttribute("aria-label", "Close navigation menu");
+            toggle.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+        };
+
+        toggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = navbar.classList.contains("is-open");
+            if (isOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+
+        if (overlay) {
+            overlay.addEventListener("click", closeMenu);
+        }
+
+        navLinks.addEventListener("click", (e) => {
+            if (e.target.closest("a")) {
+                setTimeout(closeMenu, 150);
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (navbar.classList.contains("is-open") && !navbar.contains(e.target)) {
+                closeMenu();
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") closeMenu();
+        });
+
+        window.addEventListener("resize", () => {
+            if (window.innerWidth > 760) closeMenu();
+        });
+    }
 }
 
 
