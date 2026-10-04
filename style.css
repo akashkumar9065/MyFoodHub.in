@@ -65,11 +65,11 @@ ul{
 .auth-nav-loader {
     display: none;
     align-items: center;
+    justify-content: center;
     gap: 4px;
-    min-width: 45px;
-    padding: 10px 12px;
-    border-radius: 999px;
-    background: #fff1eb;
+    padding: 8px 12px;
+    background: transparent;
+    pointer-events: none;
 }
 
 #navbar.auth-pending .auth-nav-loader { display: flex; }
@@ -1052,18 +1052,9 @@ hr{
 
 @media (max-width:992px){
 
-    #navbar{
-        padding:20px;
-        flex-direction:column;
-        height:auto;
-    }
 
-    .nav-links{
-        margin-top:15px;
-        flex-wrap:wrap;
-        justify-content:center;
-        gap:20px;
-    }
+
+
 
     #hero{
         flex-direction:column;
@@ -1106,11 +1097,7 @@ hr{
         font-size:28px;
     }
 
-    .nav-links{
-        flex-direction:column;
-        align-items:center;
-        gap:12px;
-    }
+
 
     .hero-text h1{
         font-size:34px;
@@ -2375,11 +2362,36 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
         min-height: 68px;
         padding: 0 16px;
         flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
         position: sticky;
+        top: 0;
+        z-index: 1300;
+        background: #ffffff;
     }
 
     .logo h2 { font-size: 23px; }
-    .menu-toggle { display: inline-flex; }
+
+    .menu-toggle {
+        display: inline-flex;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 12px;
+        background: #fff1eb;
+        color: #ff5722;
+        font-size: 21px;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .menu-toggle:hover, .menu-toggle:active {
+        background: #ffe4d9;
+        color: #e64a19;
+        transform: scale(0.96);
+    }
 
     .nav-links {
         display: none;
@@ -2391,17 +2403,58 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
         padding: 10px;
         flex-direction: column;
         align-items: stretch;
-        gap: 2px;
+        gap: 4px;
         background: #fff;
         border: 1px solid #f2e4df;
-        border-radius: 14px;
-        box-shadow: 0 14px 28px rgba(48, 28, 20, .16);
+        border-radius: 16px;
+        box-shadow: 0 16px 36px rgba(48, 28, 20, .18);
+        z-index: 1310;
     }
 
-    #navbar.is-open .nav-links { display: flex; }
-    .nav-links li a { display: block; padding: 11px 13px; font-size: 15px; border-radius: 8px; }
-    .nav-links li a:hover, .nav-links li a.active { background: #fff1eb; }
-    .signup-btn, .login-btn { display: block; text-align: center; padding: 11px 13px; }
+    #navbar.is-open .nav-links {
+        display: flex !important;
+        animation: slideDownNav 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .nav-links li a {
+        display: flex;
+        align-items: center;
+        padding: 12px 14px;
+        font-size: 15px;
+        font-weight: 500;
+        border-radius: 10px;
+        color: #333;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-links li a:hover, .nav-links li a.active {
+        background: #fff1eb;
+        color: #ff5722;
+    }
+
+    .signup-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #ff5722;
+        color: #fff !important;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    .login-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid #ff5722;
+        color: #ff5722 !important;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-top: 4px;
+    }
 
     #hero { min-height: auto; padding: 42px var(--page-padding) 50px; gap: 26px; }
     .hero-text h1 { font-size: clamp(31px, 9vw, 40px); line-height: 1.16; }
@@ -3116,9 +3169,8 @@ textarea#editAddress::placeholder {
         padding: 6px;
         border: 1px solid #f0ddd6;
         border-radius: 18px;
-        background: rgba(255, 255, 255, .96);
+        background: #ffffff;
         box-shadow: 0 10px 28px rgba(63, 34, 24, .18);
-        backdrop-filter: blur(12px);
     }
 
     .mobile-bottom-nav a {
@@ -3334,468 +3386,6 @@ textarea#editAddress::placeholder {
     .order-success-card { padding: 32px 20px; border-radius: 17px; }
     .success-actions { flex-direction: column; }
 }
-/* ===================================================
-   FOODHUB - FINAL COMBINED CSS (INCLUDING ADMIN PANEL)
-=================================================== */
-
-/* ===========================
-   GOOGLE FONT
-=========================== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-/* ===========================
-   RESET
-=========================== */
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
-}
-
-html{
-    scroll-behavior:smooth;
-}
-
-body{
-    background:#f8f9fa;
-    color:#333;
-    line-height: 1.6;
-}
-
-/* ===========================
-   LINKS & LISTS
-=========================== */
-a{
-    text-decoration:none;
-    color:inherit;
-}
-
-ul{
-    list-style:none;
-}
-
-/* ===========================
-   NAVBAR
-=========================== */
-#navbar{
-    width:100%;
-    height:80px;
-    background:#ffffff;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 60px;
-    box-shadow:0 2px 10px rgba(0,0,0,.08);
-    position:sticky;
-    top:0;
-    z-index:999;
-}
-
-#navbar.auth-pending .auth-nav-item{
-    display:none;
-}
-
-.auth-nav-loader {
-    display: none;
-    align-items: center;
-    gap: 4px;
-    min-width: 45px;
-    padding: 10px 12px;
-    border-radius: 999px;
-    background: #fff1eb;
-}
-
-#navbar.auth-pending .auth-nav-loader { display: flex; }
-
-.auth-nav-loader span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #ff5722;
-    animation: loadingDot 1s infinite ease-in-out;
-}
-
-.auth-nav-loader span:nth-child(2) { animation-delay: .15s; }
-.auth-nav-loader span:nth-child(3) { animation-delay: .3s; }
-
-@keyframes loadingDot {
-    0%, 100% { transform: translateY(0); opacity: .45; }
-    50% { transform: translateY(-4px); opacity: 1; }
-}
-
-.logo h2{
-    color:#ff5722;
-    font-size:30px;
-}
-
-.nav-links{
-    display:flex;
-    gap:35px;
-    align-items: center;
-}
-
-.nav-links li a{
-    color:#333;
-    font-size:18px;
-    font-weight:500;
-    transition:.3s;
-}
-
-.nav-links li a:hover,
-.nav-links li a.active{
-    color:#ff5722;
-}
-
-.signup-btn{
-    background:#ff5722;
-    color:#fff !important;
-    padding:10px 22px;
-    border-radius:30px;
-    font-weight:bold;
-    transition:.3s;
-}
-
-.signup-btn:hover{
-    background:#e64a19;
-}
-
-.login-btn{
-    border:2px solid #ff5722;
-    color:#ff5722 !important;
-    padding:10px 22px;
-    border-radius:30px;
-    font-weight:bold;
-    transition:.3s;
-}
-
-.login-btn:hover{
-    background:#ff5722;
-    color:#fff !important;
-}
-
-/* ===========================
-   HERO SECTION
-=========================== */
-#hero{
-    width:100%;
-    min-height:90vh;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:80px;
-    background:#fff8f2;
-}
-
-.hero-text{
-    width:50%;
-}
-
-.hero-text h1{
-    font-size:60px;
-    line-height:75px;
-    color:#222;
-    margin-bottom:20px;
-}
-
-.hero-text p{
-    font-size:20px;
-    color:#555;
-    line-height:35px;
-    margin-bottom:35px;
-}
-
-.btn{
-    display:inline-block;
-    background:#ff5722;
-    color:#fff;
-    padding:15px 35px;
-    border-radius:8px;
-    font-size:18px;
-    transition:.3s;
-}
-
-.btn:hover{
-    background:#e64a19;
-    transform:translateY(-2px);
-}
-
-.hero-image{
-    width:45%;
-    text-align:center;
-}
-
-.hero-image img{
-    width:100%;
-    max-width:550px;
-}
-
-/* ===========================
-   SEARCH & HOME SEARCH
-=========================== */
-.home-search-results {
-    width: min(94%, 980px);
-    margin: 20px auto 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    text-align: left;
-}
-
-.home-search-result {
-    display: flex;
-    align-items: center;
-    min-height: 112px;
-    gap: 14px;
-    padding: 12px;
-    background: #fff;
-    border: 1px solid #f1e4df;
-    border-radius: 16px;
-    color: #222;
-    text-decoration: none;
-    box-shadow: 0 8px 22px rgba(61, 32, 21, 0.08);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-}
-
-.home-search-result:hover { border-color: #ff5722; transform: translateY(-4px); box-shadow: 0 14px 28px rgba(255, 87, 34, 0.16); }
-
-.search-result-image {
-    width: 84px;
-    height: 84px;
-    flex: 0 0 84px;
-    overflow: hidden;
-    border-radius: 13px;
-    background: #fff2ed;
-}
-
-.home-search-result img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.25s ease;
-}
-
-.home-search-result:hover img { transform: scale(1.08); }
-.home-search-result span { display: grid; gap: 5px; min-width: 0; }
-.home-search-result small { color: #e64a19; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
-.home-search-result strong { font-size: 17px; }
-.home-search-result em { color: #777; font-size: 13px; font-style: normal; }
-.home-search-result em i { color: #ff5722; margin-left: 3px; }
-.no-search-result { grid-column: 1 / -1; padding: 22px; color: #777; text-align: center; background: #fff; border-radius: 14px; box-shadow: 0 8px 22px rgba(61, 32, 21, 0.08); }
-
-/* ===========================
-   CATEGORY & WHY US & REVIEWS
-=========================== */
-#category, #why-us, #reviews{
-    padding:70px 8%;
-}
-
-#why-us{
-    background:#fff8f2;
-}
-
-#category h2, #why-us h2, #reviews h2, #restaurants h2{
-    text-align:center;
-    font-size:38px;
-    margin-bottom:50px;
-}
-
-.category-container{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:30px;
-}
-
-.card{
-    background:#fff;
-    border-radius:15px;
-    overflow:hidden;
-    text-align:center;
-    box-shadow:0 5px 20px rgba(0,0,0,.08);
-    transition:.3s;
-}
-
-.card:hover{
-    transform:translateY(-10px);
-}
-
-.card img{
-    width:100%;
-    height:220px;
-    object-fit:cover;
-}
-
-.card h3{
-    padding:20px;
-    font-size:24px;
-}
-
-.why-container{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:30px;
-}
-
-.why-box{
-    background:#fff;
-    padding:35px;
-    border-radius:15px;
-    text-align:center;
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
-}
-
-.why-box i{
-    font-size:55px;
-    color:#ff5722;
-    margin-bottom:20px;
-}
-
-.why-box h3{
-    margin-bottom:15px;
-    font-size:26px;
-}
-
-.why-box p{
-    color:#666;
-    line-height:28px;
-}
-
-.review-container{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-    gap:30px;
-}
-
-.review{
-    background:#fff;
-    padding:30px;
-    border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
-}
-
-.review p{
-    line-height:30px;
-    color:#555;
-}
-
-.review h4{
-    margin-top:20px;
-    color:#ff5722;
-}
-
-/* ===========================
-   POPULAR RESTAURANTS
-=========================== */
-#restaurants{
-    padding:70px 8%;
-    background:#f8f8f8;
-}
-
-.restaurant-container{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:30px;
-}
-
-.restaurant-card{
-    background:#fff;
-    border-radius:15px;
-    overflow:hidden;
-    box-shadow:0 8px 20px rgba(0,0,0,.1);
-    transition:.3s;
-}
-
-.restaurant-card:hover{
-    transform:translateY(-10px);
-}
-
-.restaurant-card img{
-    width:100%;
-    height:220px;
-    object-fit:cover;
-}
-
-.restaurant-info{
-    padding:20px;
-}
-
-.restaurant-info h3{
-    margin-bottom:10px;
-    font-size:24px;
-}
-
-.rating{
-    color:#FFD700;
-    font-size:18px;
-    margin:10px 0;
-}
-
-.rating span{
-    color:#777;
-    font-size:14px;
-}
-
-.time{
-    color:#555;
-    margin-bottom:20px;
-}
-
-.restaurant-info button{
-    width:100%;
-    padding:12px;
-    border:none;
-    background:#ff5722;
-    color:#fff;
-    font-size:16px;
-    border-radius:8px;
-    cursor:pointer;
-    transition:.3s;
-}
-
-.restaurant-info button:hover{
-    background:#e64a19;
-}
-
-/* ===========================
-   FOOTER
-=========================== */
-footer{
-    background:#222;
-    color:#fff;
-    padding:40px 20px;
-    text-align:center;
-}
-
-.footer-content h2, .footer-logo{
-    font-size:35px;
-    margin-bottom:15px;
-    color:#ff5722;
-}
-
-.footer-content p{
-    margin:10px 0;
-}
-
-.footer-content a{
-    color:#ff9800;
-}
-
-.social{
-    margin:20px 0;
-}
-
-.social a{
-    margin:0 10px;
-    font-size:24px;
-    color:#fff;
-    transition:.3s;
-}
-
-.social a:hover{
-    color:#ff5722;
-    transform:scale(1.1);
-}
-
 /* ===================================================
    ADMIN DASHBOARD STYLING (Compatible with admin.js)
 =================================================== */
@@ -4089,4 +3679,37 @@ footer{
     .admin-sidebar { width: 80px; padding: 20px 10px; }
     .admin-sidebar h2, .admin-sidebar p, .admin-sidebar span, .admin-sidebar .admin-nav-menu span { display: none; }
     .admin-main-content { margin-left: 80px; max-width: calc(100% - 80px); padding: 20px; }
+}
+
+
+/* ==============================================
+   MOBILE NAVIGATION OVERLAY BACKDROP & ANIMATIONS
+============================================== */
+.nav-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    z-index: 1100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.nav-backdrop.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@keyframes slideDownNav {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
