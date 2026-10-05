@@ -42,6 +42,40 @@ if (adminLogoutBtn) {
     });
 }
 
+// Mobile Sidebar Toggle Logic
+const admHamburger = document.getElementById("admHamburger");
+const admSidebar   = document.getElementById("admSidebar");
+const admBackdrop  = document.getElementById("admBackdrop");
+
+function openSidebar() {
+    admSidebar.classList.add("open");
+    admHamburger.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+}
+
+function closeSidebar() {
+    admSidebar.classList.remove("open");
+    admHamburger.innerHTML = '<i class="fa-solid fa-bars"></i>';
+}
+
+if (admHamburger && admSidebar) {
+    admHamburger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        admSidebar.classList.contains("open") ? closeSidebar() : openSidebar();
+    });
+
+    // Close on backdrop click
+    if (admBackdrop) {
+        admBackdrop.addEventListener("click", closeSidebar);
+    }
+
+    // Close when a nav link or button is clicked inside sidebar
+    admSidebar.addEventListener("click", (e) => {
+        if (e.target.closest("a") || e.target.closest("button.adm-logout-btn")) {
+            closeSidebar();
+        }
+    });
+}
+
 // ==========================================
 // 2. ORDERS DASHBOARD & PAGINATION LOGIC
 // ==========================================
@@ -57,7 +91,7 @@ if (ordersTableBody) {
         let revenue = 0, pending = 0, delivered = 0, total = snapshot.size;
 
         if (snapshot.empty) {
-            ordersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No orders found.</td></tr>';
+            ordersTableBody.innerHTML = '<tr><td colspan="8" class="admin-table-loading">No orders found.</td></tr>';
             updateKPIs(0, 0, 0, 0);
             return;
         }
@@ -100,7 +134,7 @@ function renderFilteredAndPaginatedOrders() {
 
     ordersTableBody.innerHTML = "";
     if (paginatedData.length === 0) {
-        ordersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No matching orders found.</td></tr>';
+        ordersTableBody.innerHTML = '<tr><td colspan="8" class="admin-table-loading">No matching orders found.</td></tr>';
     } else {
         paginatedData.forEach((data) => {
             const docId = data.id;
@@ -122,7 +156,7 @@ function renderFilteredAndPaginatedOrders() {
                             🛒 ${escapeHTML(data.items || "No items")}
                         </div>
                     </td>
-                    <td>₹${Number(data.totalPrice || 0)}</td>
+                    <td><strong>₹${Number(data.totalPrice || 0)}</strong></td>
                     <td><small>${escapeHTML(data.paymentMode || "COD")}</small></td>
                     <td><span class="admin-badge ${statusClass}">${escapeHTML(data.status || "Pending")}</span></td>
                     <td>
@@ -382,7 +416,7 @@ function renderRestaurantWiseMenu() {
     if (!restaurantWiseMenuContainer) return;
 
     if (allRestaurantsData.length === 0) {
-        restaurantWiseMenuContainer.innerHTML = '<p style="text-align:center; color:#777; padding: 20px;">No restaurants found. Please add a restaurant first.</p>';
+        restaurantWiseMenuContainer.innerHTML = '<p class="admin-loading-text">No restaurants found. Please add a restaurant first.</p>';
         return;
     }
 
@@ -397,72 +431,77 @@ function renderRestaurantWiseMenu() {
 
         let itemsHTML = "";
         if (matchedItems.length === 0) {
-            itemsHTML = `<tr><td colspan="4" style="text-align:center; color:#888; padding: 15px;">No food items added for this restaurant yet.</td></tr>`;
+            itemsHTML = `<tr><td colspan="4" class="admin-table-loading">No food items added for this restaurant yet.</td></tr>`;
         } else {
             matchedItems.forEach(item => {
                 itemsHTML += `
                     <tr>
-                        <td style="width: 60px;"><img src="${escapeHTML(item.image)}" alt="" onerror="this.src='https://via.placeholder.com/40?text=Img'" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;"></td>
-                        <td><strong>${escapeHTML(item.name)}</strong><br><small style="color:#666;">⭐ ${item.rating || 4.5} | ${escapeHTML(item.description || '')}</small></td>
-                        <td><strong>₹${Number(item.price)}</strong></td>
-                        <td style="text-align: right;">
-                            <button class="admin-btn admin-btn-secondary edit-menu-btn" 
-                                data-id="${item.id}" 
-                                data-name="${escapeHTML(item.name)}" 
-                                data-price="${item.price}" 
-                                data-restaurant="${escapeHTML(item.restaurant)}" 
-                                data-image="${escapeHTML(item.image)}" 
-                                data-rating="${item.rating || 4.5}" 
-                                data-desc="${escapeHTML(item.description || '')}"
-                                style="padding: 5px 10px; font-size: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">
-                                Edit
-                            </button>
-                            <button class="admin-btn admin-btn-danger delete-menu-btn" data-id="${item.id}" 
-                                style="padding: 5px 10px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                Delete
-                            </button>
+                        <td class="food-img-td"><img src="${escapeHTML(item.image)}" alt="${escapeHTML(item.name)}" onerror="this.src='https://via.placeholder.com/45?text=Img'" class="food-thumb-img"></td>
+                        <td>
+                            <strong class="food-name-title">${escapeHTML(item.name)}</strong>
+                            <div class="food-meta-info">⭐ ${item.rating || 4.5} | ${escapeHTML(item.description || '')}</div>
+                        </td>
+                        <td><strong class="food-price-tag">₹${Number(item.price)}</strong></td>
+                        <td class="food-actions-td">
+                            <div class="food-actions-row">
+                                <button class="admin-btn-sm edit-menu-btn" 
+                                    data-id="${item.id}" 
+                                    data-name="${escapeHTML(item.name)}" 
+                                    data-price="${item.price}" 
+                                    data-restaurant="${escapeHTML(item.restaurant)}" 
+                                    data-image="${escapeHTML(item.image)}" 
+                                    data-rating="${item.rating || 4.5}" 
+                                    data-desc="${escapeHTML(item.description || '')}">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </button>
+                                <button class="admin-btn-sm danger delete-menu-btn" data-id="${item.id}">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        // Restaurant Card Structure with Edit, Delete & Add Item buttons
+        // Restaurant Card Structure
         const cardHTML = `
-            <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-                <div style="background: #f8f9fa; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; flex-wrap: wrap; gap: 10px;">
-                    <div style="display: flex; align-items: center; gap: 12px; cursor: pointer; flex-grow: 1;" onclick="const body = document.getElementById('menu-body-${restSlug}'); const icon = document.getElementById('icon-${restSlug}'); if(body.style.display === 'none'){ body.style.display='block'; icon.className='fa-solid fa-chevron-up'; } else { body.style.display='none'; icon.className='fa-solid fa-chevron-down'; }">
-                        <img src="${escapeHTML(rest.image)}" alt="" onerror="this.src='https://via.placeholder.com/40?text=Rest'" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
-                        <h4 style="margin: 0; color: #333; font-size: 18px;">${escapeHTML(rest.name)} <span style="font-size: 13px; color: #666; font-weight: normal;">(${matchedItems.length} items)</span></h4>
-                        <i id="icon-${restSlug}" class="fa-solid fa-chevron-down" style="margin-left: 10px; color: #666; font-size: 14px;"></i>
+            <div class="admin-rest-card">
+                <div class="admin-rest-header">
+                    <div class="admin-rest-info" onclick="const body = document.getElementById('menu-body-${restSlug}'); const icon = document.getElementById('icon-${restSlug}'); if(body.classList.contains('open')){ body.classList.remove('open'); icon.className='fa-solid fa-chevron-down'; } else { body.classList.add('open'); icon.className='fa-solid fa-chevron-up'; }">
+                        <img src="${escapeHTML(rest.image)}" alt="${escapeHTML(rest.name)}" onerror="this.src='https://via.placeholder.com/40?text=Rest'" class="admin-rest-img">
+                        <div class="admin-rest-title">
+                            <h4>${escapeHTML(rest.name)} <span class="admin-rest-count">(${matchedItems.length} item${matchedItems.length === 1 ? '' : 's'})</span></h4>
+                        </div>
+                        <i id="icon-${restSlug}" class="fa-solid fa-chevron-down admin-rest-arrow"></i>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        <button type="button" class="edit-rest-btn" 
+                    <div class="admin-rest-actions">
+                        <button type="button" class="admin-btn-action edit-rest-btn" 
                             data-id="${rest.id}" 
                             data-name="${escapeHTML(rest.name)}" 
                             data-slug="${escapeHTML(rest.slug)}" 
                             data-image="${escapeHTML(rest.image)}" 
                             data-rating="${rest.rating || 4.6}" 
                             data-reviews="${escapeHTML(rest.reviews || '1.8k Reviews')}" 
-                            data-time="${escapeHTML(rest.deliveryTime || '20-25 Mins')}"
-                            style="background: #ffc107; color: #333; border: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: 500;">
+                            data-time="${escapeHTML(rest.deliveryTime || '20-25 Mins')}">
                             <i class="fa-solid fa-pen"></i> Edit
                         </button>
-                        <button type="button" class="delete-rest-btn" data-id="${rest.id}" 
-                            style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: 500;">
+                        <button type="button" class="admin-btn-action danger delete-rest-btn" data-id="${rest.id}">
                             <i class="fa-solid fa-trash"></i> Delete
                         </button>
-                        <button type="button" onclick="document.getElementById('foodRestaurant').value='${rest.slug}'; document.getElementById('formTitle').innerText='Add Item to ${escapeHTML(rest.name)}'; document.getElementById('manage-menu-section').scrollIntoView({behavior: 'smooth'});" style="background: #28a745; color: white; border: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; cursor: pointer;">
+                        <button type="button" class="admin-btn-action success" onclick="document.getElementById('foodRestaurant').value='${rest.slug}'; document.getElementById('formTitle').innerText='Add Item to ${escapeHTML(rest.name)}'; document.getElementById('manage-menu-section').scrollIntoView({behavior: 'smooth'});">
                             <i class="fa-solid fa-plus"></i> Add Item
                         </button>
                     </div>
                 </div>
-                <div id="menu-body-${restSlug}" style="padding: 0 15px; display: none;">
-                    <table class="admin-table" style="width: 100%; border-collapse: collapse;">
-                        <tbody>
-                            ${itemsHTML}
-                        </tbody>
-                    </table>
+                <div id="menu-body-${restSlug}" class="admin-rest-body">
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table admin-food-table">
+                            <tbody>
+                                ${itemsHTML}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         `;
