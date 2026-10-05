@@ -66,16 +66,19 @@ onAuthStateChanged(auth, (user) => {
         if(displayEmail) displayEmail.innerText = user.email;
         if(profileGreeting) profileGreeting.innerText = (user.displayName || "Foodie").split(" ")[0];
 
-        // Admin Panel Button Injection (Agar user admin hai toh profile menu mein button dikhega)
+        // Admin Panel Button Injection (Agar user admin hai toh navbar mein button dikhega)
         if (user.email === ADMIN_EMAIL) {
-            const profileSidebar = document.querySelector(".cart-section") || document.querySelector("aside") || document.querySelector(".nav-links");
-            if (profileSidebar && !document.getElementById("adminPanelQuickBtn")) {
-                const adminBtnHTML = `
-                    <a id="adminPanelQuickBtn" href="admin.html" style="background: #ff5722; color: white; padding: 10px 15px; border-radius: 8px; display: block; margin: 15px 0; text-align: center; font-weight: bold; text-decoration: none;">
+            const navLinks = document.querySelector(".nav-links");
+            if (navLinks && !document.getElementById("adminPanelQuickBtn") && !document.getElementById("nav-admin-panel")) {
+                const adminLi = document.createElement("li");
+                adminLi.id = "nav-admin-panel";
+                adminLi.className = "auth-nav-item";
+                adminLi.innerHTML = `
+                    <a id="adminPanelQuickBtn" href="admin.html" class="nav-admin-btn">
                         <i class="fa-solid fa-gauge"></i> Admin Panel
                     </a>
                 `;
-                profileSidebar.insertAdjacentHTML("beforeend", adminBtnHTML);
+                navLinks.appendChild(adminLi);
             }
         }
 
