@@ -1,107 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <link rel="icon" type="image/png" href="indexImage/foodhub.png">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FoodHub | Admin Dashboard</title>
+    <link rel="icon" type="image/png" href="indexImage/foodhub.png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        /* Table cells layout and scroll box for long content */
-        .admin-table td {
-            max-width: 200px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: normal;
-            vertical-align: middle;
-            font-size: 14px;
-        }
-        .table-scroll-box {
-            max-height: 75px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        .table-scroll-box::-webkit-scrollbar {
-            width: 4px;
-        }
-        .table-scroll-box::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
-    </style>
 </head>
-<body class="admin-dashboard-body">
+<body class="admin-body">
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="admin-sidebar">
-        <div class="admin-profile-img"><i class="fa-solid fa-user-shield"></i></div>
-        <h2>ADMIN PANEL</h2>
-        <p id="adminEmailDisplay">Loading...</p>
-        <ul class="admin-nav-menu">
-            <li><a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
-            <li><a href="#manage-menu-section"><i class="fa-solid fa-utensils"></i> Manage Menu</a></li>
-            <li><a href="index.html"><i class="fa-solid fa-globe"></i> View Website</a></li>
-            <li style="margin-top: auto;">
-                <button id="adminLogoutBtn" class="admin-logout-btn">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+    <!-- ═══ MOBILE TOP BAR (visible only on ≤ 768px) ═══ -->
+    <header class="adm-topbar" id="admTopbar">
+        <div class="adm-topbar-brand">
+            <div class="adm-logo-circle"><i class="fa-solid fa-shield-halved"></i></div>
+            <span class="adm-topbar-title">FoodHub Admin</span>
+        </div>
+        <button class="adm-hamburger" id="admHamburger" aria-label="Open Menu" type="button">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- ═══ SIDEBAR (fixed desktop / drawer mobile) ═══ -->
+    <aside class="adm-sidebar" id="admSidebar">
+        <!-- Overlay backdrop for mobile -->
+        <div class="adm-backdrop" id="admBackdrop"></div>
+
+        <div class="adm-sidebar-inner">
+            <!-- Brand (desktop only) -->
+            <div class="adm-sidebar-brand">
+                <div class="adm-logo-circle large"><i class="fa-solid fa-shield-halved"></i></div>
+                <h2 class="adm-sidebar-title">ADMIN PANEL</h2>
+                <p class="adm-sidebar-email" id="adminEmailDisplay">Loading…</p>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="adm-nav">
+                <ul class="adm-nav-list">
+                    <li>
+                        <a href="#" class="adm-nav-link active" data-section="dashboard">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#adm-manage-menu" class="adm-nav-link" data-section="menu">
+                            <i class="fa-solid fa-utensils"></i>
+                            <span>Manage Menu</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="adm-nav-link">
+                            <i class="fa-solid fa-globe"></i>
+                            <span>View Website</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout at bottom -->
+            <div class="adm-sidebar-footer">
+                <button id="adminLogoutBtn" class="adm-logout-btn" type="button">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
                 </button>
-            </li>
-        </ul>
+            </div>
+        </div>
     </aside>
 
-    <!-- RIGHT MAIN CONTENT -->
-    <main class="admin-main-content">
-        <header class="admin-header">
-            <h1>Live Dashboard</h1>
-        </header>
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="adm-main" id="admMain">
 
-        <!-- KPI CARDS -->
-        <section class="admin-kpi-grid">
-            <div class="admin-kpi-card dark">
-                <span>Total Revenue</span>
-                <h3 id="totalRevenue">₹ 0</h3>
-                <i class="fa-solid fa-indian-rupee-sign"></i>
+        <!-- Page Header -->
+        <div class="adm-page-header">
+            <div>
+                <h1 class="adm-page-title">Live Dashboard</h1>
+                <p class="adm-page-sub">Real-time overview of orders, revenue &amp; restaurant management.</p>
             </div>
-            <div class="admin-kpi-card">
-                <span>Total Orders</span>
-                <h3 id="totalOrders">0</h3>
-                <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+
+        <!-- ── KPI Cards ── -->
+        <section class="adm-kpi-grid">
+            <div class="adm-kpi dark">
+                <div class="adm-kpi-info">
+                    <span>Total Revenue</span>
+                    <h3 id="totalRevenue">₹ 0</h3>
+                </div>
+                <div class="adm-kpi-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
             </div>
-            <div class="admin-kpi-card">
-                <span>Pending Orders</span>
-                <h3 id="pendingOrders">0</h3>
-                <i class="fa-solid fa-clock" style="color: #ff9800;"></i>
+            <div class="adm-kpi">
+                <div class="adm-kpi-info">
+                    <span>Total Orders</span>
+                    <h3 id="totalOrders">0</h3>
+                </div>
+                <div class="adm-kpi-icon blue"><i class="fa-solid fa-cart-shopping"></i></div>
             </div>
-            <div class="admin-kpi-card">
-                <span>Delivered</span>
-                <h3 id="deliveredOrders">0</h3>
-                <i class="fa-solid fa-check-circle" style="color: #28a745;"></i>
+            <div class="adm-kpi">
+                <div class="adm-kpi-info">
+                    <span>Pending Orders</span>
+                    <h3 id="pendingOrders">0</h3>
+                </div>
+                <div class="adm-kpi-icon orange"><i class="fa-solid fa-clock"></i></div>
+            </div>
+            <div class="adm-kpi">
+                <div class="adm-kpi-info">
+                    <span>Delivered</span>
+                    <h3 id="deliveredOrders">0</h3>
+                </div>
+                <div class="adm-kpi-icon green"><i class="fa-solid fa-circle-check"></i></div>
             </div>
         </section>
 
-        <!-- LIVE ORDERS TABLE WITH FILTERS & PAGINATION -->
-        <section class="admin-panel admin-mb-40">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 10px;">
-                <h3 style="margin: 0;">Recent Orders Tracker</h3>
-                
-                <!-- Search & Status Filter Controls -->
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="orderSearchInput" placeholder="Search ID / Customer..." style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
-                    
-                    <select id="statusFilterSelect" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background: white;">
-                        <option value="All">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Cooking">Cooking</option>
-                        <option value="Out for Delivery">Out for Delivery</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
+        <!-- ── Orders Table ── -->
+        <section class="adm-card adm-mb">
+            <div class="adm-card-header">
+                <h3><i class="fa-solid fa-list-check"></i> Recent Orders Tracker</h3>
+                <div class="adm-filter-row">
+                    <div class="adm-search-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="orderSearchInput" placeholder="Search ID, Customer…" autocomplete="off">
+                    </div>
+                    <div class="adm-select-wrap">
+                        <i class="fa-solid fa-filter"></i>
+                        <select id="statusFilterSelect">
+                            <option value="All">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Cooking">Cooking</option>
+                            <option value="Out for Delivery">Out for Delivery</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
+            <div class="adm-table-wrap">
+                <table class="adm-table">
                     <thead>
                         <tr>
                             <th>Order ID</th>
@@ -115,64 +149,63 @@
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
-                        <tr><td colspan="8" style="text-align: center; padding: 20px;">Loading Live Orders...</td></tr>
+                        <tr><td colspan="8" class="adm-table-empty">Loading Live Orders…</td></tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Pagination Bottom Controls -->
-            <div id="paginationContainer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 0 5px;">
-                <span id="pageInfo" style="font-size: 14px; color: #666;">Showing page 1</span>
-                <div style="display: flex; gap: 8px;">
-                    <button id="prevPageBtn" class="admin-btn admin-btn-secondary" style="padding: 5px 12px; font-size: 13px;" disabled>Previous</button>
-                    <button id="nextPageBtn" class="admin-btn admin-btn-secondary" style="padding: 5px 12px; font-size: 13px;" disabled>Next</button>
+            <div id="paginationContainer" class="adm-pagination">
+                <span id="pageInfo">Showing page 1</span>
+                <div class="adm-page-btns">
+                    <button id="prevPageBtn" class="adm-btn adm-btn-ghost" disabled>
+                        <i class="fa-solid fa-chevron-left"></i> Previous
+                    </button>
+                    <button id="nextPageBtn" class="adm-btn adm-btn-ghost" disabled>
+                        Next <i class="fa-solid fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- MANAGE RESTAURANTS & BANNERS SECTION -->
-        <section class="admin-panel admin-mb-40">
-            <h3 class="admin-menu-title" id="restFormTitle"><i class="fa-solid fa-store"></i> Add / Edit Restaurant & Banner</h3>
-
-            <div class="admin-form-container">
-                <form id="restaurantForm" class="admin-form-grid">
+        <!-- ── Add / Edit Restaurant ── -->
+        <section class="adm-card adm-mb">
+            <div class="adm-card-header">
+                <h3 id="restFormTitle"><i class="fa-solid fa-store"></i> Add / Edit Restaurant &amp; Banner</h3>
+            </div>
+            <div class="adm-form-box">
+                <form id="restaurantForm" class="adm-form-grid">
                     <input type="hidden" id="editRestId">
 
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Restaurant Name</label>
-                        <input type="text" id="restName" class="admin-form-input" required placeholder="e.g., McDonald's">
+                    <div class="adm-field">
+                        <label>Restaurant Name</label>
+                        <input type="text" id="restName" class="adm-input" required placeholder="e.g., McDonald's">
+                    </div>
+                    <div class="adm-field">
+                        <label>Slug / ID</label>
+                        <input type="text" id="restSlug" class="adm-input" required placeholder="e.g., mcdonalds">
+                    </div>
+                    <div class="adm-field">
+                        <label>Banner Image Path</label>
+                        <input type="text" id="restBanner" class="adm-input" required placeholder="e.g., mcdonalds/banner.png">
+                    </div>
+                    <div class="adm-field">
+                        <label>Rating</label>
+                        <input type="number" step="0.1" id="restRating" class="adm-input" value="4.6" required>
+                    </div>
+                    <div class="adm-field">
+                        <label>Reviews Count</label>
+                        <input type="text" id="restReviews" class="adm-input" value="1.8k Reviews" required>
+                    </div>
+                    <div class="adm-field">
+                        <label>Delivery Time</label>
+                        <input type="text" id="restTime" class="adm-input" value="20-25 Mins" required>
                     </div>
 
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Slug / ID (e.g., mcdonalds)</label>
-                        <input type="text" id="restSlug" class="admin-form-input" required placeholder="mcdonalds">
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Banner Image Path</label>
-                        <input type="text" id="restBanner" class="admin-form-input" required placeholder="e.g., mcdonalds/banner.png">
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Rating</label>
-                        <input type="number" step="0.1" id="restRating" class="admin-form-input" value="4.6" required>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Reviews Count</label>
-                        <input type="text" id="restReviews" class="admin-form-input" value="1.8k Reviews" required>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Delivery Time</label>
-                        <input type="text" id="restTime" class="admin-form-input" value="20-25 Mins" required>
-                    </div>
-
-                    <div class="admin-form-actions full-width">
-                        <button type="submit" id="restSubmitBtn" class="admin-btn admin-btn-success">
+                    <div class="adm-field full-col adm-form-actions">
+                        <button type="submit" id="restSubmitBtn" class="adm-btn adm-btn-primary">
                             <i class="fa-solid fa-plus"></i> Add Restaurant
                         </button>
-                        <button type="button" id="cancelRestEditBtn" class="admin-btn admin-btn-secondary" style="display: none;">
+                        <button type="button" id="cancelRestEditBtn" class="adm-btn adm-btn-ghost" style="display:none;">
                             Cancel
                         </button>
                     </div>
@@ -180,68 +213,63 @@
             </div>
         </section>
 
-        <!-- MANAGE MENU (RESTAURANT-WISE SECTIONS) -->
-        <section class="admin-panel" id="manage-menu-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 class="admin-menu-title" style="margin: 0;"><i class="fa-solid fa-utensils"></i> Restaurant-wise Menu Management</h3>
+        <!-- ── Manage Menu ── -->
+        <section class="adm-card" id="adm-manage-menu">
+            <div class="adm-card-header">
+                <h3><i class="fa-solid fa-utensils"></i> Restaurant-wise Menu Management</h3>
             </div>
 
-            <!-- Global Add/Edit Form -->
-            <div class="admin-form-container" style="margin-bottom: 30px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
-                <h4 id="formTitle" style="margin-top: 0; color: #333; margin-bottom: 15px;">Add New Food Item</h4>
-                <form id="menuForm" class="admin-form-grid">
+            <!-- Add / Edit Food Form -->
+            <div class="adm-form-box adm-mb-sm">
+                <h4 id="formTitle" class="adm-form-sub-title">Add New Food Item</h4>
+                <form id="menuForm" class="adm-form-grid">
                     <input type="hidden" id="editFoodId">
 
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Food Name</label>
-                        <input type="text" id="foodName" class="admin-form-input" required placeholder="e.g., Spicy Zinger Burger">
+                    <div class="adm-field">
+                        <label>Food Name</label>
+                        <input type="text" id="foodName" class="adm-input" required placeholder="e.g., Spicy Zinger Burger">
                     </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Price (₹)</label>
-                        <input type="number" id="foodPrice" class="admin-form-input" required placeholder="e.g., 149">
+                    <div class="adm-field">
+                        <label>Price (₹)</label>
+                        <input type="number" id="foodPrice" class="adm-input" required placeholder="e.g., 149">
                     </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Select Restaurant</label>
-                        <select id="foodRestaurant" class="admin-form-input" required>
-                            <option value="">Select Restaurant...</option>
+                    <div class="adm-field">
+                        <label>Select Restaurant</label>
+                        <select id="foodRestaurant" class="adm-input" required>
+                            <option value="">Select Restaurant…</option>
                         </select>
                     </div>
-
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Image Folder Path</label>
-                        <input type="text" id="foodImage" class="admin-form-input" required placeholder="e.g., kfc/zinger-burger.png">
+                    <div class="adm-field">
+                        <label>Image Folder Path</label>
+                        <input type="text" id="foodImage" class="adm-input" required placeholder="e.g., kfc/zinger-burger.png">
+                    </div>
+                    <div class="adm-field">
+                        <label>Rating (1–5)</label>
+                        <input type="number" step="0.1" min="1" max="5" id="foodRating" class="adm-input" placeholder="4.5">
+                    </div>
+                    <div class="adm-field full-col">
+                        <label>Short Description</label>
+                        <input type="text" id="foodDesc" class="adm-input" required placeholder="e.g., Crispy chicken burger with fresh lettuce.">
                     </div>
 
-                    <!-- Rating Input Field -->
-                    <div class="admin-form-group">
-                        <label class="admin-form-label">Rating (e.g., 4.5)</label>
-                        <input type="number" step="0.1" min="1" max="5" id="foodRating" class="admin-form-input" placeholder="4.5">
-                    </div>
-
-                    <div class="admin-form-group full-width">
-                        <label class="admin-form-label">Short Description</label>
-                        <input type="text" id="foodDesc" class="admin-form-input" required placeholder="e.g., Crispy chicken burger with fresh lettuce.">
-                    </div>
-
-                    <div class="admin-form-actions full-width">
-                        <button type="submit" id="menuSubmitBtn" class="admin-btn admin-btn-success">
+                    <div class="adm-field full-col adm-form-actions">
+                        <button type="submit" id="menuSubmitBtn" class="adm-btn adm-btn-primary">
                             <i class="fa-solid fa-plus"></i> Add New Item
                         </button>
-                        <button type="button" id="cancelEditBtn" class="admin-btn admin-btn-secondary" style="display: none;">
+                        <button type="button" id="cancelEditBtn" class="adm-btn adm-btn-ghost" style="display:none;">
                             Cancel
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Restaurant-Wise Menu Cards Container -->
-            <div id="restaurantWiseMenuContainer">
-                <p style="text-align: center; color: #777; padding: 20px;">Loading restaurant menus...</p>
+            <!-- Restaurant-wise accordion cards -->
+            <div id="restaurantWiseMenuContainer" class="adm-rest-list">
+                <p class="adm-empty-text">Loading restaurant menus…</p>
             </div>
         </section>
-    </main>
+
+    </main><!-- /adm-main -->
 
     <script type="module" src="admin.js"></script>
 </body>
