@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <link rel="icon" type="image/png" href="indexImage/foodhub.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FoodHub | About Us</title>
@@ -32,6 +31,17 @@
                 <li><a href="cart.html">Cart</a></li>
                 <li><a href="about.html" class="active">About</a></li>
                 <li><a href="contact.html">Contact</a></li>
+                <li id="nav-signup" class="auth-nav-item"><a href="signup.html" class="signup-btn">Signup</a></li>
+                <li id="nav-login" class="auth-nav-item"><a href="login.html" class="login-btn">login</a></li>
+                <li id="nav-profile" class="auth-nav-item" style="display: none;">
+                    <a href="profile.html" class="nav-profile-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Profile">
+                    </a>
+                </li>
+                <li id="nav-admin-panel" class="auth-nav-item" style="display: none;">
+                    <a href="admin.html" class="nav-admin-btn"><i class="fa-solid fa-gauge"></i> Admin Panel</a>
+                </li>
+                <li class="auth-nav-loader" aria-label="Checking login status"><span></span><span></span><span></span></li>
             </ul>
 
         </nav>
@@ -274,7 +284,7 @@
     <script src="toast.js"></script>
     <script type="module" src="cart-manager.js"></script>
     <script src="script.js"></script>
-
+    <script type="module" src="navbar.js"></script>
     <script src="bottom-nav.js"></script>
 </body>
 </html>
