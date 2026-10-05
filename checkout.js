@@ -316,7 +316,7 @@ async function processFinalOrder(user, name, phone, address, city, pincode, item
         document.dispatchEvent(new Event("foodhub-clear-cart"));
         window.showToast?.("Order Placed Successfully!", "success");
         setTimeout(() => {
-            window.location.href = "profile.html";
+            window.location.href = "order-success.html";
         }, 1500);
 
     } catch (err) {
